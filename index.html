@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arcturus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F7F4EF;--bg2:#EFEBE4;--bg3:#E6E0D6;
+  --surface:#FFFFFF;--border:#DDD7CC;--border2:#C8C0B2;
+  --text:#1A1714;--text2:#5C554C;--text3:#8C877F;
+  --accent:#C25B3F;--accent2:#A04830;
+  --sidebar-w:220px;--header-h:56px;--radius:8px;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.08),0 2px 4px rgba(0,0,0,0.04);
+  --font-body:'DM Sans',sans-serif;
+  --font-display:'DM Serif Display',serif;
+  --font-mono:'DM Mono',monospace;
+  --font-logo:'Bebas Neue',sans-serif;
+  --li:#0A66C2;--ig:#E1306C;--th:#000000;
+}
+html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased;height:100%}
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);background:var(--text);color:var(--bg);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.sidebar-logo{padding:44px 20px 13px;border-bottom:1px solid rgba(255,255,255,0.08)}
+.sidebar-logo-name{font-family:var(--font-logo);font-size:22px;letter-spacing:0.06em;color:#F7F4EF;line-height:1}
+.sidebar-logo-sub{font-size:9px;color:#C25B3F;letter-spacing:0.1em;text-transform:uppercase;margin-top:3px;font-family:var(--font-mono)}
+.sidebar-logo-version{font-size:8px;color:rgba(247,244,239,0.2);letter-spacing:0.08em;font-family:var(--font-mono);margin-top:2px}
+.sidebar-nav{padding:12px 10px;flex:1;overflow-y:auto}
+.sidebar-section-label{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,244,239,0.28);font-family:var(--font-mono);padding:10px 10px 4px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px;font-family:var(--font-body);color:rgba(247,244,239,0.62);transition:all 0.15s;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:rgba(255,255,255,0.06);color:#F7F4EF}
+.nav-item.active{background:rgba(194,91,63,0.25);color:#F7F4EF}
+.nav-dot{width:7px;height:7px;border-radius:2px;flex-shrink:0}
+.nav-count{margin-left:auto;font-size:10px;font-family:var(--font-mono);color:rgba(247,244,239,0.32);background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:3px}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:var(--header-h);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;background:var(--surface);flex-shrink:0}
+.topbar-title{font-family:var(--font-display);font-size:17px;flex:1;color:var(--text)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius);font-size:13px;font-weight:500;font-family:var(--font-body);cursor:pointer;border:none;transition:all 0.15s}
+.btn-primary{background:var(--accent);color:white}
+.btn-primary:hover{background:var(--accent2)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--bg2);border-color:var(--border2);color:var(--text)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-danger{background:#DC2626;color:white}
+.btn-danger:hover{background:#B91C1C}
+.btn-icon{padding:5px 8px;font-size:13px}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:24px}
+
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.stat-label{font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);font-family:var(--font-mono);margin-bottom:8px;line-height:1.3}
+.stat-value{font-family:var(--font-display);font-size:32px;line-height:1;display:block;min-height:38px}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:5px;font-family:var(--font-body)}
+
+/* PLATFORM LAST POSTED */
+.platform-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.platform-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
+.platform-card-label{font-size:9px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-mono);display:flex;align-items:center;gap:6px}
+.platform-card-days{font-family:var(--font-display);font-size:26px;line-height:1;color:var(--text)}
+.platform-card-sub{font-size:11px;color:var(--text3);font-family:var(--font-body)}
+.platform-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* CARDS */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text2);font-family:var(--font-mono)}
+.card-body{padding:16px}
+
+.pillar-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pillar-bar-label{font-size:12px;color:var(--text2);width:72px;flex-shrink:0;font-family:var(--font-body)}
+.pillar-bar-track{flex:1;height:6px;background:var(--bg2);border-radius:3px;overflow:hidden}
+.pillar-bar-fill{height:100%;border-radius:3px;transition:width 0.6s ease}
+.pillar-bar-count{font-size:11px;color:var(--text3);width:20px;text-align:right;font-family:var(--font-mono)}
+.status-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)}
+.status-row:last-child{border-bottom:none}
+.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* FILTERS */
+.filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.filter-chip{padding:5px 12px;border-radius:20px;font-size:12px;font-family:var(--font-body);cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text2);transition:all 0.15s}
+.filter-chip:hover{border-color:var(--border2);color:var(--text)}
+.filter-chip.active{border-color:var(--accent);background:var(--accent);color:white}
+
+/* POST CARDS */
+.post-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.post-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;cursor:pointer;transition:all 0.15s;box-shadow:var(--shadow)}
+.post-card:hover{border-color:var(--border2);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.post-card-pillar-bar{height:3px;border-radius:1.5px;margin-bottom:12px}
+.post-card-title{font-size:14px;font-weight:700;font-family:var(--font-body);margin-bottom:6px;line-height:1.35;color:var(--text)}
+.post-card-body{font-size:12px;font-weight:400;font-family:var(--font-body);color:var(--text2);line-height:1.55;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.post-card-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tag{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:500;font-family:var(--font-mono);letter-spacing:0.02em}
+.post-card-date{margin-left:auto;font-size:10px;color:var(--text3);font-family:var(--font-mono)}
+
+/* PLATFORM TAGS */
+.ptag{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:600;font-family:var(--font-mono);letter-spacing:0.04em}
+.ptag-li{background:#0A66C218;color:#0A66C2}
+.ptag-ig{background:#E1306C18;color:#E1306C}
+.ptag-th{background:#00000012;color:#444}
+
+/* PLATFORM CHECKBOXES */
+.platform-checks{display:flex;gap:10px;flex-wrap:wrap;margin-top:2px}
+.platform-check{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:6px;border:1px solid var(--border);cursor:pointer;font-size:12px;font-family:var(--font-body);transition:all 0.15s;user-select:none}
+.platform-check:hover{border-color:var(--border2)}
+.platform-check.checked-li{border-color:#0A66C2;background:#0A66C208;color:#0A66C2}
+.platform-check.checked-ig{border-color:#E1306C;background:#E1306C08;color:#E1306C}
+.platform-check.checked-th{border-color:#555;background:#00000008;color:#333}
+.platform-check input[type=checkbox]{display:none}
+
+/* PLATFORM TABS */
+.platform-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:0}
+.platform-tab{padding:8px 16px;font-size:12px;font-family:var(--font-body);cursor:pointer;border:none;background:none;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.15s}
+.platform-tab:hover{color:var(--text)}
+.platform-tab.active-li{color:#0A66C2;border-bottom-color:#0A66C2}
+.platform-tab.active-ig{color:#E1306C;border-bottom-color:#E1306C}
+.platform-tab.active-th{color:#333;border-bottom-color:#555}
+
+/* PERFORMANCE SECTION */
+.perf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.perf-stat{background:var(--bg2);border-radius:var(--radius);padding:10px 12px;text-align:center}
+.perf-stat-label{font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);font-family:var(--font-mono);margin-bottom:4px}
+.perf-stat-value{font-family:var(--font-display);font-size:22px;color:var(--text);line-height:1}
+
+/* EDITOR */
+.editor-form{padding:24px;overflow-y:auto;flex:1}
+.form-group{margin-bottom:18px}
+.form-label{display:block;font-size:10px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;font-family:var(--font-mono)}
+.form-input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:var(--font-body);background:var(--surface);color:var(--text);transition:border-color 0.15s;outline:none;line-height:1.5}
+.form-input:focus{border-color:var(--accent)}
+.form-textarea{resize:vertical;min-height:100px;line-height:1.6}
+.form-textarea.tall{min-height:220px}
+.form-select{appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238C877F' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.section-divider{border:none;border-top:1px solid var(--border);margin:24px 0}
+.section-heading{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);font-family:var(--font-mono);margin-bottom:14px}
+
+.published-date-field{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:12px;color:var(--text2);font-family:var(--font-mono);display:flex;align-items:center;gap:8px}
+.published-date-dot{width:7px;height:7px;border-radius:50%;background:#6B7280;flex-shrink:0}
+
+.linkedin-url-row{display:flex;align-items:center;gap:8px}
+.linkedin-url-link{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:var(--radius);background:#0A66C2;color:white;font-size:11px;font-family:var(--font-body);text-decoration:none;font-weight:500;flex-shrink:0;transition:background 0.15s}
+.linkedin-url-link:hover{background:#084f9a}
+
+/* AUTOSAVE */
+.autosave-indicator{font-size:10px;font-family:var(--font-mono);color:var(--text3);display:flex;align-items:center;gap:5px}
+.autosave-dot{width:5px;height:5px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background 0.3s}
+.autosave-dot.saving{background:#F59E0B;animation:pulse 1s infinite}
+.autosave-dot.saved{background:#4CAF50}
+.autosave-dot.error{background:#DC2626}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* EMPTY */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;color:var(--text3);gap:10px}
+.empty-title{font-size:15px;font-weight:500;font-family:var(--font-body);color:var(--text2)}
+.empty-sub{font-size:13px;font-family:var(--font-body);max-width:280px;line-height:1.5}
+
+/* SHEET BAR */
+.sheet-bar{background:var(--bg2);border-top:1px solid var(--border);padding:6px 22px;display:flex;align-items:center;gap:10px;font-size:10px;color:var(--text3);font-family:var(--font-mono);flex-shrink:0}
+.sheet-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;transition:background 0.3s}
+.sheet-dot.connected{background:#4CAF50}
+.sheet-dot.loading{background:#F59E0B}
+.sheet-dot.error{background:#DC2626}
+.sheet-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:3px;font-size:9px;font-family:var(--font-mono)}
+.sheet-badge.synced{background:#E6F0E6;color:#2A6B2A}
+.sheet-badge.pending{background:#FEF3C7;color:#92400E}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal{background:var(--surface);border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.15);width:480px;max-width:95vw;padding:24px}
+.modal-title{font-family:var(--font-display);font-size:20px;margin-bottom:16px;color:var(--text)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#F7F4EF;padding:10px 16px;border-radius:var(--radius);font-size:12px;font-family:var(--font-mono);z-index:200;opacity:0;transform:translateY(8px);transition:all 0.2s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.error{background:#DC2626}
+
+/* LOADING */
+.loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:12px}
+.loading-spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+</style>
+</head>
+<body>
+<div id="app" class="app"></div>
+<div id="toast" class="toast"></div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtuMyKcwbM7dzJM4LBl6sWBRqRYoMcP4BcQOH7NJb_WHqEi0MV-6E0V_VIKDkRrl4/exec";
+
+const PILLARS = [
+  {id:"p1",label:"Running a Creative Agency",short:"Agency",color:"#C25B3F"},
+  {id:"p2",label:"Industry Perspective",short:"Industry",color:"#4A7C6F"},
+  {id:"p3",label:"Creative Leadership",short:"Leadership",color:"#5B5EA6"},
+  {id:"p4",label:"Craft & Camera",short:"Craft",color:"#B8860B"},
+  {id:"p5",label:"Perspective",short:"Perspective",color:"#7B4F8E"},
+];
+const STATUSES = [
+  {id:"idea",label:"Idea",color:"#94A3B8"},
+  {id:"draft",label:"Draft",color:"#F59E0B"},
+  {id:"ready",label:"Ready",color:"#10B981"},
+  {id:"scheduled",label:"Scheduled",color:"#3B82F6"},
+  {id:"published",label:"Published",color:"#6B7280"},
+];
+const PLATFORMS = [
+  {id:"linkedin",label:"LinkedIn",short:"LI",cls:"li",color:"#0A66C2"},
+  {id:"instagram",label:"Instagram",short:"IG",cls:"ig",color:"#E1306C"},
+  {id:"threads",label:"Threads",short:"TH",cls:"th",color:"#444"},
+];
+
+let state = {
+  posts:[],view:"dashboard",editingId:null,showModal:false,
+  filterPillar:null,filterStatus:null,search:"",
+  loading:true,sheetStatus:"loading",sheetMessage:"Connecting…",pendingSync:[],
+};
+let editorState = {};
+let autosaveTimer = null;
+let activePlatformTab = "linkedin";
+
+// ── SHEETS ────────────────────────────────────────────────────────
+async function sheetRead() {
+  const res = await fetch(SCRIPT_URL);
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.error || "Read failed");
+  return data.posts;
+}
+async function sheetWrite(post) {
+  const res = await fetch(SCRIPT_URL, {method:"POST",body:JSON.stringify({action:"write",post})});
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.error || "Write failed");
+}
+async function sheetDelete(id) {
+  const res = await fetch(SCRIPT_URL, {method:"POST",body:JSON.stringify({action:"delete",id})});
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.error || "Delete failed");
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────
+function genId() { return "post_"+Date.now()+"_"+Math.random().toString(36).slice(2,6); }
+function getPillar(id) { return PILLARS.find(p=>p.id===id); }
+function getStatus(id) { return STATUSES.find(s=>s.id===id); }
+function safe(s) { return (s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function formatDate(iso) { if(!iso)return""; try{return new Date(iso).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});}catch{return iso;} }
+function formatDateTime(iso) { if(!iso)return""; try{return new Date(iso).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});}catch{return iso;} }
+function daysSince(iso) {
+  if(!iso)return null;
+  try{
+    const diff = Date.now() - new Date(iso).getTime();
+    const d = Math.floor(diff/(1000*60*60*24));
+    return d;
+  }catch{return null;}
+}
+
+function parsePlatforms(val) {
+  if(!val)return[];
+  if(Array.isArray(val))return val;
+  return val.split(",").map(s=>s.trim()).filter(Boolean);
+}
+
+function pillarTag(id) {
+  const p=getPillar(id);if(!p)return"";
+  return `<span class="tag" style="background:${p.color}18;color:${p.color}">${p.short}</span>`;
+}
+function statusTag(id) {
+  const s=getStatus(id);if(!s)return"";
+  return `<span class="tag" style="background:${s.color}18;color:${s.color}">${s.label}</span>`;
+}
+function platformTags(platforms) {
+  const arr = parsePlatforms(platforms);
+  return arr.map(pid => {
+    const p=PLATFORMS.find(x=>x.id===pid);if(!p)return"";
+    return `<span class="ptag ptag-${p.cls}">${p.short}</span>`;
+  }).join("");
+}
+
+let toastTimer;
+function showToast(msg,isError=false) {
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.className="toast show"+(isError?" error":"");
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.className="toast";},3000);
+}
+
+function navigate(view,id=null) {
+  state.view=view;if(id)state.editingId=id;
+  activePlatformTab="linkedin";render();
+}
+
+// ── SHEET OPS ─────────────────────────────────────────────────────
+async function loadFromSheet() {
+  state.loading=true;state.sheetStatus="loading";state.sheetMessage="Loading from sheet…";render();
+  try {
+    const posts=await sheetRead();
+    state.posts=posts.map(p=>({...p,platforms:parsePlatforms(p.platforms)}));
+    state.loading=false;state.sheetStatus="connected";state.sheetMessage="Sheet connected";render();
+  } catch(err) {
+    state.loading=false;state.sheetStatus="error";state.sheetMessage="Error: "+err.message;render();
+    showToast("Could not load from sheet",true);
+  }
+}
+
+async function savePost(post) {
+  if(post.status==="published"&&!post.published_at) post.published_at=new Date().toISOString();
+  post.updated_at=new Date().toISOString();
+  // Serialise platforms array to comma string for sheet
+  const toWrite={...post,platforms:Array.isArray(post.platforms)?post.platforms.join(","):post.platforms||""};
+  const idx=state.posts.findIndex(p=>p.id===post.id);
+  if(idx>=0)state.posts[idx]=post;else state.posts.push(post);
+  if(!state.pendingSync.includes(post.id))state.pendingSync.push(post.id);
+  setAutosaveIndicator("saving");
+  try {
+    await sheetWrite(toWrite);
+    state.pendingSync=state.pendingSync.filter(i=>i!==post.id);
+    state.sheetMessage="All changes saved";
+    setAutosaveIndicator("saved");
+    updateSheetBar();
+  } catch(err) {
+    state.pendingSync=state.pendingSync.filter(i=>i!==post.id);
+    setAutosaveIndicator("error");
+    showToast("Save failed: "+err.message,true);
+  }
+}
+
+function setAutosaveIndicator(status) {
+  const dot=document.getElementById("autosave-dot");
+  const txt=document.getElementById("autosave-txt");
+  if(!dot||!txt)return;
+  dot.className="autosave-dot "+status;
+  if(status==="saving"){txt.textContent="Saving…";}
+  else if(status==="saved"){txt.textContent="Saved";}
+  else if(status==="error"){txt.textContent="Save error";}
+  else{txt.textContent="Unsaved changes";}
+}
+
+function updateSheetBar() {
+  const bar=document.getElementById("sheet-bar-msg");
+  if(bar)bar.textContent=state.sheetMessage;
+}
+
+async function deletePost(id) {
+  if(!confirm("Delete this post? This can't be undone."))return;
+  state.posts=state.posts.filter(p=>p.id!==id);
+  state.view="library";state.editingId=null;render();
+  try{await sheetDelete(id);showToast("Post deleted");}
+  catch(err){showToast("Delete failed: "+err.message,true);}
+}
+
+async function createPost(pillar) {
+  const post={
+    id:genId(),title:"",pillar,status:"idea",
+    platforms:[],body_linkedin:"",body_instagram:"",body_threads:"",
+    notes:"",published_at:"",linkedin_url:"",
+    views:"",likes:"",comments:"",shares:"",verdict:"",
+    created_at:new Date().toISOString(),updated_at:new Date().toISOString(),
+  };
+  state.posts.push(post);state.showModal=false;navigate("editor",post.id);
+}
+
+// ── AUTOSAVE ──────────────────────────────────────────────────────
+function scheduleAutosave(postId) {
+  clearTimeout(autosaveTimer);
+  setAutosaveIndicator("pending");
+  autosaveTimer=setTimeout(async()=>{
+    const post=state.posts.find(p=>p.id===postId);
+    if(!post)return;
+    const toSave={...post,...editorState,
+      platforms:editorState.platforms||[],
+    };
+    if(toSave.status==="published"&&!toSave.published_at){
+      toSave.published_at=new Date().toISOString();
+      editorState.published_at=toSave.published_at;
+      const db=document.getElementById("pub-date-block");
+      if(db)db.innerHTML=renderPublishedDateBlock();
+    }
+    await savePost(toSave);
+  },2500);
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────
+function getLastPostedPerPlatform() {
+  const published=state.posts.filter(p=>p.status==="published"&&p.published_at);
+  const result={};
+  PLATFORMS.forEach(plat=>{
+    const matching=published.filter(p=>{
+      const platforms=parsePlatforms(p.platforms);
+      return platforms.includes(plat.id);
+    }).sort((a,b)=>new Date(b.published_at)-new Date(a.published_at));
+    result[plat.id]=matching.length>0?matching[0]:null;
+  });
+  return result;
+}
+
+function renderDashboard() {
+  const posts=state.posts;
+  const total=posts.length;
+  const byPillar=PILLARS.map(p=>({...p,count:posts.filter(x=>x.pillar===p.id).length}));
+  const byStatus=STATUSES.map(s=>({...s,count:posts.filter(x=>x.status===s.id).length}));
+  const ideaCount=byStatus.find(s=>s.id==="idea")?.count||0;
+  const draftCount=byStatus.find(s=>s.id==="draft")?.count||0;
+  const readyCount=posts.filter(x=>x.status==="ready"||x.status==="scheduled").length;
+  const publishedCount=posts.filter(x=>x.status==="published").length;
+  const maxP=Math.max(...byPillar.map(p=>p.count),1);
+  const recent=[...posts].sort((a,b)=>new Date(b.updated_at)-new Date(a.updated_at)).slice(0,6);
+  const lastPosted=getLastPostedPerPlatform();
+
+  const stats=[
+    {label:"Total Posts",value:total,color:"var(--text)",sub:"in sheet"},
+    {label:"Ideas",value:ideaCount,color:"#94A3B8",sub:"to develop"},
+    {label:"In Draft",value:draftCount,color:"#F59E0B",sub:"in progress"},
+    {label:"Ready",value:readyCount,color:"#10B981",sub:"to publish"},
+    {label:"Published",value:publishedCount,color:"#6B7280",sub:"live"},
+  ];
+
+  return `<div class="content">
+    <div class="stats-grid">
+      ${stats.map(s=>`<div class="stat-card"><div class="stat-label">${s.label}</div><span class="stat-value" style="color:${s.color}">${s.value}</span><div class="stat-sub">${s.sub}</div></div>`).join("")}
+    </div>
+    <div class="platform-grid">
+      ${PLATFORMS.map(plat=>{
+        const last=lastPosted[plat.id];
+        const days=last?daysSince(last.published_at):null;
+        const daysText=days===null?"No posts yet":days===0?"Today":days===1?"Yesterday":`${days} days ago`;
+        const postTitle=last?last.title:"—";
+        return `<div class="platform-card">
+          <div class="platform-card-label"><div class="platform-dot" style="background:${plat.color}"></div><span style="color:${plat.color}">${plat.label}</span><span style="color:var(--text3);margin-left:2px">— last post</span></div>
+          <div class="platform-card-days" style="color:${days===null?"var(--text3)":days>7?"#DC2626":days>3?"#F59E0B":"#10B981"}">${daysText}</div>
+          <div class="platform-card-sub" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${safe(postTitle)}</div>
+        </div>`;
+      }).join("")}
+    </div>
+    <div class="two-col" style="margin-bottom:16px">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Posts by Pillar</span></div>
+        <div class="card-body">
+          ${byPillar.map(p=>`<div class="pillar-bar-row"><span class="pillar-bar-label">${p.short}</span><div class="pillar-bar-track"><div class="pillar-bar-fill" style="width:${(p.count/maxP)*100}%;background:${p.color}"></div></div><span class="pillar-bar-count">${p.count}</span></div>`).join("")}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Status Breakdown</span></div>
+        <div class="card-body" style="padding:8px 16px">
+          ${byStatus.map(s=>`<div class="status-row"><div style="display:flex;align-items:center;gap:8px"><div class="status-dot" style="background:${s.color}"></div><span style="font-size:13px;font-family:var(--font-body)">${s.label}</span></div><span style="font-size:12px;color:${s.color};font-family:var(--font-mono);font-weight:500">${s.count}</span></div>`).join("")}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Recent Activity</span><button class="btn btn-ghost btn-sm" onclick="navigate('library')">View all →</button></div>
+      <div style="padding:0 16px">
+        ${recent.length===0?`<div class="empty" style="padding:30px 0"><div class="empty-title">No posts yet</div></div>`:
+          recent.map((p,i)=>{
+            const pl=getPillar(p.pillar);
+            const syncing=state.pendingSync.includes(p.id);
+            return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:${i<recent.length-1?"1px solid var(--border)":"none"};cursor:pointer" onclick="navigate('editor','${p.id}')">
+              <div style="width:10px;height:10px;border-radius:2px;background:${pl?.color||"#ccc"};flex-shrink:0"></div>
+              <span style="flex:1;font-size:13px;font-family:var(--font-body)">${safe(p.title)||'<em style="color:var(--text3)">Untitled</em>'}</span>
+              ${statusTag(p.status)}
+              ${platformTags(p.platforms)}
+              ${p.published_at?`<span style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">${formatDate(p.published_at)}</span>`:""}
+              <span class="sheet-badge ${syncing?"pending":"synced"}">${syncing?"↑ saving":"✓ saved"}</span>
+            </div>`;
+          }).join("")}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── LIBRARY ───────────────────────────────────────────────────────
+function renderLibrary() {
+  const filtered=state.posts.filter(p=>{
+    if(state.filterPillar&&p.pillar!==state.filterPillar)return false;
+    if(state.filterStatus&&p.status!==state.filterStatus)return false;
+    if(state.search){
+      const q=state.search.toLowerCase();
+      return(p.title||"").toLowerCase().includes(q)||
+             (p.body_linkedin||"").toLowerCase().includes(q)||
+             (p.body_instagram||"").toLowerCase().includes(q)||
+             (p.body_threads||"").toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  return `<div class="content">
+    <div class="filters">
+      <input class="form-input" style="width:220px;padding:5px 12px;font-size:12px" placeholder="Search posts…" value="${safe(state.search)}" oninput="state.search=this.value;renderMain()">
+      <span style="font-size:11px;color:var(--text3);padding:0 4px;font-family:var(--font-body)">Pillar:</span>
+      ${PILLARS.map(p=>`<button class="filter-chip ${state.filterPillar===p.id?"active":""}" onclick="state.filterPillar=state.filterPillar==='${p.id}'?null:'${p.id}';renderMain()" style="${state.filterPillar!==p.id?`border-color:${p.color}44;color:${p.color}`:""}">${p.short}</button>`).join("")}
+      <span style="font-size:11px;color:var(--text3);padding:0 4px;font-family:var(--font-body)">Status:</span>
+      ${STATUSES.map(s=>`<button class="filter-chip ${state.filterStatus===s.id?"active":""}" onclick="state.filterStatus=state.filterStatus==='${s.id}'?null:'${s.id}';renderMain()">${s.label}</button>`).join("")}
+      <span style="margin-left:auto;font-size:12px;color:var(--text3);font-family:var(--font-mono)">${filtered.length} post${filtered.length!==1?"s":""}</span>
+    </div>
+    ${filtered.length===0?`<div class="empty">
+        <div class="empty-title">${state.posts.length===0?"Library is empty":"No posts match"}</div>
+        <div class="empty-sub">${state.posts.length===0?"Create your first post idea.":"Try adjusting your filters."}</div>
+        ${state.posts.length===0?`<button class="btn btn-primary" style="margin-top:8px" onclick="state.showModal=true;render()">+ New Post</button>`:""}
+      </div>`:
+    `<div class="post-grid">
+      ${filtered.map(p=>{
+        const pl=getPillar(p.pillar);
+        const previewBody=p.body_linkedin||p.body_instagram||p.body_threads||"";
+        return `<div class="post-card" onclick="navigate('editor','${p.id}')">
+          <div class="post-card-pillar-bar" style="background:${pl?.color||"var(--border)"}"></div>
+          <div class="post-card-title">${safe(p.title)||'<em style="color:var(--text3);font-weight:400">Untitled post</em>'}</div>
+          ${previewBody?`<div class="post-card-body">${safe(previewBody)}</div>`:""}
+          <div class="post-card-meta">
+            ${pillarTag(p.pillar)}${statusTag(p.status)}${platformTags(p.platforms)}
+            ${p.published_at?`<span class="tag" style="background:#6B728018;color:#6B7280;margin-left:auto">${formatDate(p.published_at)}</span>`:
+              `<span class="post-card-date">${formatDate(p.updated_at)}</span>`}
+          </div>
+        </div>`;
+      }).join("")}
+    </div>`}
+  </div>`;
+}
+
+// ── EDITOR ────────────────────────────────────────────────────────
+function initEditor(post) {
+  editorState={
+    _postId:post.id,
+    title:post.title||"",pillar:post.pillar||"p1",status:post.status||"idea",
+    platforms:parsePlatforms(post.platforms),
+    body_linkedin:post.body_linkedin||"",body_instagram:post.body_instagram||"",body_threads:post.body_threads||"",
+    notes:post.notes||"",published_at:post.published_at||null,linkedin_url:post.linkedin_url||"",
+    views:post.views||"",likes:post.likes||"",comments:post.comments||"",shares:post.shares||"",verdict:post.verdict||"",
+  };
+}
+
+function handleStatusChange(val) {
+  editorState.status=val;
+  if(val==="published"&&!editorState.published_at) editorState.published_at=new Date().toISOString();
+  const db=document.getElementById("pub-date-block");
+  if(db)db.innerHTML=renderPublishedDateBlock();
+  scheduleAutosave(editorState._postId);
+}
+
+function togglePlatform(pid) {
+  const arr=editorState.platforms||[];
+  if(arr.includes(pid)){editorState.platforms=arr.filter(x=>x!==pid);}
+  else{editorState.platforms=[...arr,pid];}
+  // Re-render platform checks and tabs
+  const checksEl=document.getElementById("platform-checks");
+  if(checksEl)checksEl.innerHTML=renderPlatformChecks();
+  const tabsEl=document.getElementById("platform-tabs");
+  if(tabsEl)tabsEl.innerHTML=renderPlatformTabs();
+  const bodyEl=document.getElementById("platform-body-section");
+  if(bodyEl)bodyEl.innerHTML=renderPlatformBodySection();
+  scheduleAutosave(editorState._postId);
+}
+
+function switchPlatformTab(pid) {
+  activePlatformTab=pid;
+  const tabsEl=document.getElementById("platform-tabs");
+  if(tabsEl)tabsEl.innerHTML=renderPlatformTabs();
+  const bodyEl=document.getElementById("platform-body-section");
+  if(bodyEl)bodyEl.innerHTML=renderPlatformBodySection();
+}
+
+function renderPlatformChecks() {
+  return PLATFORMS.map(plat=>{
+    const checked=(editorState.platforms||[]).includes(plat.id);
+    return `<div class="platform-check ${checked?`checked-${plat.cls}`:""}" onclick="togglePlatform('${plat.id}')">
+      <input type="checkbox" ${checked?"checked":""}> ${plat.label}
+    </div>`;
+  }).join("");
+}
+
+function renderPlatformTabs() {
+  const active=editorState.platforms||[];
+  if(active.length===0)return"";
+  return active.map(pid=>{
+    const p=PLATFORMS.find(x=>x.id===pid);if(!p)return"";
+    const isActive=activePlatformTab===pid;
+    return `<button class="platform-tab ${isActive?`active-${p.cls}`:""}" onclick="switchPlatformTab('${pid}')">${p.label}</button>`;
+  }).join("");
+}
+
+function renderPlatformBodySection() {
+  const active=editorState.platforms||[];
+  if(active.length===0){
+    return`<div style="font-size:12px;color:var(--text3);font-family:var(--font-body);padding:10px 0">Select platforms above to add body text for each.</div>`;
+  }
+  if(!active.includes(activePlatformTab)) activePlatformTab=active[0];
+  const fieldKey=`body_${activePlatformTab}`;
+  const plat=PLATFORMS.find(x=>x.id===activePlatformTab);
+  const placeholder={linkedin:"Write your LinkedIn post here. Professional tone, up to ~1300 chars.",instagram:"Write your Instagram caption here. Visual-led, up to 2200 chars.",threads:"Write your Threads post here. Conversational, up to 500 chars."}[activePlatformTab]||"Write your post here.";
+  return `<div class="platform-tabs" id="platform-tabs">${renderPlatformTabs()}</div>
+    <div style="padding-top:14px">
+      <textarea class="form-input form-textarea tall" id="body-textarea-${activePlatformTab}"
+        oninput="editorState['${fieldKey}']=this.value;scheduleAutosave('${editorState._postId}')"
+        placeholder="${placeholder}">${safe(editorState[fieldKey]||"")}</textarea>
+    </div>`;
+}
+
+function renderPublishedDateBlock() {
+  if(editorState.status==="published"&&editorState.published_at){
+    return`<div class="published-date-field"><div class="published-date-dot"></div><span>Published ${formatDateTime(editorState.published_at)}</span></div>`;
+  }
+  return`<div style="font-size:12px;color:var(--text3);font-family:var(--font-mono);padding:4px 0">Date recorded automatically when status set to Published</div>`;
+}
+
+function renderPerformanceSection() {
+  if(editorState.status!=="published")return"";
+  return `<hr class="section-divider">
+    <div class="section-heading">Post Performance</div>
+    <div class="perf-grid">
+      ${["views","likes","comments","shares"].map(f=>`
+        <div class="perf-stat">
+          <div class="perf-stat-label">${f.charAt(0).toUpperCase()+f.slice(1)}</div>
+          <div class="perf-stat-value">${editorState[f]||"—"}</div>
+        </div>`).join("")}
+    </div>
+    <div class="form-row">
+      ${["views","likes","comments","shares"].map(f=>`
+        <div class="form-group">
+          <label class="form-label">${f.charAt(0).toUpperCase()+f.slice(1)}</label>
+          <input class="form-input" type="number" value="${safe(String(editorState[f]||""))}"
+            oninput="editorState['${f}']=this.value;scheduleAutosave('${editorState._postId}')"
+            placeholder="0">
+        </div>`).join("")}
+    </div>
+    <div class="form-group">
+      <label class="form-label">Verdict</label>
+      <select class="form-input form-select" onchange="editorState.verdict=this.value;scheduleAutosave('${editorState._postId}')">
+        <option value="">— select —</option>
+        ${["Strong traction","Good traction","Steady","Low traction","No traction","Too early to tell"].map(v=>`<option value="${v}" ${editorState.verdict===v?"selected":""}>${v}</option>`).join("")}
+      </select>
+    </div>`;
+}
+
+function renderEditor(post) {
+  const e=editorState;
+  const pl=getPillar(e.pillar);
+
+  return `<div style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+    <div class="topbar">
+      <button class="btn btn-ghost btn-sm" onclick="navigate('library')">← Back</button>
+      <div style="flex:1;display:flex;align-items:center;gap:10px;min-width:0">
+        ${pl?`<div style="width:10px;height:10px;border-radius:2px;background:${pl.color};flex-shrink:0"></div>`:""}
+        <span id="editor-title-display" style="font-family:var(--font-display);font-size:16px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${safe(e.title)||'<em style="color:var(--text3);font-style:italic">Untitled post</em>'}</span>
+        <div class="autosave-indicator" style="flex-shrink:0">
+          <div class="autosave-dot saved" id="autosave-dot"></div>
+          <span id="autosave-txt">Saved</span>
+        </div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deletePost('${post.id}')">Delete</button>
+    </div>
+    <div class="editor-form">
+      <div class="form-group">
+        <label class="form-label">Title</label>
+        <input class="form-input" value="${safe(e.title)}"
+          oninput="editorState.title=this.value;scheduleAutosave('${post.id}');const d=document.getElementById('editor-title-display');if(d)d.innerHTML=this.value||'<em style=color:var(--text3);font-style:italic>Untitled post</em>'"
+          placeholder="What's the core idea in a line?">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Pillar</label>
+          <select class="form-input form-select" onchange="editorState.pillar=this.value;scheduleAutosave('${post.id}')">
+            ${PILLARS.map(p=>`<option value="${p.id}" ${e.pillar===p.id?"selected":""}>${p.label}</option>`).join("")}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-input form-select" onchange="handleStatusChange(this.value)">
+            ${STATUSES.map(s=>`<option value="${s.id}" ${e.status===s.id?"selected":""}>${s.label}</option>`).join("")}
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Platforms</label>
+        <div class="platform-checks" id="platform-checks">${renderPlatformChecks()}</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Body Text</label>
+        <div id="platform-body-section">${renderPlatformBodySection()}</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-input form-textarea"
+          oninput="editorState.notes=this.value;scheduleAutosave('${post.id}')"
+          placeholder="Links, shoot references, what triggered this idea.">${safe(e.notes)}</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Published Date</label>
+        <div id="pub-date-block">${renderPublishedDateBlock()}</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">LinkedIn URL</label>
+        <div class="linkedin-url-row">
+          <input class="form-input" value="${safe(e.linkedin_url)}"
+            oninput="editorState.linkedin_url=this.value;scheduleAutosave('${post.id}')"
+            placeholder="Paste the live post URL here once published">
+          ${e.linkedin_url?`<a href="${safe(e.linkedin_url)}" target="_blank" class="linkedin-url-link">View post ↗</a>`:""}
+        </div>
+      </div>
+      <div id="performance-section">${renderPerformanceSection()}</div>
+    </div>
+  </div>`;
+}
+
+// ── SIDEBAR ───────────────────────────────────────────────────────
+function renderSidebar() {
+  const counts=PILLARS.reduce((acc,p)=>{acc[p.id]=state.posts.filter(x=>x.pillar===p.id).length;return acc;},{});
+  return `<div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-name">ARCTURUS</div>
+      <div class="sidebar-logo-sub">Social Content Database</div>
+      <div class="sidebar-logo-version">v1.0</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Views</div>
+      ${[{id:"dashboard",label:"Dashboard"},{id:"library",label:"Post Library"}].map(item=>
+        `<button class="nav-item ${state.view===item.id?"active":""}" onclick="navigate('${item.id}')">${item.label}</button>`
+      ).join("")}
+      <div class="sidebar-section-label" style="margin-top:8px">Pillars</div>
+      ${PILLARS.map(p=>
+        `<button class="nav-item" onclick="state.filterPillar='${p.id}';navigate('library')">
+          <div class="nav-dot" style="background:${p.color}"></div>${p.short}
+          <span class="nav-count">${counts[p.id]||0}</span>
+        </button>`
+      ).join("")}
+    </nav>
+    <div style="padding:12px 10px;border-top:1px solid rgba(255,255,255,0.08)">
+      <button class="btn btn-primary" style="width:100%;justify-content:center;background:#C25B3F" onclick="state.showModal=true;render()">+ New Post</button>
+    </div>
+  </div>`;
+}
+
+// ── SHEET BAR ─────────────────────────────────────────────────────
+function renderSheetBar() {
+  const dotClass=state.sheetStatus==="connected"?"connected":state.sheetStatus==="loading"?"loading":"error";
+  const n=state.pendingSync.length;
+  const msg=n>0?`${n} change${n>1?"s":""} saving…`:state.sheetMessage;
+  return `<div class="sheet-bar">
+    <div class="sheet-dot ${dotClass}"></div>
+    <span>Google Sheet</span>
+    <span style="color:var(--border2)">·</span>
+    <span id="sheet-bar-msg" style="color:var(--text2)">${msg}</span>
+    <button class="btn btn-ghost btn-sm" style="margin-left:auto;font-size:10px;padding:3px 8px" onclick="loadFromSheet()">↻ Refresh</button>
+  </div>`;
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────
+function renderModal() {
+  return `<div class="modal-overlay" onclick="state.showModal=false;render()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title">New post</div>
+      <div class="form-group">
+        <label class="form-label">Which pillar?</label>
+        <select class="form-input form-select" id="modal-pillar">
+          ${PILLARS.map(p=>`<option value="${p.id}">${p.label}</option>`).join("")}
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+        <button class="btn btn-ghost" onclick="state.showModal=false;render()">Cancel</button>
+        <button class="btn btn-primary" onclick="createPost(document.getElementById('modal-pillar').value)">Create →</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── RENDER ────────────────────────────────────────────────────────
+function renderMain() {
+  const main=document.getElementById("main-area");if(!main)return;
+  let html="";
+  if(state.loading){
+    html=`<div class="loading-screen"><div class="loading-spinner"></div><span style="font-family:var(--font-mono);font-size:12px;color:var(--text3)">Loading from sheet…</span></div>`;
+  }else if(state.view==="editor"){
+    const post=state.posts.find(p=>p.id===state.editingId);
+    if(post){
+      if(editorState._postId!==post.id)initEditor(post);
+      html=renderEditor(post);
+    }else{
+      html=`<div class="empty"><div class="empty-title">Post not found</div></div>`;
+    }
+  }else if(state.view==="library"){
+    html=`<div class="topbar"><span class="topbar-title">Post Library</span><button class="btn btn-primary btn-sm" onclick="state.showModal=true;render()">+ New Post</button></div>`+renderLibrary();
+  }else{
+    html=`<div class="topbar"><span class="topbar-title">Dashboard</span></div>`+renderDashboard();
+  }
+  main.innerHTML=html+renderSheetBar();
+}
+
+function render() {
+  const app=document.getElementById("app");
+  app.innerHTML=renderSidebar()+`<div id="main-area" class="main"></div>`+(state.showModal?renderModal():"");
+  renderMain();
+}
+
+render();
+loadFromSheet();
+</script>
+</body>
+</html>
