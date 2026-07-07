@@ -30,7 +30,7 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 
 /* SIDEBAR */
 .sidebar{width:var(--sidebar-w);background:var(--text);color:var(--bg);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
-.sidebar-logo{padding:44px 20px 13px;border-bottom:1px solid rgba(255,255,255,0.08)}
+.sidebar-logo{padding:44px 20px 13px;border-bottom:1px solid rgba(255,255,255,0.08);-webkit-app-region:drag}
 .sidebar-logo-name{font-family:var(--font-logo);font-size:22px;letter-spacing:0.06em;color:#F7F4EF;line-height:1}
 .sidebar-logo-sub{font-size:9px;color:#C25B3F;letter-spacing:0.1em;text-transform:uppercase;margin-top:3px;font-family:var(--font-mono)}
 .sidebar-logo-version{font-size:8px;color:rgba(247,244,239,0.2);letter-spacing:0.08em;font-family:var(--font-mono);margin-top:2px}
@@ -206,6 +206,7 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtuMyKcwbM7dzJM4LBl6sWBRqRYoMcP4BcQOH7NJb_WHqEi0MV-6E0V_VIKDkRrl4/exec";
+const SHEET_TOKEN = "PaR5WgzcM6QeuojXFPeKnX0q9ePyCyDt";
 
 const PILLARS = [
   {id:"p1",label:"Running a Creative Agency",short:"Agency",color:"#C25B3F"},
@@ -238,18 +239,18 @@ let activePlatformTab = "linkedin";
 
 // ── SHEETS ────────────────────────────────────────────────────────
 async function sheetRead() {
-  const res = await fetch(SCRIPT_URL);
+  const res = await fetch(SCRIPT_URL + "?token=" + encodeURIComponent(SHEET_TOKEN));
   const data = await res.json();
   if (!data.ok) throw new Error(data.error || "Read failed");
   return data.posts;
 }
 async function sheetWrite(post) {
-  const res = await fetch(SCRIPT_URL, {method:"POST",body:JSON.stringify({action:"write",post})});
+  const res = await fetch(SCRIPT_URL, {method:"POST",body:JSON.stringify({action:"write",post,token:SHEET_TOKEN})});
   const data = await res.json();
   if (!data.ok) throw new Error(data.error || "Write failed");
 }
 async function sheetDelete(id) {
-  const res = await fetch(SCRIPT_URL, {method:"POST",body:JSON.stringify({action:"delete",id})});
+  const res = await fetch(SCRIPT_URL, {method:"POST",body:JSON.stringify({action:"delete",id,token:SHEET_TOKEN})});
   const data = await res.json();
   if (!data.ok) throw new Error(data.error || "Delete failed");
 }
