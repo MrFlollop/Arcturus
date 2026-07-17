@@ -44,6 +44,7 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius);font-size:13px;font-weight:500;font-family:var(--font-body);cursor:pointer;border:none;transition:all 0.15s;white-space:nowrap}
 .btn-primary{background:var(--accent);color:white}
 .btn-primary:hover{background:var(--accent2)}
+.btn-primary:disabled{opacity:0.6;cursor:default}
 .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
 .btn-ghost:hover{background:var(--bg2);border-color:var(--border2);color:var(--text)}
 .btn-sm{padding:5px 10px;font-size:12px}
@@ -164,10 +165,11 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 .bottom-nav{display:none}
 @media (max-width: 860px){
   .sidebar{display:none}
-  .app{padding-bottom:var(--bottom-nav-h)}
+  .app{padding-bottom:calc(var(--bottom-nav-h) + env(safe-area-inset-bottom) + 8px)}
   .main{width:100%}
-  .topbar{padding:0 16px;height:calc(var(--header-h) + env(safe-area-inset-top));padding-top:env(safe-area-inset-top)}
+  .topbar{padding:0 16px;height:calc(var(--header-h) + max(24px,env(safe-area-inset-top)));padding-top:max(24px,env(safe-area-inset-top))}
   .topbar-new-btn{display:none}
+  .autosave-indicator span{display:none}
   .content{padding:16px}
   .stats-grid{grid-template-columns:repeat(2,1fr);gap:8px}
   .platform-grid{grid-template-columns:1fr;gap:8px}
@@ -177,23 +179,26 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
   .perf-grid{grid-template-columns:repeat(2,1fr)}
   .editor-form{padding:16px}
   .bottom-nav{
-    display:flex;position:fixed;bottom:0;left:0;right:0;height:var(--bottom-nav-h);
+    display:flex;position:fixed;bottom:0;left:0;right:0;
+    height:calc(var(--bottom-nav-h) + env(safe-area-inset-bottom));
     background:var(--text);border-top:1px solid rgba(255,255,255,0.08);
-    align-items:center;justify-content:space-around;z-index:50;
-    padding-bottom:env(safe-area-inset-bottom);
+    align-items:center;justify-content:space-between;z-index:50;
+    padding:0 30px;padding-bottom:env(safe-area-inset-bottom);
   }
   .bottom-nav-item{
-    display:flex;flex-direction:column;align-items:center;gap:2px;
-    background:none;border:none;color:rgba(247,244,239,0.55);
-    font-size:10px;font-family:var(--font-body);cursor:pointer;padding:8px 14px;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    background:none;border:none;color:rgba(247,244,239,0.5);
+    font-size:12px;font-weight:500;font-family:var(--font-body);cursor:pointer;
+    padding:10px 16px;min-width:60px;
   }
-  .bottom-nav-item.active{color:#F7F4EF}
-  .bottom-nav-item .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);margin-bottom:2px;opacity:0}
+  .bottom-nav-item.active{color:#F7F4EF;font-weight:700}
+  .bottom-nav-item .dot{width:20px;height:3px;border-radius:2px;background:var(--accent);margin-bottom:2px;opacity:0}
   .bottom-nav-item.active .dot{opacity:1}
   .bottom-nav-fab{
-    width:48px;height:48px;border-radius:50%;background:var(--accent);color:white;
-    display:flex;align-items:center;justify-content:center;font-size:22px;
-    border:none;cursor:pointer;margin-top:-20px;box-shadow:0 4px 12px rgba(194,91,63,0.4);
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:52px;height:52px;border-radius:50%;background:var(--accent);color:white;
+    display:flex;align-items:center;justify-content:center;font-size:24px;
+    border:none;cursor:pointer;box-shadow:0 4px 14px rgba(194,91,63,0.45);
   }
 }
 </style>
@@ -204,18 +209,18 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtuMyKcwbM7dzJM4LBl6sWBRqRYoMcP4BcQOH7NJb_WHqEi0MV-6E0V_VIKDkRrl4/exec";
 const SHEET_TOKEN = "PaR5WgzcM6QeuojXFPeKnX0q9ePyCyDt";
+const CADENCE_DAYS = 7;
 const PILLARS = [
   {id:"p1",label:"Running a Creative Agency",short:"Agency",color:"#C25B3F"},
   {id:"p2",label:"Industry Perspective",short:"Industry",color:"#4A7C6F"},
   {id:"p3",label:"Creative Leadership",short:"Leadership",color:"#5B5EA6"},
   {id:"p4",label:"Craft & Camera",short:"Craft",color:"#B8860B"},
-  {id:"p5",label:"Perspective",short:"Perspective",color:"#7B4F8E"},
+  {id:"p5",label:"Personal",short:"Personal",color:"#7B4F8E"},
 ];
 const STATUSES = [
   {id:"idea",label:"Idea",color:"#94A3B8"},
   {id:"draft",label:"Draft",color:"#F59E0B"},
   {id:"ready",label:"Ready",color:"#10B981"},
-  {id:"scheduled",label:"Scheduled",color:"#3B82F6"},
   {id:"published",label:"Published",color:"#6B7280"},
 ];
 const PLATFORMS = [
@@ -223,14 +228,20 @@ const PLATFORMS = [
   {id:"instagram",label:"Instagram",short:"IG",cls:"ig",color:"#E1306C",wordRange:[50,150]},
   {id:"threads",label:"Threads",short:"TH",cls:"th",color:"#444",wordRange:[20,80]},
 ];
+const PLATFORM_PROMPTS = {
+  linkedin: "Please tidy this LinkedIn post up for me — sharpen the opening hook, keep it in my voice and UK English, punchy rather than corporate. Suggest a tightened version if it helps.",
+  instagram: "Please suggest 5–8 relevant hashtags for this Instagram caption, and tidy the copy slightly if needed — keep it casual and authentic, not polished.",
+  threads: "Please tighten this Threads post — keep it short and conversational, cut anything that reads corporate or stiff."
+};
 let state = {
   posts:[],view:"dashboard",editingId:null,showNewPost:false,
-  filterPillar:null,filterStatus:null,search:"",
+  filterPillar:null,filterStatus:null,search:"",sortBy:"updated_desc",
   loading:true,sheetStatus:"loading",sheetMessage:"Connecting…",pendingSync:[],
 };
 let editorState = {};
 let autosaveTimer = null;
 let activePlatformTab = "linkedin";
+let isCreatingPost = false;
 async function sheetRead() {
   const res = await fetch(SCRIPT_URL + "?token=" + encodeURIComponent(SHEET_TOKEN));
   const data = await res.json();
@@ -262,6 +273,9 @@ function parsePlatforms(val) {
   if(Array.isArray(val))return val;
   return val.split(",").map(function(s){return s.trim();}).filter(Boolean);
 }
+function parseBool(val) {
+  return val===true||val==="true"||val==="TRUE"||val===1||val==="1";
+}
 function wordCount(text) {
   if(!text)return 0;
   return text.trim().split(/\s+/).filter(Boolean).length;
@@ -280,6 +294,12 @@ function platformTags(platforms) {
     const p=PLATFORMS.find(function(x){return x.id===pid;});if(!p)return"";
     return '<span class="ptag ptag-'+p.cls+'">'+p.short+'</span>';
   }).join("");
+}
+function photosReadyTag(post) {
+  const platforms = parsePlatforms(post.platforms);
+  if(platforms.length===0) return "";
+  if(parseBool(post.photos_ready)) return '<span class="tag" style="background:#10B98118;color:#10B981">📷 Ready</span>';
+  return '<span class="tag" style="background:var(--bg2);color:var(--text3)">📷 Pending</span>';
 }
 let toastTimer;
 function showToast(msg,isError) {
@@ -307,11 +327,30 @@ async function copyToClipboard(fieldKey,btnEl) {
     showToast("Copy failed — try selecting manually",true);
   }
 }
+async function copyWithPrompt(fieldKey,platformId,btnEl) {
+  const text = editorState[fieldKey] || "";
+  if(!text){ showToast("Nothing to copy yet",true); return; }
+  const suffix = PLATFORM_PROMPTS[platformId] || "";
+  const combined = suffix ? (text + "\n\n---\n" + suffix) : text;
+  try {
+    await navigator.clipboard.writeText(combined);
+    if(btnEl){
+      const original=btnEl.textContent;
+      btnEl.textContent="Copied ✓";
+      btnEl.classList.add("copied");
+      setTimeout(function(){ btnEl.textContent=original; btnEl.classList.remove("copied"); },1800);
+    }
+    showToast("Copied with prompt ✓");
+  } catch(err) {
+    showToast("Copy failed — try selecting manually",true);
+  }
+}
 async function loadFromSheet() {
   state.loading=true;state.sheetStatus="loading";state.sheetMessage="Loading from sheet…";render();
   try {
     const posts=await sheetRead();
-    state.posts=posts.map(function(p){return Object.assign({},p,{platforms:parsePlatforms(p.platforms)});});
+    state.posts=posts.map(function(p){return Object.assign({},p,{platforms:parsePlatforms(p.platforms),photos_ready:parseBool(p.photos_ready)});});
+    ensureSuggestedDates();
     state.loading=false;state.sheetStatus="connected";state.sheetMessage="Sheet connected";render();
   } catch(err) {
     state.loading=false;state.sheetStatus="error";state.sheetMessage="Error: "+err.message;render();
@@ -360,25 +399,40 @@ async function deletePost(id) {
   catch(err){showToast("Delete failed: "+err.message,true);}
 }
 async function createNewPost() {
-  const pillar = document.getElementById("np-pillar").value;
-  const idea = document.getElementById("np-idea").value.trim();
-  const extraNotes = document.getElementById("np-notes").value.trim();
-  const titleInput = document.getElementById("np-title").value.trim();
-  if(!idea){ showToast("Add your idea first",true); return; }
-  const title = titleInput || idea.slice(0,60).split("\n")[0];
-  const combinedNotes = extraNotes ? idea + "\n\n" + extraNotes : idea;
-  const post={
-    id:genId(),title:title,pillar:pillar,status:"idea",
-    platforms:[],body_linkedin:"",body_instagram:"",body_threads:"",
-    notes:combinedNotes,published_at:"",linkedin_url:"",
-    views:"",likes:"",comments:"",shares:"",verdict:"",
-    created_at:new Date().toISOString(),updated_at:new Date().toISOString(),
-  };
-  state.posts.push(post);
-  state.showNewPost=false;
-  await savePost(post);
-  showToast("Post added ✓");
-  render();
+  if(isCreatingPost) return;
+  isCreatingPost=true;
+  const btn=document.getElementById("np-submit-btn");
+  if(btn){btn.disabled=true;btn.textContent="Adding…";}
+  try {
+    const pillar = document.getElementById("np-pillar").value;
+    const status = document.getElementById("np-status").value;
+    const idea = document.getElementById("np-idea").value.trim();
+    const extraNotes = document.getElementById("np-notes").value.trim();
+    const titleInput = document.getElementById("np-title").value.trim();
+    if(!idea){
+      showToast("Add your idea first",true);
+      if(btn){btn.disabled=false;btn.textContent="Add Post →";}
+      isCreatingPost=false;
+      return;
+    }
+    const title = titleInput || idea.slice(0,60).split("\n")[0];
+    const combinedNotes = extraNotes ? idea + "\n\n" + extraNotes : idea;
+    const post={
+      id:genId(),title:title,pillar:pillar,status:status,
+      platforms:[],body_linkedin:"",body_instagram:"",body_threads:"",
+      notes:combinedNotes,published_at:"",linkedin_url:"",
+      views:"",likes:"",comments:"",shares:"",verdict:"",
+      photos_ready:false,suggested_date:"",
+      created_at:new Date().toISOString(),updated_at:new Date().toISOString(),
+    };
+    state.posts.push(post);
+    state.showNewPost=false;
+    await savePost(post);
+    showToast("Post added ✓");
+    render();
+  } finally {
+    isCreatingPost=false;
+  }
 }
 function scheduleAutosave(postId) {
   clearTimeout(autosaveTimer);
@@ -402,6 +456,13 @@ function manualSave(postId) {
   showToast("Saving now…");
   doSaveNow(postId);
 }
+async function goBackFromEditor(postId) {
+  const btn=document.getElementById("editor-back-btn");
+  if(btn){btn.disabled=true;btn.textContent="Saving…";}
+  clearTimeout(autosaveTimer);
+  await doSaveNow(postId);
+  navigate("library");
+}
 function getLastPostedPerPlatform() {
   const published=state.posts.filter(function(p){return p.status==="published"&&p.published_at;});
   const result={};
@@ -414,6 +475,95 @@ function getLastPostedPerPlatform() {
   });
   return result;
 }
+function getTrackKey(pillarId) { return pillarId==="p5" ? "personal" : "work"; }
+function computeLastPublished(trackKey) {
+  const matches = state.posts.filter(function(p){ return p.status==="published" && p.published_at && getTrackKey(p.pillar)===trackKey; });
+  if(matches.length===0) return null;
+  matches.sort(function(a,b){ return new Date(b.published_at)-new Date(a.published_at); });
+  return matches[0];
+}
+function computeOverdue() {
+  const tracks=["personal","work"];
+  const result=[];
+  tracks.forEach(function(trackKey){
+    const last=computeLastPublished(trackKey);
+    const daysSinceLast = last ? daysSince(last.published_at) : null;
+    if(daysSinceLast===null || daysSinceLast > CADENCE_DAYS) {
+      result.push({
+        track:trackKey,
+        daysOverdue: daysSinceLast===null ? null : daysSinceLast-CADENCE_DAYS,
+        lastTitle: last ? last.title : null,
+        neverPosted: daysSinceLast===null
+      });
+    }
+  });
+  return result;
+}
+function ensureSuggestedDates() {
+  const tracks=["personal","work"];
+  tracks.forEach(function(trackKey){
+    const trackReady = state.posts.filter(function(p){ return p.status==="ready" && getTrackKey(p.pillar)===trackKey; });
+    const withDate = trackReady.filter(function(p){ return p.suggested_date; });
+    const withoutDate = trackReady.filter(function(p){ return !p.suggested_date; }).sort(function(a,b){ return new Date(a.created_at||0)-new Date(b.created_at||0); });
+    if(withoutDate.length===0) return;
+    let baseline;
+    if(withDate.length>0){
+      baseline = withDate.reduce(function(max,p){ const d=new Date(p.suggested_date); return d>max?d:max; }, new Date(0));
+    } else {
+      const last=computeLastPublished(trackKey);
+      baseline = last ? new Date(last.published_at) : new Date(Date.now()-CADENCE_DAYS*24*60*60*1000);
+    }
+    let cursor = new Date(Math.max(baseline.getTime()+CADENCE_DAYS*24*60*60*1000, Date.now()));
+    withoutDate.forEach(function(p){
+      p.suggested_date = cursor.toISOString();
+      savePost(Object.assign({},p));
+      cursor = new Date(cursor.getTime()+CADENCE_DAYS*24*60*60*1000);
+    });
+  });
+}
+function updateSuggestedDate(postId,dateStr) {
+  const post=state.posts.find(function(p){return p.id===postId;});
+  if(!post)return;
+  post.suggested_date=new Date(dateStr+"T09:00:00").toISOString();
+  savePost(Object.assign({},post));
+  render();
+}
+function getTodayStripSummary() {
+  const overdue=computeOverdue();
+  const in7=Date.now()+7*24*60*60*1000;
+  const dueThisWeek=state.posts.filter(function(p){
+    return p.status==="ready" && p.suggested_date && new Date(p.suggested_date).getTime()<=in7 && new Date(p.suggested_date).getTime()>=Date.now()-24*60*60*1000;
+  }).length;
+  return {overdueCount:overdue.length,dueThisWeek:dueThisWeek};
+}
+function shouldShowBackupNudge() {
+  try {
+    const last=localStorage.getItem("arcturus_backup_nudge_at");
+    if(!last)return true;
+    const days=(Date.now()-parseInt(last,10))/(1000*60*60*24);
+    return days>30;
+  } catch(e){ return false; }
+}
+function dismissBackupNudge() {
+  try{ localStorage.setItem("arcturus_backup_nudge_at",String(Date.now())); }catch(e){}
+  const el=document.getElementById("backup-nudge");
+  if(el)el.remove();
+}
+function sortPosts(list) {
+  const arr=list.slice();
+  if(state.sortBy==="updated_desc"){
+    arr.sort(function(a,b){return new Date(b.updated_at||b.created_at||0)-new Date(a.updated_at||a.created_at||0);});
+  } else if(state.sortBy==="updated_asc"){
+    arr.sort(function(a,b){return new Date(a.updated_at||a.created_at||0)-new Date(b.updated_at||b.created_at||0);});
+  } else if(state.sortBy==="title_asc"){
+    arr.sort(function(a,b){return (a.title||"").localeCompare(b.title||"");});
+  } else if(state.sortBy==="status"){
+    arr.sort(function(a,b){return STATUSES.findIndex(function(s){return s.id===a.status;})-STATUSES.findIndex(function(s){return s.id===b.status;});});
+  } else if(state.sortBy==="pillar"){
+    arr.sort(function(a,b){return PILLARS.findIndex(function(p){return p.id===a.pillar;})-PILLARS.findIndex(function(p){return p.id===b.pillar;});});
+  }
+  return arr;
+}
 function renderDashboard() {
   const posts=state.posts;
   const total=posts.length;
@@ -421,11 +571,12 @@ function renderDashboard() {
   const byStatus=STATUSES.map(function(s){return Object.assign({},s,{count:posts.filter(function(x){return x.status===s.id;}).length});});
   const ideaCount=(byStatus.find(function(s){return s.id==="idea";})||{}).count||0;
   const draftCount=(byStatus.find(function(s){return s.id==="draft";})||{}).count||0;
-  const readyCount=posts.filter(function(x){return x.status==="ready"||x.status==="scheduled";}).length;
+  const readyCount=posts.filter(function(x){return x.status==="ready";}).length;
   const publishedCount=posts.filter(function(x){return x.status==="published";}).length;
   const maxP=Math.max.apply(null,byPillar.map(function(p){return p.count;}).concat([1]));
-  const recent=posts.slice().sort(function(a,b){return new Date(b.updated_at)-new Date(a.updated_at);}).slice(0,6);
+  const recent=posts.slice().sort(function(a,b){return new Date(b.updated_at||b.created_at||0)-new Date(a.updated_at||a.created_at||0);}).slice(0,6);
   const lastPosted=getLastPostedPerPlatform();
+  const todayStrip=getTodayStripSummary();
   const stats=[
     {label:"Total Posts",value:total,color:"var(--text)",sub:"in sheet"},
     {label:"Ideas",value:ideaCount,color:"#94A3B8",sub:"to develop"},
@@ -433,7 +584,20 @@ function renderDashboard() {
     {label:"Ready",value:readyCount,color:"#10B981",sub:"to publish"},
     {label:"Published",value:publishedCount,color:"#6B7280",sub:"live"},
   ];
-  let html = '<div class="content"><div class="stats-grid">';
+  let html = '<div class="content">';
+  html += '<div class="card" style="margin-bottom:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;flex-wrap:wrap" onclick="navigate(\'cadence\')">'
+    + (todayStrip.overdueCount>0 ? '<span style="color:#DC2626;font-weight:600;font-size:13px">⚠ '+todayStrip.overdueCount+' overdue</span>' : '<span style="color:#10B981;font-size:13px">✓ On track</span>')
+    + '<span style="color:var(--text3)">·</span>'
+    + '<span style="color:var(--text2);font-size:13px">'+todayStrip.dueThisWeek+' due this week</span>'
+    + '<span style="margin-left:auto;color:var(--text3);font-size:11px">Cadence →</span>'
+    + '</div>';
+  if(shouldShowBackupNudge()){
+    html += '<div class="card" id="backup-nudge" style="margin-bottom:16px;padding:12px 16px;display:flex;align-items:center;gap:10px;background:var(--bg2);flex-wrap:wrap">'
+      + '<span style="font-size:12px;color:var(--text2);flex:1;min-width:200px">💾 Worth duplicating your Google Sheet occasionally as a backup — it is the only copy of everything.</span>'
+      + '<button class="btn btn-ghost btn-sm" onclick="dismissBackupNudge()">Got it</button>'
+      + '</div>';
+  }
+  html += '<div class="stats-grid">';
   stats.forEach(function(s){
     html += '<div class="stat-card"><div class="stat-label">'+s.label+'</div><span class="stat-value" style="color:'+s.color+'">'+s.value+'</span><div class="stat-sub">'+s.sub+'</div></div>';
   });
@@ -472,8 +636,42 @@ function renderDashboard() {
   html += '</div></div></div>';
   return html;
 }
+function renderCadence() {
+  ensureSuggestedDates();
+  const overdue=computeOverdue();
+  const readyWithDates=state.posts.filter(function(p){return p.status==="ready"&&p.suggested_date;});
+  readyWithDates.sort(function(a,b){return new Date(a.suggested_date)-new Date(b.suggested_date);});
+  let html='<div class="content">';
+  if(overdue.length>0){
+    html += '<div class="card" style="margin-bottom:16px;border-color:#DC262644"><div class="card-header"><span class="card-title" style="color:#DC2626">⚠ Overdue</span></div><div class="card-body">';
+    overdue.forEach(function(o){
+      const label=o.track==="personal"?"Personal":"Work";
+      let text;
+      if(o.neverPosted){ text=label+" — no posts published yet"; }
+      else { text=label+" — "+o.daysOverdue+" day"+(o.daysOverdue!==1?"s":"")+" overdue"+(o.lastTitle?(' (last: "'+safe(o.lastTitle)+'")'):""); }
+      html += '<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2)">'+text+'</div>';
+    });
+    html += '</div></div>';
+  }
+  html += '<div class="card"><div class="card-header"><span class="card-title">Upcoming</span></div><div class="card-body">';
+  if(readyWithDates.length===0){
+    html += '<div class="empty" style="padding:24px 0"><div class="empty-title">Nothing scheduled yet</div><div class="empty-sub">Mark a post Ready and it will get a suggested date here.</div></div>';
+  } else {
+    readyWithDates.forEach(function(p){
+      const pl=getPillar(p.pillar);
+      const trackLabel=getTrackKey(p.pillar)==="personal"?"Personal":"Work";
+      html += '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);flex-wrap:wrap">'
+        + '<input type="date" class="form-input" style="width:150px;padding:6px 8px;font-size:12px" value="'+p.suggested_date.slice(0,10)+'" onchange="updateSuggestedDate(\''+p.id+'\',this.value)">'
+        + '<span class="tag" style="background:'+pl.color+'18;color:'+pl.color+'">'+trackLabel+'</span>'
+        + '<span style="flex:1;font-size:13px;cursor:pointer;min-width:120px" onclick="navigate(\'editor\',\''+p.id+'\')">'+safe(p.title)+'</span>'
+        + '</div>';
+    });
+  }
+  html += '</div></div></div>';
+  return html;
+}
 function renderLibrary() {
-  const filtered=state.posts.filter(function(p){
+  let filtered=state.posts.filter(function(p){
     if(state.filterPillar&&p.pillar!==state.filterPillar)return false;
     if(state.filterStatus&&p.status!==state.filterStatus)return false;
     if(state.search){
@@ -486,17 +684,23 @@ function renderLibrary() {
     }
     return true;
   });
+  filtered=sortPosts(filtered);
   let html = '<div class="content"><div class="filters">'
-    + '<input class="form-input" style="width:220px;padding:5px 12px;font-size:12px" placeholder="Search posts &amp; notes…" value="'+safe(state.search)+'" oninput="state.search=this.value;renderMain()">'
-    + '<span style="font-size:11px;color:var(--text3);padding:0 4px;font-family:var(--font-body)">Pillar:</span>';
+    + '<input class="form-input" id="lib-search-input" style="width:220px;padding:5px 12px;font-size:12px" placeholder="Search posts &amp; notes…" value="'+safe(state.search)+'" oninput="const _p=this.selectionStart;state.search=this.value;renderMain();const _e=document.getElementById(\'lib-search-input\');if(_e){_e.focus();_e.setSelectionRange(_p,_p);}">'
+    + '<select class="form-input form-select" style="width:145px;padding:5px 26px 5px 10px;font-size:12px" onchange="state.filterPillar=this.value||null;renderMain()"><option value="">All Pillars</option>';
   PILLARS.forEach(function(p){
-    html += '<button class="filter-chip '+(state.filterPillar===p.id?"active":"")+'" onclick="state.filterPillar=state.filterPillar===\''+p.id+'\'?null:\''+p.id+'\';renderMain()" style="'+(state.filterPillar!==p.id?"border-color:"+p.color+"44;color:"+p.color:"")+'">'+p.short+'</button>';
+    html += '<option value="'+p.id+'" '+(state.filterPillar===p.id?"selected":"")+'>'+p.short+'</option>';
   });
-  html += '<span style="font-size:11px;color:var(--text3);padding:0 4px;font-family:var(--font-body)">Status:</span>';
+  html += '</select><select class="form-input form-select" style="width:135px;padding:5px 26px 5px 10px;font-size:12px" onchange="state.filterStatus=this.value||null;renderMain()"><option value="">All Statuses</option>';
   STATUSES.forEach(function(s){
-    html += '<button class="filter-chip '+(state.filterStatus===s.id?"active":"")+'" onclick="state.filterStatus=state.filterStatus===\''+s.id+'\'?null:\''+s.id+'\';renderMain()">'+s.label+'</button>';
+    html += '<option value="'+s.id+'" '+(state.filterStatus===s.id?"selected":"")+'>'+s.label+'</option>';
   });
-  html += '<span style="margin-left:auto;font-size:12px;color:var(--text3);font-family:var(--font-mono)">'+filtered.length+' post'+(filtered.length!==1?"s":"")+'</span></div>';
+  html += '</select><select class="form-input form-select" style="width:145px;padding:5px 26px 5px 10px;font-size:12px" onchange="state.sortBy=this.value;renderMain()">';
+  [["updated_desc","Last edited"],["updated_asc","Oldest first"],["title_asc","Title A–Z"],["status","Status"],["pillar","Pillar"]].forEach(function(opt){
+    html += '<option value="'+opt[0]+'" '+(state.sortBy===opt[0]?"selected":"")+'>'+opt[1]+'</option>';
+  });
+  html += '</select>'
+    + '<span style="margin-left:auto;font-size:12px;color:var(--text3);font-family:var(--font-mono)">'+filtered.length+' post'+(filtered.length!==1?"s":"")+'</span></div>';
   if(filtered.length===0){
     html += '<div class="empty"><div class="empty-title">'+(state.posts.length===0?"Library is empty":"No posts match")+'</div><div class="empty-sub">'+(state.posts.length===0?"Add your first post idea.":"Try adjusting your filters.")+'</div>'+(state.posts.length===0?'<button class="btn btn-primary" style="margin-top:8px" onclick="state.showNewPost=true;render()">+ New Post</button>':"")+'</div>';
   } else {
@@ -506,7 +710,7 @@ function renderLibrary() {
       const previewBody=p.body_linkedin||p.body_instagram||p.body_threads||p.notes||"";
       html += '<div class="post-card" onclick="navigate(\'editor\',\''+p.id+'\')"><div class="post-card-pillar-bar" style="background:'+(pl?pl.color:"var(--border)")+'"></div><div class="post-card-title">'+(safe(p.title)||'<em style="color:var(--text3);font-weight:400">Untitled post</em>')+'</div>'
         + (previewBody?'<div class="post-card-body">'+safe(previewBody)+'</div>':"")
-        + '<div class="post-card-meta">'+pillarTag(p.pillar)+statusTag(p.status)+platformTags(p.platforms)
+        + '<div class="post-card-meta">'+pillarTag(p.pillar)+statusTag(p.status)+platformTags(p.platforms)+photosReadyTag(p)
         + (p.published_at?'<span class="tag" style="background:#6B728018;color:#6B7280;margin-left:auto">'+formatDate(p.published_at)+'</span>':'<span class="post-card-date">'+formatDate(p.updated_at)+'</span>')
         + '</div></div>';
     });
@@ -523,6 +727,7 @@ function initEditor(post) {
     body_linkedin:post.body_linkedin||"",body_instagram:post.body_instagram||"",body_threads:post.body_threads||"",
     notes:post.notes||"",published_at:post.published_at||null,linkedin_url:post.linkedin_url||"",
     views:post.views||"",likes:post.likes||"",comments:post.comments||"",shares:post.shares||"",verdict:post.verdict||"",
+    photos_ready:parseBool(post.photos_ready),suggested_date:post.suggested_date||"",
   };
 }
 function handleStatusChip(val) {
@@ -534,7 +739,19 @@ function handleStatusChip(val) {
   if(chipsEl)chipsEl.innerHTML=renderStatusChips();
   const perfEl=document.getElementById("performance-section");
   if(perfEl)perfEl.innerHTML=renderPerformanceSection();
-  scheduleAutosave(editorState._postId);
+  clearTimeout(autosaveTimer);
+  doSaveNow(editorState._postId);
+}
+function togglePhotosReady(postId) {
+  editorState.photos_ready=!editorState.photos_ready;
+  const el=document.getElementById("photos-ready-check");
+  if(el)el.innerHTML=renderPhotosReadyCheck();
+  clearTimeout(autosaveTimer);
+  doSaveNow(postId);
+}
+function renderPhotosReadyCheck() {
+  const checked=!!editorState.photos_ready;
+  return '<div class="platform-check" style="display:inline-flex;'+(checked?"border-color:#10B981;background:#10B98108;color:#10B981":"")+'" onclick="togglePhotosReady(\''+editorState._postId+'\')"><input type="checkbox" '+(checked?"checked":"")+'> 📷 Photos ready</div>';
 }
 function togglePlatform(pid) {
   const arr=editorState.platforms||[];
@@ -600,11 +817,18 @@ function renderPlatformBodySection() {
   const text=editorState[fieldKey]||"";
   const words=wordCount(text);
   const lo=plat.wordRange[0], hi=plat.wordRange[1];
+  let linkedinUrlBlock="";
+  if(activePlatformTab==="linkedin"){
+    linkedinUrlBlock = '<div class="form-group" style="margin-top:14px"><label class="form-label">LinkedIn URL</label><div class="linkedin-url-row"><input class="form-input" value="'+safe(editorState.linkedin_url||"")+'" oninput="editorState.linkedin_url=this.value;scheduleAutosave(\''+editorState._postId+'\')" placeholder="Paste the live post URL here once published">'
+      + (editorState.linkedin_url?'<a href="'+safe(editorState.linkedin_url)+'" target="_blank" class="linkedin-url-link">View post ↗</a>':"")
+      + '</div></div>';
+  }
   return '<div class="platform-tabs" id="platform-tabs">'+renderPlatformTabs()+'</div>'
     + '<div style="padding-top:14px">'
-    + '<div style="display:flex;justify-content:flex-end;margin-bottom:6px"><button class="btn btn-copy" onclick="copyToClipboard(\''+fieldKey+'\', this)">📋 Copy text</button></div>'
+    + '<div style="display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap;margin-bottom:6px"><button class="btn btn-copy" onclick="copyToClipboard(\''+fieldKey+'\', this)">📋 Copy text</button><button class="btn btn-copy" onclick="copyWithPrompt(\''+fieldKey+'\',\''+activePlatformTab+'\', this)">✨ Copy + Prompt</button></div>'
     + '<textarea class="form-input form-textarea tall" id="body-textarea-'+activePlatformTab+'" oninput="editorState[\''+fieldKey+'\']=this.value;scheduleAutosave(\''+editorState._postId+'\');updateWordCount()" placeholder="'+placeholder+'">'+safe(text)+'</textarea>'
     + '<div class="word-count-row"><span class="word-count-text" id="word-count-display">'+words+' word'+(words!==1?"s":"")+' · '+text.length+' chars · ideal range '+lo+'–'+hi+' words</span></div>'
+    + linkedinUrlBlock
     + '</div>';
 }
 function renderPublishedDateBlock() {
@@ -633,11 +857,10 @@ function renderPerformanceSection() {
 function renderEditor(post) {
   const e=editorState;
   const pl=getPillar(e.pillar);
-  let html = '<div style="flex:1;overflow:hidden;display:flex;flex-direction:column"><div class="topbar"><button class="btn btn-ghost btn-sm" onclick="navigate(\'library\')">← Back</button><div style="flex:1;display:flex;align-items:center;gap:10px;min-width:0">'
+  let html = '<div style="flex:1;overflow:hidden;display:flex;flex-direction:column"><div class="topbar"><button class="btn btn-ghost btn-sm" id="editor-back-btn" onclick="goBackFromEditor(\''+post.id+'\')">← Back</button><div style="flex:1;display:flex;align-items:center;gap:10px;min-width:0">'
     + (pl?'<div style="width:10px;height:10px;border-radius:2px;background:'+pl.color+';flex-shrink:0"></div>':"")
     + '<span id="editor-title-display" style="font-family:var(--font-display);font-size:16px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(safe(e.title)||'<em style="color:var(--text3);font-style:italic">Untitled post</em>')+'</span>'
     + '<div class="autosave-indicator" style="flex-shrink:0"><div class="autosave-dot saved" id="autosave-dot"></div><span id="autosave-txt">Saved</span></div></div>'
-    + '<button class="btn btn-ghost btn-sm" onclick="manualSave(\''+post.id+'\')">💾 Save now</button>'
     + '<button class="btn btn-danger btn-sm" onclick="deletePost(\''+post.id+'\')">Delete</button></div>'
     + '<div class="editor-form">'
     + '<div class="form-group"><label class="form-label">Title</label><input class="form-input" value="'+safe(e.title)+'" oninput="editorState.title=this.value;scheduleAutosave(\''+post.id+'\');const d=document.getElementById(\'editor-title-display\');if(d)d.innerHTML=this.value||\'<em style=color:var(--text3);font-style:italic>Untitled post</em>\'" placeholder="What\'s the core idea in a line?"></div>'
@@ -646,20 +869,19 @@ function renderEditor(post) {
   html += '</select></div>'
     + '<div class="form-group"><label class="form-label">Status</label><div class="status-chip-row" id="status-chips">'+renderStatusChips()+'</div></div>'
     + '<div class="form-group"><label class="form-label">Platforms</label><div class="platform-checks" id="platform-checks">'+renderPlatformChecks()+'</div></div>'
+    + '<div class="form-group"><label class="form-label">Photos</label><div id="photos-ready-check">'+renderPhotosReadyCheck()+'</div></div>'
     + '<div class="form-group"><label class="form-label">Body Text</label><div id="platform-body-section">'+renderPlatformBodySection()+'</div></div>'
     + '<div class="form-group"><label class="form-label">Notes</label><textarea class="form-input form-textarea" oninput="editorState.notes=this.value;scheduleAutosave(\''+post.id+'\')" placeholder="Links, shoot references, what triggered this idea.">'+safe(e.notes)+'</textarea></div>'
     + '<div class="form-group"><label class="form-label">Published Date</label><div id="pub-date-block">'+renderPublishedDateBlock()+'</div></div>'
-    + '<div class="form-group"><label class="form-label">LinkedIn URL</label><div class="linkedin-url-row"><input class="form-input" value="'+safe(e.linkedin_url)+'" oninput="editorState.linkedin_url=this.value;scheduleAutosave(\''+post.id+'\')" placeholder="Paste the live post URL here once published">'
-    + (e.linkedin_url?'<a href="'+safe(e.linkedin_url)+'" target="_blank" class="linkedin-url-link">View post ↗</a>':"")
-    + '</div></div>'
     + '<div id="performance-section">'+renderPerformanceSection()+'</div>'
+    + '<button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px;padding:12px" onclick="manualSave(\''+post.id+'\')">💾 Save Now</button>'
     + '</div></div>';
   return html;
 }
 function renderSidebar() {
   const counts=PILLARS.reduce(function(acc,p){acc[p.id]=state.posts.filter(function(x){return x.pillar===p.id;}).length;return acc;},{});
-  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v2.0</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
-  [{id:"dashboard",label:"Dashboard"},{id:"library",label:"Post Library"}].forEach(function(item){
+  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v3.0</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
+  [{id:"dashboard",label:"Dashboard"},{id:"library",label:"Post Library"},{id:"cadence",label:"Cadence"}].forEach(function(item){
     html += '<button class="nav-item '+(state.view===item.id?"active":"")+'" onclick="navigate(\''+item.id+'\')">'+item.label+'</button>';
   });
   html += '<div class="sidebar-section-label" style="margin-top:8px">Pillars</div>';
@@ -686,7 +908,9 @@ function renderSheetBar() {
 function renderNewPostModal() {
   let html = '<div class="modal-overlay" onclick="state.showNewPost=false;render()"><div class="modal" onclick="event.stopPropagation()"><div class="modal-title">New Post</div><div class="modal-sub">Get the idea down now — refine platforms, body copy and everything else later from the Library.</div><div class="form-group"><label class="form-label">Pillar</label><select class="form-input form-select" id="np-pillar">';
   PILLARS.forEach(function(p){ html += '<option value="'+p.id+'">'+p.label+'</option>'; });
-  html += '</select></div><div class="form-group"><label class="form-label">Title (optional)</label><input class="form-input" id="np-title" placeholder="Leave blank to auto-generate from your idea"></div><div class="form-group"><label class="form-label">Your idea</label><textarea class="form-input form-textarea tall" id="np-idea" placeholder="Just get it down. Voice-to-text is fine — tidy it up later." autofocus></textarea></div><div class="form-group"><label class="form-label">Notes</label><textarea class="form-input form-textarea" id="np-notes" placeholder="Links, shoot references, anything else worth keeping alongside this."></textarea></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px"><button class="btn btn-ghost" onclick="state.showNewPost=false;render()">Cancel</button><button class="btn btn-primary" onclick="createNewPost()">Add Post →</button></div></div></div>';
+  html += '</select></div><div class="form-group"><label class="form-label">Status</label><select class="form-input form-select" id="np-status">';
+  STATUSES.forEach(function(s){ html += '<option value="'+s.id+'">'+s.label+'</option>'; });
+  html += '</select></div><div class="form-group"><label class="form-label">Title (optional)</label><input class="form-input" id="np-title" placeholder="Leave blank to auto-generate from your idea"></div><div class="form-group"><label class="form-label">Your idea</label><textarea class="form-input form-textarea tall" id="np-idea" placeholder="Just get it down. Voice-to-text is fine — tidy it up later." autofocus></textarea></div><div class="form-group"><label class="form-label">Notes</label><textarea class="form-input form-textarea" id="np-notes" placeholder="Links, shoot references, anything else worth keeping alongside this."></textarea></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px"><button class="btn btn-ghost" onclick="state.showNewPost=false;render()">Cancel</button><button class="btn btn-primary" id="np-submit-btn" onclick="createNewPost()">Add Post →</button></div></div></div>';
   return html;
 }
 function renderMain() {
@@ -703,9 +927,11 @@ function renderMain() {
       html='<div class="empty"><div class="empty-title">Post not found</div></div>';
     }
   }else if(state.view==="library"){
-    html='<div class="topbar"><span class="topbar-title">Post Library</span><button class="btn btn-primary btn-sm topbar-new-btn" onclick="state.showNewPost=true;render()">+ New Post</button></div>'+renderLibrary();
+    html='<div class="topbar"><span class="topbar-title">🟠 Post Library</span><button class="btn btn-primary btn-sm topbar-new-btn" onclick="state.showNewPost=true;render()">+ New Post</button></div>'+renderLibrary();
+  }else if(state.view==="cadence"){
+    html='<div class="topbar"><span class="topbar-title">🟠 Cadence</span></div>'+renderCadence();
   }else{
-    html='<div class="topbar"><span class="topbar-title">Dashboard</span></div>'+renderDashboard();
+    html='<div class="topbar"><span class="topbar-title">🟠 Dashboard</span></div>'+renderDashboard();
   }
   main.innerHTML=html+renderSheetBar();
 }
