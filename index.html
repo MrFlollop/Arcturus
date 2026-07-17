@@ -50,7 +50,6 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 .btn-sm{padding:5px 10px;font-size:12px}
 .btn-danger{background:#DC2626;color:white}
 .btn-danger:hover{background:#B91C1C}
-.btn-icon{padding:5px 8px;font-size:13px}
 .btn-copy{background:var(--bg2);color:var(--text2);border:1px solid var(--border);padding:4px 9px;font-size:11px}
 .btn-copy:hover{background:var(--bg3);color:var(--text)}
 .btn-copy.copied{background:#E6F0E6;color:#2A6B2A;border-color:#2A6B2A44}
@@ -60,12 +59,6 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 .stat-label{font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);font-family:var(--font-mono);margin-bottom:8px;line-height:1.3}
 .stat-value{font-family:var(--font-display);font-size:32px;line-height:1;display:block;min-height:38px}
 .stat-sub{font-size:11px;color:var(--text3);margin-top:5px;font-family:var(--font-body)}
-.platform-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
-.platform-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
-.platform-card-label{font-size:9px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-mono);display:flex;align-items:center;gap:6px}
-.platform-card-days{font-family:var(--font-display);font-size:clamp(19px,5vw,26px);line-height:1.15;color:var(--text);word-break:break-word}
-.platform-card-sub{font-size:11px;color:var(--text3);font-family:var(--font-body);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:normal;line-height:1.4}
-.platform-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
 .card-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
@@ -80,9 +73,6 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 .status-row:last-child{border-bottom:none}
 .status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
-.filter-chip{padding:5px 12px;border-radius:20px;font-size:12px;font-family:var(--font-body);cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text2);transition:all 0.15s}
-.filter-chip:hover{border-color:var(--border2);color:var(--text)}
-.filter-chip.active{border-color:var(--accent);background:var(--accent);color:white}
 .post-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .post-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;cursor:pointer;transition:all 0.15s;box-shadow:var(--shadow)}
 .post-card:hover{border-color:var(--border2);box-shadow:var(--shadow-md);transform:translateY(-1px)}
@@ -95,23 +85,9 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 .ptag{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:600;font-family:var(--font-mono);letter-spacing:0.04em}
 .ptag-li{background:#0A66C218;color:#0A66C2}
 .ptag-ig{background:#E1306C18;color:#E1306C}
-.ptag-th{background:#00000012;color:#444}
-.platform-checks{display:flex;gap:10px;flex-wrap:wrap;margin-top:2px}
-.platform-check{display:flex;align-items:center;gap:6px;padding:9px 14px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-size:13px;font-family:var(--font-body);transition:all 0.15s;user-select:none}
-.platform-check:hover{border-color:var(--border2)}
-.platform-check.checked-li{border-color:#0A66C2;background:#0A66C208;color:#0A66C2}
-.platform-check.checked-ig{border-color:#E1306C;background:#E1306C08;color:#E1306C}
-.platform-check.checked-th{border-color:#555;background:#00000008;color:#333}
-.platform-check input[type=checkbox]{display:none}
 .status-chip-row{display:flex;gap:8px;flex-wrap:wrap}
 .status-chip{padding:10px 16px;border-radius:20px;font-size:13px;font-family:var(--font-body);font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);transition:all 0.15s;min-height:40px;display:flex;align-items:center;gap:6px}
 .status-chip:active{transform:scale(0.97)}
-.platform-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:0}
-.platform-tab{padding:8px 16px;font-size:12px;font-family:var(--font-body);cursor:pointer;border:none;background:none;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.15s}
-.platform-tab:hover{color:var(--text)}
-.platform-tab.active-li{color:#0A66C2;border-bottom-color:#0A66C2}
-.platform-tab.active-ig{color:#E1306C;border-bottom-color:#E1306C}
-.platform-tab.active-th{color:#333;border-bottom-color:#555}
 .word-count-row{display:flex;align-items:center;justify-content:space-between;margin-top:6px;padding:0 2px}
 .word-count-text{font-size:10px;color:var(--text3);font-family:var(--font-mono)}
 .perf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
@@ -131,9 +107,8 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 .section-heading{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);font-family:var(--font-mono);margin-bottom:14px}
 .published-date-field{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:12px;color:var(--text2);font-family:var(--font-mono);display:flex;align-items:center;gap:8px}
 .published-date-dot{width:7px;height:7px;border-radius:50%;background:#6B7280;flex-shrink:0}
-.linkedin-url-row{display:flex;align-items:center;gap:8px}
-.linkedin-url-link{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:var(--radius);background:#0A66C2;color:white;font-size:11px;font-family:var(--font-body);text-decoration:none;font-weight:500;flex-shrink:0;transition:background 0.15s}
-.linkedin-url-link:hover{background:#084f9a}
+.post-url-link{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:var(--radius);background:#0A66C2;color:white;font-size:11px;font-family:var(--font-body);text-decoration:none;font-weight:500;transition:background 0.15s}
+.post-url-link:hover{background:#084f9a}
 .autosave-indicator{font-size:10px;font-family:var(--font-mono);color:var(--text3);display:flex;align-items:center;gap:5px}
 .autosave-dot{width:5px;height:5px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background 0.3s}
 .autosave-dot.saving{background:#F59E0B;animation:pulse 1s infinite}
@@ -161,7 +136,14 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 .loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:12px}
 .loading-spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes confetti-fall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(115vh) rotate(360deg);opacity:0}}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.topbar-emoji{display:none}
+.mobile-menu-btn{display:none}
+.mobile-menu-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:150;display:flex;justify-content:flex-end}
+.mobile-menu-panel{width:250px;background:var(--text);color:#F7F4EF;height:100%;padding:20px 14px;padding-top:calc(20px + max(24px,env(safe-area-inset-top)));display:flex;flex-direction:column;gap:6px}
+.mobile-menu-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:8px;background:none;border:none;color:rgba(247,244,239,0.75);font-size:14px;font-family:var(--font-body);cursor:pointer;text-align:left}
+.mobile-menu-item:active{background:rgba(255,255,255,0.08)}
 .bottom-nav{display:none}
 @media (max-width: 860px){
   .sidebar{display:none}
@@ -169,10 +151,11 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
   .main{width:100%}
   .topbar{padding:0 16px;height:calc(var(--header-h) + max(24px,env(safe-area-inset-top)));padding-top:max(24px,env(safe-area-inset-top))}
   .topbar-new-btn{display:none}
+  .mobile-menu-btn{display:inline-flex}
+  .topbar-emoji{display:inline}
   .autosave-indicator span{display:none}
   .content{padding:16px}
   .stats-grid{grid-template-columns:repeat(2,1fr);gap:8px}
-  .platform-grid{grid-template-columns:1fr;gap:8px}
   .two-col{grid-template-columns:1fr;gap:12px}
   .post-grid{grid-template-columns:1fr}
   .form-row{grid-template-columns:1fr}
@@ -180,20 +163,18 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
   .editor-form{padding:16px}
   .bottom-nav{
     display:flex;position:fixed;bottom:0;left:0;right:0;
-    height:calc(var(--bottom-nav-h) + env(safe-area-inset-bottom));
+    height:calc(var(--bottom-nav-h) + env(safe-area-inset-bottom) + 8px);
     background:var(--text);border-top:1px solid rgba(255,255,255,0.08);
     align-items:center;justify-content:space-between;z-index:50;
-    padding:0 30px;padding-bottom:env(safe-area-inset-bottom);
+    padding:0 20px;padding-bottom:env(safe-area-inset-bottom);
   }
   .bottom-nav-item{
-    display:flex;flex-direction:column;align-items:center;gap:4px;
-    background:none;border:none;color:rgba(247,244,239,0.5);
-    font-size:12px;font-weight:500;font-family:var(--font-body);cursor:pointer;
-    padding:10px 16px;min-width:60px;
+    display:flex;align-items:center;justify-content:center;
+    background:none;border:none;color:rgba(247,244,239,0.55);
+    font-size:14px;font-weight:600;font-family:var(--font-body);cursor:pointer;
+    padding:11px 20px;border-radius:16px;min-width:76px;transition:all 0.15s;
   }
-  .bottom-nav-item.active{color:#F7F4EF;font-weight:700}
-  .bottom-nav-item .dot{width:20px;height:3px;border-radius:2px;background:var(--accent);margin-bottom:2px;opacity:0}
-  .bottom-nav-item.active .dot{opacity:1}
+  .bottom-nav-item.active{color:#F7F4EF;background:rgba(194,91,63,0.28)}
   .bottom-nav-fab{
     position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
     width:52px;height:52px;border-radius:50%;background:var(--accent);color:white;
@@ -209,7 +190,8 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtuMyKcwbM7dzJM4LBl6sWBRqRYoMcP4BcQOH7NJb_WHqEi0MV-6E0V_VIKDkRrl4/exec";
 const SHEET_TOKEN = "PaR5WgzcM6QeuojXFPeKnX0q9ePyCyDt";
-const CADENCE_DAYS = 7;
+const CADENCE_TARGET_DAYS = 7;
+const FEEDBACK_TITLE = "Arcturus Feedback & Ideas";
 const PILLARS = [
   {id:"p1",label:"Running a Creative Agency",short:"Agency",color:"#C25B3F"},
   {id:"p2",label:"Industry Perspective",short:"Industry",color:"#4A7C6F"},
@@ -219,28 +201,25 @@ const PILLARS = [
 ];
 const STATUSES = [
   {id:"idea",label:"Idea",color:"#94A3B8"},
-  {id:"draft",label:"Draft",color:"#F59E0B"},
+  {id:"draft",label:"Drafting",color:"#F59E0B"},
   {id:"ready",label:"Ready",color:"#10B981"},
   {id:"published",label:"Published",color:"#6B7280"},
 ];
-const PLATFORMS = [
-  {id:"linkedin",label:"LinkedIn",short:"LI",cls:"li",color:"#0A66C2",wordRange:[150,300]},
-  {id:"instagram",label:"Instagram",short:"IG",cls:"ig",color:"#E1306C",wordRange:[50,150]},
-  {id:"threads",label:"Threads",short:"TH",cls:"th",color:"#444",wordRange:[20,80]},
+const PLATFORMS_DEF = [
+  {id:"linkedin",label:"LinkedIn",cls:"li",color:"#0A66C2",wordRange:[150,300]},
+  {id:"instagram",label:"Instagram",cls:"ig",color:"#E1306C",wordRange:[50,150]},
 ];
-const PLATFORM_PROMPTS = {
+const PLATFORM_TIDY_PROMPTS = {
   linkedin: "Please tidy this LinkedIn post up for me — sharpen the opening hook, keep it in my voice and UK English, punchy rather than corporate. Suggest a tightened version if it helps.",
-  instagram: "Please suggest 5–8 relevant hashtags for this Instagram caption, and tidy the copy slightly if needed — keep it casual and authentic, not polished.",
-  threads: "Please tighten this Threads post — keep it short and conversational, cut anything that reads corporate or stiff."
+  instagram: "Please suggest 5–8 relevant hashtags for this Instagram caption, and tidy the copy slightly if needed — keep it casual and authentic, not polished."
 };
 let state = {
-  posts:[],view:"dashboard",editingId:null,showNewPost:false,
+  posts:[],view:"dashboard",editingId:null,showNewPost:false,showMobileMenu:false,
   filterPillar:null,filterStatus:null,search:"",sortBy:"updated_desc",
   loading:true,sheetStatus:"loading",sheetMessage:"Connecting…",pendingSync:[],
 };
 let editorState = {};
 let autosaveTimer = null;
-let activePlatformTab = "linkedin";
 let isCreatingPost = false;
 async function sheetRead() {
   const res = await fetch(SCRIPT_URL + "?token=" + encodeURIComponent(SHEET_TOKEN));
@@ -261,6 +240,7 @@ async function sheetDelete(id) {
 function genId() { return "post_"+Date.now()+"_"+Math.random().toString(36).slice(2,6); }
 function getPillar(id) { return PILLARS.find(p=>p.id===id); }
 function getStatus(id) { return STATUSES.find(s=>s.id===id); }
+function getPlatformDef(id) { return PLATFORMS_DEF.find(p=>p.id===id) || PLATFORMS_DEF[1]; }
 function safe(s) { return (s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 function formatDate(iso) { if(!iso)return""; try{return new Date(iso).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});}catch(e){return iso;} }
 function formatDateTime(iso) { if(!iso)return""; try{return new Date(iso).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});}catch(e){return iso;} }
@@ -268,7 +248,7 @@ function daysSince(iso) {
   if(!iso)return null;
   try{ const diff=Date.now()-new Date(iso).getTime(); return Math.floor(diff/(1000*60*60*24)); }catch(e){return null;}
 }
-function parsePlatforms(val) {
+function parsePlatformsLegacy(val) {
   if(!val)return[];
   if(Array.isArray(val))return val;
   return val.split(",").map(function(s){return s.trim();}).filter(Boolean);
@@ -288,16 +268,12 @@ function statusTag(id) {
   const s=getStatus(id);if(!s)return"";
   return '<span class="tag" style="background:'+s.color+'18;color:'+s.color+'">'+s.label+'</span>';
 }
-function platformTags(platforms) {
-  const arr = parsePlatforms(platforms);
-  return arr.map(function(pid){
-    const p=PLATFORMS.find(function(x){return x.id===pid;});if(!p)return"";
-    return '<span class="ptag ptag-'+p.cls+'">'+p.short+'</span>';
-  }).join("");
+function platformTag(platformId) {
+  const p=getPlatformDef(platformId);
+  return '<span class="ptag ptag-'+p.cls+'">'+(p.id==="linkedin"?"LI":"IG")+'</span>';
 }
 function photosReadyTag(post) {
-  const platforms = parsePlatforms(post.platforms);
-  if(platforms.length===0) return "";
+  if(!post.platform) return "";
   if(parseBool(post.photos_ready)) return '<span class="tag" style="background:#10B98118;color:#10B981">📷 Ready</span>';
   return '<span class="tag" style="background:var(--bg2);color:var(--text3)">📷 Pending</span>';
 }
@@ -309,10 +285,23 @@ function showToast(msg,isError) {
 }
 function navigate(view,id) {
   state.view=view;if(id)state.editingId=id;
-  activePlatformTab="linkedin";render();
+  state.showMobileMenu=false;
+  render();
 }
-async function copyToClipboard(fieldKey,btnEl) {
-  const text = editorState[fieldKey] || "";
+function celebrate() {
+  const overlay=document.createElement("div");
+  overlay.style.cssText="position:fixed;inset:0;z-index:500;pointer-events:none;overflow:hidden";
+  const emojis=["🎉","✨","🚀","🟠","🎊"];
+  for(let i=0;i<24;i++){
+    const piece=document.createElement("div");
+    piece.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    piece.style.cssText="position:absolute;top:-40px;left:"+(Math.random()*100)+"%;font-size:"+(18+Math.random()*20)+"px;animation:confetti-fall "+(1.8+Math.random()*1.2)+"s ease-in forwards;animation-delay:"+(Math.random()*0.4)+"s;opacity:0.9";
+    overlay.appendChild(piece);
+  }
+  document.body.appendChild(overlay);
+  setTimeout(function(){overlay.remove();},3300);
+}
+async function copyToClipboard(text,btnEl,label) {
   if(!text){ showToast("Nothing to copy yet",true); return; }
   try {
     await navigator.clipboard.writeText(text);
@@ -322,34 +311,26 @@ async function copyToClipboard(fieldKey,btnEl) {
       btnEl.classList.add("copied");
       setTimeout(function(){ btnEl.textContent=original; btnEl.classList.remove("copied"); },1800);
     }
-    showToast("Copied to clipboard ✓");
+    showToast((label||"Copied")+" ✓");
   } catch(err) {
     showToast("Copy failed — try selecting manually",true);
   }
 }
-async function copyWithPrompt(fieldKey,platformId,btnEl) {
-  const text = editorState[fieldKey] || "";
-  if(!text){ showToast("Nothing to copy yet",true); return; }
-  const suffix = PLATFORM_PROMPTS[platformId] || "";
-  const combined = suffix ? (text + "\n\n---\n" + suffix) : text;
-  try {
-    await navigator.clipboard.writeText(combined);
-    if(btnEl){
-      const original=btnEl.textContent;
-      btnEl.textContent="Copied ✓";
-      btnEl.classList.add("copied");
-      setTimeout(function(){ btnEl.textContent=original; btnEl.classList.remove("copied"); },1800);
-    }
-    showToast("Copied with prompt ✓");
-  } catch(err) {
-    showToast("Copy failed — try selecting manually",true);
-  }
+function copyBodyWithTidyPrompt(btnEl) {
+  const suffix = PLATFORM_TIDY_PROMPTS[editorState.platform] || "";
+  const combined = editorState.body + (editorState.body && suffix ? "\n\n---\n" : "") + suffix;
+  copyToClipboard(combined, btnEl, "Copied with prompt");
 }
 async function loadFromSheet() {
   state.loading=true;state.sheetStatus="loading";state.sheetMessage="Loading from sheet…";render();
   try {
     const posts=await sheetRead();
-    state.posts=posts.map(function(p){return Object.assign({},p,{platforms:parsePlatforms(p.platforms),photos_ready:parseBool(p.photos_ready)});});
+    state.posts=posts.map(function(p){
+      const legacyPlatforms=parsePlatformsLegacy(p.platforms);
+      const platform = p.platform || (legacyPlatforms.indexOf("linkedin")!==-1?"linkedin":(legacyPlatforms.indexOf("instagram")!==-1?"instagram":"instagram"));
+      const body = p.body || p.body_linkedin || p.body_instagram || p.body_threads || p.notes || "";
+      return Object.assign({},p,{platform:platform,body:body,photos_ready:parseBool(p.photos_ready)});
+    });
     ensureSuggestedDates();
     state.loading=false;state.sheetStatus="connected";state.sheetMessage="Sheet connected";render();
   } catch(err) {
@@ -360,13 +341,12 @@ async function loadFromSheet() {
 async function savePost(post) {
   if(post.status==="published"&&!post.published_at) post.published_at=new Date().toISOString();
   post.updated_at=new Date().toISOString();
-  const toWrite=Object.assign({},post,{platforms:Array.isArray(post.platforms)?post.platforms.join(","):post.platforms||""});
   const idx=state.posts.findIndex(function(p){return p.id===post.id;});
   if(idx>=0)state.posts[idx]=post;else state.posts.push(post);
   if(state.pendingSync.indexOf(post.id)===-1)state.pendingSync.push(post.id);
   setAutosaveIndicator("saving");
   try {
-    await sheetWrite(toWrite);
+    await sheetWrite(post);
     state.pendingSync=state.pendingSync.filter(function(i){return i!==post.id;});
     state.sheetMessage="All changes saved";
     setAutosaveIndicator("saved");
@@ -398,33 +378,33 @@ async function deletePost(id) {
   try{await sheetDelete(id);showToast("Post deleted");}
   catch(err){showToast("Delete failed: "+err.message,true);}
 }
+function blankPost(overrides) {
+  return Object.assign({
+    id:genId(),title:"",pillar:"p1",status:"idea",platform:"linkedin",body:"",
+    published_at:"",linkedin_url:"",views:"",likes:"",comments:"",shares:"",verdict:"",
+    photos_ready:false,suggested_date:"",
+    created_at:new Date().toISOString(),updated_at:new Date().toISOString(),
+  }, overrides||{});
+}
 async function createNewPost() {
   if(isCreatingPost) return;
   isCreatingPost=true;
   const btn=document.getElementById("np-submit-btn");
   if(btn){btn.disabled=true;btn.textContent="Adding…";}
   try {
-    const pillar = document.getElementById("np-pillar").value;
-    const status = document.getElementById("np-status").value;
-    const idea = document.getElementById("np-idea").value.trim();
-    const extraNotes = document.getElementById("np-notes").value.trim();
-    const titleInput = document.getElementById("np-title").value.trim();
+    const pillar=document.getElementById("np-pillar").value;
+    const platform=document.getElementById("np-platform").value;
+    const status=document.getElementById("np-status").value;
+    const idea=document.getElementById("np-idea").value.trim();
+    const titleInput=document.getElementById("np-title").value.trim();
     if(!idea){
       showToast("Add your idea first",true);
       if(btn){btn.disabled=false;btn.textContent="Add Post →";}
       isCreatingPost=false;
       return;
     }
-    const title = titleInput || idea.slice(0,60).split("\n")[0];
-    const combinedNotes = extraNotes ? idea + "\n\n" + extraNotes : idea;
-    const post={
-      id:genId(),title:title,pillar:pillar,status:status,
-      platforms:[],body_linkedin:"",body_instagram:"",body_threads:"",
-      notes:combinedNotes,published_at:"",linkedin_url:"",
-      views:"",likes:"",comments:"",shares:"",verdict:"",
-      photos_ready:false,suggested_date:"",
-      created_at:new Date().toISOString(),updated_at:new Date().toISOString(),
-    };
+    const title=titleInput || idea.slice(0,60).split("\n")[0];
+    const post=blankPost({title:title,pillar:pillar,platform:platform,status:status,body:idea});
     state.posts.push(post);
     state.showNewPost=false;
     await savePost(post);
@@ -433,6 +413,32 @@ async function createNewPost() {
   } finally {
     isCreatingPost=false;
   }
+}
+function duplicatePost(postId) {
+  const orig=state.posts.find(function(p){return p.id===postId;});
+  if(!orig)return;
+  const newPlatform = orig.platform==="linkedin"?"instagram":"linkedin";
+  const suffix = newPlatform==="instagram"?" for Insta":" for LinkedIn";
+  const newPost=blankPost({
+    title:(orig.title||"Untitled")+suffix,
+    pillar:orig.pillar,
+    status:"draft",
+    platform:newPlatform,
+    body:orig.body||"",
+    photos_ready:orig.photos_ready,
+  });
+  state.posts.push(newPost);
+  savePost(newPost);
+  showToast("Duplicate created ✓");
+  navigate("editor",newPost.id);
+}
+function goToFeedbackPost() {
+  const existing=state.posts.find(function(p){return p.title===FEEDBACK_TITLE;});
+  if(existing){ navigate("editor",existing.id); return; }
+  const post=blankPost({title:FEEDBACK_TITLE,pillar:"p1",platform:"linkedin",status:"idea"});
+  state.posts.push(post);
+  savePost(post);
+  navigate("editor",post.id);
 }
 function scheduleAutosave(postId) {
   clearTimeout(autosaveTimer);
@@ -443,7 +449,7 @@ async function doSaveNow(postId) {
   clearTimeout(autosaveTimer);
   const post=state.posts.find(function(p){return p.id===postId;});
   if(!post)return;
-  const toSave=Object.assign({},post,editorState,{platforms:editorState.platforms||[]});
+  const toSave=Object.assign({},post,editorState);
   if(toSave.status==="published"&&!toSave.published_at){
     toSave.published_at=new Date().toISOString();
     editorState.published_at=toSave.published_at;
@@ -452,10 +458,6 @@ async function doSaveNow(postId) {
   }
   await savePost(toSave);
 }
-function manualSave(postId) {
-  showToast("Saving now…");
-  doSaveNow(postId);
-}
 async function goBackFromEditor(postId) {
   const btn=document.getElementById("editor-back-btn");
   if(btn){btn.disabled=true;btn.textContent="Saving…";}
@@ -463,35 +465,29 @@ async function goBackFromEditor(postId) {
   await doSaveNow(postId);
   navigate("library");
 }
-function getLastPostedPerPlatform() {
-  const published=state.posts.filter(function(p){return p.status==="published"&&p.published_at;});
-  const result={};
-  PLATFORMS.forEach(function(plat){
-    const matching=published.filter(function(p){
-      const platforms=parsePlatforms(p.platforms);
-      return platforms.indexOf(plat.id)!==-1;
-    }).sort(function(a,b){return new Date(b.published_at)-new Date(a.published_at);});
-    result[plat.id]=matching.length>0?matching[0]:null;
-  });
-  return result;
+function getCadenceTrack(post) {
+  if(post.platform==="linkedin") return "linkedin";
+  if(post.pillar==="p5") return "personal_ig";
+  return "work_ig";
 }
-function getTrackKey(pillarId) { return pillarId==="p5" ? "personal" : "work"; }
+const TRACK_LABELS={linkedin:"LinkedIn",personal_ig:"Personal Instagram",work_ig:"Work Instagram"};
+const TRACK_COLORS={linkedin:"#0A66C2",personal_ig:"#7B4F8E",work_ig:"#E1306C"};
 function computeLastPublished(trackKey) {
-  const matches = state.posts.filter(function(p){ return p.status==="published" && p.published_at && getTrackKey(p.pillar)===trackKey; });
-  if(matches.length===0) return null;
-  matches.sort(function(a,b){ return new Date(b.published_at)-new Date(a.published_at); });
+  const matches=state.posts.filter(function(p){return p.status==="published"&&p.published_at&&getCadenceTrack(p)===trackKey;});
+  if(matches.length===0)return null;
+  matches.sort(function(a,b){return new Date(b.published_at)-new Date(a.published_at);});
   return matches[0];
 }
 function computeOverdue() {
-  const tracks=["personal","work"];
+  const tracks=["linkedin","personal_ig","work_ig"];
   const result=[];
   tracks.forEach(function(trackKey){
     const last=computeLastPublished(trackKey);
     const daysSinceLast = last ? daysSince(last.published_at) : null;
-    if(daysSinceLast===null || daysSinceLast > CADENCE_DAYS) {
+    if(daysSinceLast===null || daysSinceLast > CADENCE_TARGET_DAYS) {
       result.push({
         track:trackKey,
-        daysOverdue: daysSinceLast===null ? null : daysSinceLast-CADENCE_DAYS,
+        daysOverdue: daysSinceLast===null ? null : daysSinceLast-CADENCE_TARGET_DAYS,
         lastTitle: last ? last.title : null,
         neverPosted: daysSinceLast===null
       });
@@ -499,25 +495,32 @@ function computeOverdue() {
   });
   return result;
 }
+function computeTrackStats(trackKey) {
+  const pubs=state.posts.filter(function(p){return p.status==="published"&&p.published_at&&getCadenceTrack(p)===trackKey;}).sort(function(a,b){return new Date(a.published_at)-new Date(b.published_at);});
+  if(pubs.length<2) return {avgDays:null,count:pubs.length};
+  let totalGap=0;
+  for(let i=1;i<pubs.length;i++){ totalGap += (new Date(pubs[i].published_at)-new Date(pubs[i-1].published_at))/(1000*60*60*24); }
+  return {avgDays: totalGap/(pubs.length-1), count:pubs.length};
+}
 function ensureSuggestedDates() {
-  const tracks=["personal","work"];
+  const tracks=["linkedin","personal_ig","work_ig"];
   tracks.forEach(function(trackKey){
-    const trackReady = state.posts.filter(function(p){ return p.status==="ready" && getTrackKey(p.pillar)===trackKey; });
-    const withDate = trackReady.filter(function(p){ return p.suggested_date; });
-    const withoutDate = trackReady.filter(function(p){ return !p.suggested_date; }).sort(function(a,b){ return new Date(a.created_at||0)-new Date(b.created_at||0); });
-    if(withoutDate.length===0) return;
+    const trackReady=state.posts.filter(function(p){return p.status==="ready"&&getCadenceTrack(p)===trackKey;});
+    const withDate=trackReady.filter(function(p){return p.suggested_date;});
+    const withoutDate=trackReady.filter(function(p){return !p.suggested_date;}).sort(function(a,b){return new Date(a.created_at||0)-new Date(b.created_at||0);});
+    if(withoutDate.length===0)return;
     let baseline;
     if(withDate.length>0){
-      baseline = withDate.reduce(function(max,p){ const d=new Date(p.suggested_date); return d>max?d:max; }, new Date(0));
+      baseline=withDate.reduce(function(max,p){const d=new Date(p.suggested_date);return d>max?d:max;},new Date(0));
     } else {
       const last=computeLastPublished(trackKey);
-      baseline = last ? new Date(last.published_at) : new Date(Date.now()-CADENCE_DAYS*24*60*60*1000);
+      baseline = last ? new Date(last.published_at) : new Date(Date.now()-CADENCE_TARGET_DAYS*24*60*60*1000);
     }
-    let cursor = new Date(Math.max(baseline.getTime()+CADENCE_DAYS*24*60*60*1000, Date.now()));
+    let cursor=new Date(Math.max(baseline.getTime()+CADENCE_TARGET_DAYS*24*60*60*1000,Date.now()));
     withoutDate.forEach(function(p){
-      p.suggested_date = cursor.toISOString();
+      p.suggested_date=cursor.toISOString();
       savePost(Object.assign({},p));
-      cursor = new Date(cursor.getTime()+CADENCE_DAYS*24*60*60*1000);
+      cursor=new Date(cursor.getTime()+CADENCE_TARGET_DAYS*24*60*60*1000);
     });
   });
 }
@@ -532,7 +535,7 @@ function getTodayStripSummary() {
   const overdue=computeOverdue();
   const in7=Date.now()+7*24*60*60*1000;
   const dueThisWeek=state.posts.filter(function(p){
-    return p.status==="ready" && p.suggested_date && new Date(p.suggested_date).getTime()<=in7 && new Date(p.suggested_date).getTime()>=Date.now()-24*60*60*1000;
+    return p.status==="ready"&&p.suggested_date&&new Date(p.suggested_date).getTime()<=in7&&new Date(p.suggested_date).getTime()>=Date.now()-24*60*60*1000;
   }).length;
   return {overdueCount:overdue.length,dueThisWeek:dueThisWeek};
 }
@@ -540,8 +543,7 @@ function shouldShowBackupNudge() {
   try {
     const last=localStorage.getItem("arcturus_backup_nudge_at");
     if(!last)return true;
-    const days=(Date.now()-parseInt(last,10))/(1000*60*60*24);
-    return days>30;
+    return (Date.now()-parseInt(last,10))/(1000*60*60*24) > 30;
   } catch(e){ return false; }
 }
 function dismissBackupNudge() {
@@ -566,30 +568,25 @@ function sortPosts(list) {
 }
 function renderDashboard() {
   const posts=state.posts;
-  const total=posts.length;
-  const byPillar=PILLARS.map(function(p){return Object.assign({},p,{count:posts.filter(function(x){return x.pillar===p.id;}).length});});
-  const byStatus=STATUSES.map(function(s){return Object.assign({},s,{count:posts.filter(function(x){return x.status===s.id;}).length});});
-  const ideaCount=(byStatus.find(function(s){return s.id==="idea";})||{}).count||0;
-  const draftCount=(byStatus.find(function(s){return s.id==="draft";})||{}).count||0;
-  const readyCount=posts.filter(function(x){return x.status==="ready";}).length;
-  const publishedCount=posts.filter(function(x){return x.status==="published";}).length;
-  const maxP=Math.max.apply(null,byPillar.map(function(p){return p.count;}).concat([1]));
-  const recent=posts.slice().sort(function(a,b){return new Date(b.updated_at||b.created_at||0)-new Date(a.updated_at||a.created_at||0);}).slice(0,6);
-  const lastPosted=getLastPostedPerPlatform();
+  const recent=posts.slice().sort(function(a,b){return new Date(b.updated_at||b.created_at||0)-new Date(a.updated_at||a.created_at||0);}).slice(0,8);
+  const drafting=posts.filter(function(p){return p.status==="draft";}).sort(function(a,b){return new Date(b.updated_at||b.created_at||0)-new Date(a.updated_at||a.created_at||0);}).slice(0,8);
   const todayStrip=getTodayStripSummary();
-  const stats=[
-    {label:"Total Posts",value:total,color:"var(--text)",sub:"in sheet"},
-    {label:"Ideas",value:ideaCount,color:"#94A3B8",sub:"to develop"},
-    {label:"In Draft",value:draftCount,color:"#F59E0B",sub:"in progress"},
-    {label:"Ready",value:readyCount,color:"#10B981",sub:"to publish"},
-    {label:"Published",value:publishedCount,color:"#6B7280",sub:"live"},
-  ];
-  let html = '<div class="content">';
+  function renderPostRow(p,i,total){
+    const pl=getPillar(p.pillar);
+    const syncing=state.pendingSync.indexOf(p.id)!==-1;
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:'+(i<total-1?"1px solid var(--border)":"none")+';cursor:pointer" onclick="navigate(\'editor\',\''+p.id+'\')">'
+      + '<div style="width:10px;height:10px;border-radius:2px;background:'+(pl?pl.color:"#ccc")+';flex-shrink:0"></div>'
+      + '<span style="flex:1;font-size:13px;font-family:var(--font-body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(safe(p.title)||'<em style="color:var(--text3)">Untitled</em>')+'</span>'
+      + statusTag(p.status) + platformTag(p.platform)
+      + (p.published_at?'<span style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">'+formatDate(p.published_at)+'</span>':"")
+      + '<span class="sheet-badge '+(syncing?"pending":"synced")+'">'+(syncing?"↑ saving":"✓ saved")+'</span></div>';
+  }
+  let html='<div class="content">';
   html += '<div class="card" style="margin-bottom:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;flex-wrap:wrap" onclick="navigate(\'cadence\')">'
     + (todayStrip.overdueCount>0 ? '<span style="color:#DC2626;font-weight:600;font-size:13px">⚠ '+todayStrip.overdueCount+' overdue</span>' : '<span style="color:#10B981;font-size:13px">✓ On track</span>')
     + '<span style="color:var(--text3)">·</span>'
     + '<span style="color:var(--text2);font-size:13px">'+todayStrip.dueThisWeek+' due this week</span>'
-    + '<span style="margin-left:auto;color:var(--text3);font-size:11px">Cadence →</span>'
+    + '<span style="margin-left:auto;color:var(--text3);font-size:11px">Post Cadence →</span>'
     + '</div>';
   if(shouldShowBackupNudge()){
     html += '<div class="card" id="backup-nudge" style="margin-bottom:16px;padding:12px 16px;display:flex;align-items:center;gap:10px;background:var(--bg2);flex-wrap:wrap">'
@@ -597,43 +594,22 @@ function renderDashboard() {
       + '<button class="btn btn-ghost btn-sm" onclick="dismissBackupNudge()">Got it</button>'
       + '</div>';
   }
-  html += '<div class="stats-grid">';
-  stats.forEach(function(s){
-    html += '<div class="stat-card"><div class="stat-label">'+s.label+'</div><span class="stat-value" style="color:'+s.color+'">'+s.value+'</span><div class="stat-sub">'+s.sub+'</div></div>';
-  });
-  html += '</div><div class="platform-grid">';
-  PLATFORMS.forEach(function(plat){
-    const last=lastPosted[plat.id];
-    const days=last?daysSince(last.published_at):null;
-    const daysText=days===null?"No posts yet":days===0?"Today":days===1?"Yesterday":days+" days ago";
-    const postTitle=last?last.title:"—";
-    const dayColor=days===null?"var(--text3)":days>7?"#DC2626":days>3?"#F59E0B":"#10B981";
-    html += '<div class="platform-card"><div class="platform-card-label"><div class="platform-dot" style="background:'+plat.color+'"></div><span style="color:'+plat.color+'">'+plat.label+'</span><span style="color:var(--text3);margin-left:2px">— last post</span></div><div class="platform-card-days" style="color:'+dayColor+'">'+daysText+'</div><div class="platform-card-sub">'+safe(postTitle)+'</div></div>';
-  });
-  html += '</div><div class="two-col" style="margin-bottom:16px"><div class="card"><div class="card-header"><span class="card-title">Posts by Pillar</span></div><div class="card-body">';
-  byPillar.forEach(function(p){
-    html += '<div class="pillar-bar-row"><span class="pillar-bar-label">'+p.short+'</span><div class="pillar-bar-track"><div class="pillar-bar-fill" style="width:'+((p.count/maxP)*100)+'%;background:'+p.color+'"></div></div><span class="pillar-bar-count">'+p.count+'</span></div>';
-  });
-  html += '</div></div><div class="card"><div class="card-header"><span class="card-title">Status Breakdown</span></div><div class="card-body" style="padding:8px 16px">';
-  byStatus.forEach(function(s){
-    html += '<div class="status-row"><div style="display:flex;align-items:center;gap:8px"><div class="status-dot" style="background:'+s.color+'"></div><span style="font-size:13px;font-family:var(--font-body)">'+s.label+'</span></div><span style="font-size:12px;color:'+s.color+';font-family:var(--font-mono);font-weight:500">'+s.count+'</span></div>';
-  });
-  html += '</div></div></div><div class="card"><div class="card-header"><span class="card-title">Recent Activity</span><button class="btn btn-ghost btn-sm" onclick="navigate(\'library\')">View all →</button></div><div style="padding:0 16px">';
+  html += '<div class="two-col">';
+  html += '<div class="card"><div class="card-header"><span class="card-title">Recent Activity</span><button class="btn btn-ghost btn-sm" onclick="navigate(\'library\')">View all →</button></div><div style="padding:0 16px">';
   if(recent.length===0){
     html += '<div class="empty" style="padding:30px 0"><div class="empty-title">No posts yet</div></div>';
   } else {
-    recent.forEach(function(p,i){
-      const pl=getPillar(p.pillar);
-      const syncing=state.pendingSync.indexOf(p.id)!==-1;
-      html += '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:'+(i<recent.length-1?"1px solid var(--border)":"none")+';cursor:pointer" onclick="navigate(\'editor\',\''+p.id+'\')">'
-        + '<div style="width:10px;height:10px;border-radius:2px;background:'+(pl?pl.color:"#ccc")+';flex-shrink:0"></div>'
-        + '<span style="flex:1;font-size:13px;font-family:var(--font-body)">'+(safe(p.title)||'<em style="color:var(--text3)">Untitled</em>')+'</span>'
-        + statusTag(p.status) + platformTags(p.platforms)
-        + (p.published_at?'<span style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">'+formatDate(p.published_at)+'</span>':"")
-        + '<span class="sheet-badge '+(syncing?"pending":"synced")+'">'+(syncing?"↑ saving":"✓ saved")+'</span></div>';
-    });
+    recent.forEach(function(p,i){ html += renderPostRow(p,i,recent.length); });
   }
-  html += '</div></div></div>';
+  html += '</div></div>';
+  html += '<div class="card"><div class="card-header"><span class="card-title">Drafting</span><button class="btn btn-ghost btn-sm" onclick="state.filterStatus=\'draft\';navigate(\'library\')">View all →</button></div><div style="padding:0 16px">';
+  if(drafting.length===0){
+    html += '<div class="empty" style="padding:30px 0"><div class="empty-title">Nothing in Drafting</div></div>';
+  } else {
+    drafting.forEach(function(p,i){ html += renderPostRow(p,i,drafting.length); });
+  }
+  html += '</div></div>';
+  html += '</div></div>';
   return html;
 }
 function renderCadence() {
@@ -642,10 +618,23 @@ function renderCadence() {
   const readyWithDates=state.posts.filter(function(p){return p.status==="ready"&&p.suggested_date;});
   readyWithDates.sort(function(a,b){return new Date(a.suggested_date)-new Date(b.suggested_date);});
   let html='<div class="content">';
+  html += '<div class="section-heading">Posting Pace</div><div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">';
+  ["linkedin","work_ig","personal_ig"].forEach(function(trackKey){
+    const stats=computeTrackStats(trackKey);
+    let paceText, paceColor;
+    if(stats.avgDays===null){ paceText="Not enough data yet"; paceColor="var(--text3)"; }
+    else {
+      const ratio=stats.avgDays/CADENCE_TARGET_DAYS;
+      paceText="every "+stats.avgDays.toFixed(1)+" days";
+      paceColor = ratio<=0.9 ? "#10B981" : ratio<=1.15 ? "#F59E0B" : "#DC2626";
+    }
+    html += '<div class="stat-card"><div class="stat-label" style="color:'+TRACK_COLORS[trackKey]+'">'+TRACK_LABELS[trackKey]+'</div><span class="stat-value" style="font-size:16px;color:'+paceColor+'">'+paceText+'</span><div class="stat-sub">target every '+CADENCE_TARGET_DAYS+' days</div></div>';
+  });
+  html += '</div>';
   if(overdue.length>0){
     html += '<div class="card" style="margin-bottom:16px;border-color:#DC262644"><div class="card-header"><span class="card-title" style="color:#DC2626">⚠ Overdue</span></div><div class="card-body">';
     overdue.forEach(function(o){
-      const label=o.track==="personal"?"Personal":"Work";
+      const label=TRACK_LABELS[o.track];
       let text;
       if(o.neverPosted){ text=label+" — no posts published yet"; }
       else { text=label+" — "+o.daysOverdue+" day"+(o.daysOverdue!==1?"s":"")+" overdue"+(o.lastTitle?(' (last: "'+safe(o.lastTitle)+'")'):""); }
@@ -653,21 +642,80 @@ function renderCadence() {
     });
     html += '</div></div>';
   }
-  html += '<div class="card"><div class="card-header"><span class="card-title">Upcoming</span></div><div class="card-body">';
+  html += '<div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title">Upcoming</span></div><div class="card-body">';
   if(readyWithDates.length===0){
     html += '<div class="empty" style="padding:24px 0"><div class="empty-title">Nothing scheduled yet</div><div class="empty-sub">Mark a post Ready and it will get a suggested date here.</div></div>';
   } else {
     readyWithDates.forEach(function(p){
-      const pl=getPillar(p.pillar);
-      const trackLabel=getTrackKey(p.pillar)==="personal"?"Personal":"Work";
+      const trackKey=getCadenceTrack(p);
+      const days=daysSince(p.suggested_date)!==null ? Math.abs(Math.floor((new Date(p.suggested_date).getTime()-Date.now())/(1000*60*60*24))) : null;
+      const dayLabel = new Date(p.suggested_date).getTime() < Date.now() ? "due now" : (days+" day"+(days!==1?"s":"")+" away");
       html += '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);flex-wrap:wrap">'
         + '<input type="date" class="form-input" style="width:150px;padding:6px 8px;font-size:12px" value="'+p.suggested_date.slice(0,10)+'" onchange="updateSuggestedDate(\''+p.id+'\',this.value)">'
-        + '<span class="tag" style="background:'+pl.color+'18;color:'+pl.color+'">'+trackLabel+'</span>'
+        + '<span class="tag" style="background:'+TRACK_COLORS[trackKey]+'18;color:'+TRACK_COLORS[trackKey]+'">'+TRACK_LABELS[trackKey]+'</span>'
+        + '<span style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">'+dayLabel+'</span>'
         + '<span style="flex:1;font-size:13px;cursor:pointer;min-width:120px" onclick="navigate(\'editor\',\''+p.id+'\')">'+safe(p.title)+'</span>'
         + '</div>';
     });
   }
-  html += '</div></div></div>';
+  html += '</div></div>';
+  html += '</div>';
+  return html;
+}
+function renderPlatformPieChart() {
+  const total=state.posts.length||1;
+  const tracks=["linkedin","work_ig","personal_ig"];
+  const counts=tracks.map(function(t){return state.posts.filter(function(p){return getCadenceTrack(p)===t;}).length;});
+  let cumulative=0;
+  const stops=[];
+  tracks.forEach(function(t,i){
+    const pct=(counts[i]/total)*100;
+    const start=cumulative;
+    cumulative+=pct;
+    stops.push(TRACK_COLORS[t]+" "+start+"% "+cumulative+"%");
+  });
+  const gradient="conic-gradient("+stops.join(",")+")";
+  let html='<div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">';
+  html+='<div style="width:110px;height:110px;border-radius:50%;background:'+gradient+';flex-shrink:0"></div>';
+  html+='<div style="display:flex;flex-direction:column;gap:8px;min-width:160px">';
+  tracks.forEach(function(t,i){
+    html+='<div style="display:flex;align-items:center;gap:8px;font-size:12px"><div style="width:10px;height:10px;border-radius:50%;background:'+TRACK_COLORS[t]+';flex-shrink:0"></div><span style="color:var(--text2)">'+TRACK_LABELS[t]+'</span><span style="color:var(--text3);font-family:var(--font-mono);margin-left:auto;padding-left:10px">'+counts[i]+'</span></div>';
+  });
+  html+='</div></div>';
+  return html;
+}
+function renderLibraryStats() {
+  const posts=state.posts;
+  const total=posts.length;
+  const byStatus=STATUSES.map(function(s){return Object.assign({},s,{count:posts.filter(function(x){return x.status===s.id;}).length});});
+  const byPillar=PILLARS.map(function(p){return Object.assign({},p,{count:posts.filter(function(x){return x.pillar===p.id;}).length});});
+  const ideaCount=(byStatus.find(function(s){return s.id==="idea";})||{}).count||0;
+  const draftCount=(byStatus.find(function(s){return s.id==="draft";})||{}).count||0;
+  const readyCount=(byStatus.find(function(s){return s.id==="ready";})||{}).count||0;
+  const publishedCount=(byStatus.find(function(s){return s.id==="published";})||{}).count||0;
+  const maxP=Math.max.apply(null,byPillar.map(function(p){return p.count;}).concat([1]));
+  const stats=[
+    {label:"Total Posts",value:total,color:"var(--text)",sub:"in sheet"},
+    {label:"Ideas",value:ideaCount,color:"#94A3B8",sub:"to develop"},
+    {label:"Drafting",value:draftCount,color:"#F59E0B",sub:"in progress"},
+    {label:"Ready",value:readyCount,color:"#10B981",sub:"to publish"},
+    {label:"Published",value:publishedCount,color:"#6B7280",sub:"live"},
+  ];
+  let html='<div class="stats-grid">';
+  stats.forEach(function(s){
+    html+='<div class="stat-card"><div class="stat-label">'+s.label+'</div><span class="stat-value" style="color:'+s.color+'">'+s.value+'</span><div class="stat-sub">'+s.sub+'</div></div>';
+  });
+  html+='</div>';
+  html+='<div class="two-col" style="margin-bottom:16px"><div class="card"><div class="card-header"><span class="card-title">Posts by Pillar</span></div><div class="card-body">';
+  byPillar.forEach(function(p){
+    html+='<div class="pillar-bar-row"><span class="pillar-bar-label">'+p.short+'</span><div class="pillar-bar-track"><div class="pillar-bar-fill" style="width:'+((p.count/maxP)*100)+'%;background:'+p.color+'"></div></div><span class="pillar-bar-count">'+p.count+'</span></div>';
+  });
+  html+='</div></div><div class="card"><div class="card-header"><span class="card-title">Status Breakdown</span></div><div class="card-body" style="padding:8px 16px">';
+  byStatus.forEach(function(s){
+    html+='<div class="status-row"><div style="display:flex;align-items:center;gap:8px"><div class="status-dot" style="background:'+s.color+'"></div><span style="font-size:13px;font-family:var(--font-body)">'+s.label+'</span></div><span style="font-size:12px;color:'+s.color+';font-family:var(--font-mono);font-weight:500">'+s.count+'</span></div>';
+  });
+  html+='</div></div></div>';
+  html+='<div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title">Platform Mix</span></div><div class="card-body">'+renderPlatformPieChart()+'</div></div>';
   return html;
 }
 function renderLibrary() {
@@ -676,25 +724,18 @@ function renderLibrary() {
     if(state.filterStatus&&p.status!==state.filterStatus)return false;
     if(state.search){
       const q=state.search.toLowerCase();
-      return (p.title||"").toLowerCase().indexOf(q)!==-1||
-             (p.body_linkedin||"").toLowerCase().indexOf(q)!==-1||
-             (p.body_instagram||"").toLowerCase().indexOf(q)!==-1||
-             (p.body_threads||"").toLowerCase().indexOf(q)!==-1||
-             (p.notes||"").toLowerCase().indexOf(q)!==-1;
+      return (p.title||"").toLowerCase().indexOf(q)!==-1||(p.body||"").toLowerCase().indexOf(q)!==-1;
     }
     return true;
   });
   filtered=sortPosts(filtered);
-  let html = '<div class="content"><div class="filters">'
-    + '<input class="form-input" id="lib-search-input" style="width:220px;padding:5px 12px;font-size:12px" placeholder="Search posts &amp; notes…" value="'+safe(state.search)+'" oninput="const _p=this.selectionStart;state.search=this.value;renderMain();const _e=document.getElementById(\'lib-search-input\');if(_e){_e.focus();_e.setSelectionRange(_p,_p);}">'
+  let html = '<div class="content">' + renderLibraryStats() + '<div class="filters">'
+    + '<input class="form-input" id="lib-search-input" style="width:220px;padding:5px 12px;font-size:12px" placeholder="Search posts…" value="'+safe(state.search)+'" oninput="const _p=this.selectionStart;state.search=this.value;renderMain();const _e=document.getElementById(\'lib-search-input\');if(_e){_e.focus();_e.setSelectionRange(_p,_p);}">'
+    + '<button class="btn btn-ghost btn-sm" onclick="surpriseMe()">🎲 Surprise me</button>'
     + '<select class="form-input form-select" style="width:145px;padding:5px 26px 5px 10px;font-size:12px" onchange="state.filterPillar=this.value||null;renderMain()"><option value="">All Pillars</option>';
-  PILLARS.forEach(function(p){
-    html += '<option value="'+p.id+'" '+(state.filterPillar===p.id?"selected":"")+'>'+p.short+'</option>';
-  });
+  PILLARS.forEach(function(p){ html += '<option value="'+p.id+'" '+(state.filterPillar===p.id?"selected":"")+'>'+p.short+'</option>'; });
   html += '</select><select class="form-input form-select" style="width:135px;padding:5px 26px 5px 10px;font-size:12px" onchange="state.filterStatus=this.value||null;renderMain()"><option value="">All Statuses</option>';
-  STATUSES.forEach(function(s){
-    html += '<option value="'+s.id+'" '+(state.filterStatus===s.id?"selected":"")+'>'+s.label+'</option>';
-  });
+  STATUSES.forEach(function(s){ html += '<option value="'+s.id+'" '+(state.filterStatus===s.id?"selected":"")+'>'+s.label+'</option>'; });
   html += '</select><select class="form-input form-select" style="width:145px;padding:5px 26px 5px 10px;font-size:12px" onchange="state.sortBy=this.value;renderMain()">';
   [["updated_desc","Last edited"],["updated_asc","Oldest first"],["title_asc","Title A–Z"],["status","Status"],["pillar","Pillar"]].forEach(function(opt){
     html += '<option value="'+opt[0]+'" '+(state.sortBy===opt[0]?"selected":"")+'>'+opt[1]+'</option>';
@@ -707,10 +748,9 @@ function renderLibrary() {
     html += '<div class="post-grid">';
     filtered.forEach(function(p){
       const pl=getPillar(p.pillar);
-      const previewBody=p.body_linkedin||p.body_instagram||p.body_threads||p.notes||"";
       html += '<div class="post-card" onclick="navigate(\'editor\',\''+p.id+'\')"><div class="post-card-pillar-bar" style="background:'+(pl?pl.color:"var(--border)")+'"></div><div class="post-card-title">'+(safe(p.title)||'<em style="color:var(--text3);font-weight:400">Untitled post</em>')+'</div>'
-        + (previewBody?'<div class="post-card-body">'+safe(previewBody)+'</div>':"")
-        + '<div class="post-card-meta">'+pillarTag(p.pillar)+statusTag(p.status)+platformTags(p.platforms)+photosReadyTag(p)
+        + (p.body?'<div class="post-card-body">'+safe(p.body)+'</div>':"")
+        + '<div class="post-card-meta">'+pillarTag(p.pillar)+statusTag(p.status)+platformTag(p.platform)+photosReadyTag(p)
         + (p.published_at?'<span class="tag" style="background:#6B728018;color:#6B7280;margin-left:auto">'+formatDate(p.published_at)+'</span>':'<span class="post-card-date">'+formatDate(p.updated_at)+'</span>')
         + '</div></div>';
     });
@@ -719,28 +759,62 @@ function renderLibrary() {
   html += '</div>';
   return html;
 }
+function surpriseMe() {
+  const drafts=state.posts.filter(function(p){return p.status==="draft";});
+  if(drafts.length===0){ showToast("No drafts sitting around right now",true); return; }
+  const pick=drafts[Math.floor(Math.random()*drafts.length)];
+  navigate("editor",pick.id);
+}
 function initEditor(post) {
   editorState={
     _postId:post.id,
     title:post.title||"",pillar:post.pillar||"p1",status:post.status||"idea",
-    platforms:parsePlatforms(post.platforms),
-    body_linkedin:post.body_linkedin||"",body_instagram:post.body_instagram||"",body_threads:post.body_threads||"",
-    notes:post.notes||"",published_at:post.published_at||null,linkedin_url:post.linkedin_url||"",
+    platform:post.platform||"linkedin",body:post.body||"",
+    published_at:post.published_at||null,linkedin_url:post.linkedin_url||"",
     views:post.views||"",likes:post.likes||"",comments:post.comments||"",shares:post.shares||"",verdict:post.verdict||"",
     photos_ready:parseBool(post.photos_ready),suggested_date:post.suggested_date||"",
   };
 }
+function promptForPostUrl(postId) {
+  const platLabel=getPlatformDef(editorState.platform).label;
+  const val=prompt("What's the "+platLabel+" URL for this post? (or type NA)");
+  if(val===null)return;
+  editorState.linkedin_url=val.trim();
+  const el=document.getElementById("post-url-block");
+  if(el)el.innerHTML=renderPostUrlBlock();
+  scheduleAutosave(postId);
+}
+function renderPostUrlBlock() {
+  const platLabel=getPlatformDef(editorState.platform).label;
+  if(editorState.linkedin_url){
+    const isUrl = /^https?:\/\//.test(editorState.linkedin_url);
+    return '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+      + (isUrl ? '<a href="'+safe(editorState.linkedin_url)+'" target="_blank" class="post-url-link">View post ↗</a>' : '<span style="font-size:12px;color:var(--text3);font-family:var(--font-mono)">'+safe(editorState.linkedin_url)+'</span>')
+      + '<button class="btn btn-ghost btn-sm" onclick="promptForPostUrl(\''+editorState._postId+'\')">✏️ Edit</button>'
+      + '</div>';
+  }
+  return '<button class="btn btn-ghost btn-sm" onclick="promptForPostUrl(\''+editorState._postId+'\')">+ Add '+platLabel+' URL</button>';
+}
 function handleStatusChip(val) {
+  const wasPublished = editorState.status==="published";
   editorState.status=val;
-  if(val==="published"&&!editorState.published_at) editorState.published_at=new Date().toISOString();
+  if(val==="published"){
+    if(!editorState.published_at) editorState.published_at=new Date().toISOString();
+    if(!wasPublished) celebrate();
+  }
   const db=document.getElementById("pub-date-block");
   if(db)db.innerHTML=renderPublishedDateBlock();
   const chipsEl=document.getElementById("status-chips");
   if(chipsEl)chipsEl.innerHTML=renderStatusChips();
   const perfEl=document.getElementById("performance-section");
   if(perfEl)perfEl.innerHTML=renderPerformanceSection();
+  const urlEl=document.getElementById("post-url-wrap");
+  if(urlEl)urlEl.innerHTML=renderPostUrlSection();
   clearTimeout(autosaveTimer);
   doSaveNow(editorState._postId);
+  if(val==="published" && !wasPublished && !editorState.linkedin_url){
+    setTimeout(function(){ promptForPostUrl(editorState._postId); },350);
+  }
 }
 function togglePhotosReady(postId) {
   editorState.photos_ready=!editorState.photos_ready;
@@ -751,26 +825,12 @@ function togglePhotosReady(postId) {
 }
 function renderPhotosReadyCheck() {
   const checked=!!editorState.photos_ready;
-  return '<div class="platform-check" style="display:inline-flex;'+(checked?"border-color:#10B981;background:#10B98108;color:#10B981":"")+'" onclick="togglePhotosReady(\''+editorState._postId+'\')"><input type="checkbox" '+(checked?"checked":"")+'> 📷 Photos ready</div>';
+  return '<div class="status-chip" style="'+(checked?"border-color:#10B981;background:#10B98108;color:#10B981":"")+'" onclick="togglePhotosReady(\''+editorState._postId+'\')"><input type="checkbox" style="display:none" '+(checked?"checked":"")+'> 📷 Photos ready</div>';
 }
-function togglePlatform(pid) {
-  const arr=editorState.platforms||[];
-  if(arr.indexOf(pid)!==-1){editorState.platforms=arr.filter(function(x){return x!==pid;});}
-  else{editorState.platforms=arr.concat([pid]);}
-  const checksEl=document.getElementById("platform-checks");
-  if(checksEl)checksEl.innerHTML=renderPlatformChecks();
-  const tabsEl=document.getElementById("platform-tabs");
-  if(tabsEl)tabsEl.innerHTML=renderPlatformTabs();
-  const bodyEl=document.getElementById("platform-body-section");
-  if(bodyEl)bodyEl.innerHTML=renderPlatformBodySection();
+function handlePlatformChange(val) {
+  editorState.platform=val;
   scheduleAutosave(editorState._postId);
-}
-function switchPlatformTab(pid) {
-  activePlatformTab=pid;
-  const tabsEl=document.getElementById("platform-tabs");
-  if(tabsEl)tabsEl.innerHTML=renderPlatformTabs();
-  const bodyEl=document.getElementById("platform-body-section");
-  if(bodyEl)bodyEl.innerHTML=renderPlatformBodySection();
+  render();
 }
 function renderStatusChips() {
   return STATUSES.map(function(s){
@@ -778,64 +838,23 @@ function renderStatusChips() {
     return '<div class="status-chip" style="'+(active?"background:"+s.color+";border-color:"+s.color+";color:white":"color:"+s.color)+'" onclick="handleStatusChip(\''+s.id+'\')"><div style="width:7px;height:7px;border-radius:50%;background:'+(active?"white":s.color)+';flex-shrink:0"></div>'+s.label+'</div>';
   }).join("");
 }
-function renderPlatformChecks() {
-  return PLATFORMS.map(function(plat){
-    const checked=(editorState.platforms||[]).indexOf(plat.id)!==-1;
-    return '<div class="platform-check '+(checked?"checked-"+plat.cls:"")+'" onclick="togglePlatform(\''+plat.id+'\')"><input type="checkbox" '+(checked?"checked":"")+'> '+plat.label+'</div>';
-  }).join("");
-}
-function renderPlatformTabs() {
-  const active=editorState.platforms||[];
-  if(active.length===0)return"";
-  return active.map(function(pid){
-    const p=PLATFORMS.find(function(x){return x.id===pid;});if(!p)return"";
-    const isActive=activePlatformTab===pid;
-    return '<button class="platform-tab '+(isActive?"active-"+p.cls:"")+'" onclick="switchPlatformTab(\''+pid+'\')">'+p.label+'</button>';
-  }).join("");
-}
 function updateWordCount() {
-  const p=PLATFORMS.find(function(x){return x.id===activePlatformTab;});
-  if(!p)return;
-  const fieldKey="body_"+activePlatformTab;
-  const text=editorState[fieldKey]||"";
+  const p=getPlatformDef(editorState.platform);
+  const text=editorState.body||"";
   const words=wordCount(text);
   const chars=text.length;
-  const lo=p.wordRange[0], hi=p.wordRange[1];
   const el=document.getElementById("word-count-display");
-  if(el)el.textContent=words+" word"+(words!==1?"s":"")+" · "+chars+" chars · ideal range "+lo+"–"+hi+" words";
-}
-function renderPlatformBodySection() {
-  const active=editorState.platforms||[];
-  if(active.length===0){
-    return '<div style="font-size:12px;color:var(--text3);font-family:var(--font-body);padding:10px 0">Select platforms above to add body text for each.</div>';
-  }
-  if(active.indexOf(activePlatformTab)===-1) activePlatformTab=active[0];
-  const fieldKey="body_"+activePlatformTab;
-  const plat=PLATFORMS.find(function(x){return x.id===activePlatformTab;});
-  const placeholders={linkedin:"Write your LinkedIn post here. Professional tone, up to ~1300 chars.",instagram:"Write your Instagram caption here. Visual-led, up to 2200 chars.",threads:"Write your Threads post here. Conversational, up to 500 chars."};
-  const placeholder=placeholders[activePlatformTab]||"Write your post here.";
-  const text=editorState[fieldKey]||"";
-  const words=wordCount(text);
-  const lo=plat.wordRange[0], hi=plat.wordRange[1];
-  let linkedinUrlBlock="";
-  if(activePlatformTab==="linkedin"){
-    linkedinUrlBlock = '<div class="form-group" style="margin-top:14px"><label class="form-label">LinkedIn URL</label><div class="linkedin-url-row"><input class="form-input" value="'+safe(editorState.linkedin_url||"")+'" oninput="editorState.linkedin_url=this.value;scheduleAutosave(\''+editorState._postId+'\')" placeholder="Paste the live post URL here once published">'
-      + (editorState.linkedin_url?'<a href="'+safe(editorState.linkedin_url)+'" target="_blank" class="linkedin-url-link">View post ↗</a>':"")
-      + '</div></div>';
-  }
-  return '<div class="platform-tabs" id="platform-tabs">'+renderPlatformTabs()+'</div>'
-    + '<div style="padding-top:14px">'
-    + '<div style="display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap;margin-bottom:6px"><button class="btn btn-copy" onclick="copyToClipboard(\''+fieldKey+'\', this)">📋 Copy text</button><button class="btn btn-copy" onclick="copyWithPrompt(\''+fieldKey+'\',\''+activePlatformTab+'\', this)">✨ Copy + Prompt</button></div>'
-    + '<textarea class="form-input form-textarea tall" id="body-textarea-'+activePlatformTab+'" oninput="editorState[\''+fieldKey+'\']=this.value;scheduleAutosave(\''+editorState._postId+'\');updateWordCount()" placeholder="'+placeholder+'">'+safe(text)+'</textarea>'
-    + '<div class="word-count-row"><span class="word-count-text" id="word-count-display">'+words+' word'+(words!==1?"s":"")+' · '+text.length+' chars · ideal range '+lo+'–'+hi+' words</span></div>'
-    + linkedinUrlBlock
-    + '</div>';
+  if(el)el.textContent=words+" word"+(words!==1?"s":"")+" · "+chars+" chars · ideal range "+p.wordRange[0]+"–"+p.wordRange[1]+" words";
 }
 function renderPublishedDateBlock() {
   if(editorState.status==="published"&&editorState.published_at){
     return '<div class="published-date-field"><div class="published-date-dot"></div><span>Published '+formatDateTime(editorState.published_at)+'</span></div>';
   }
   return '<div style="font-size:12px;color:var(--text3);font-family:var(--font-mono);padding:4px 0">Date recorded automatically when status set to Published</div>';
+}
+function renderPostUrlSection() {
+  if(editorState.status!=="published")return"";
+  return '<div class="form-group"><label class="form-label">'+getPlatformDef(editorState.platform).label+' URL</label><div id="post-url-block">'+renderPostUrlBlock()+'</div></div>';
 }
 function renderPerformanceSection() {
   if(editorState.status!=="published")return"";
@@ -857,6 +876,9 @@ function renderPerformanceSection() {
 function renderEditor(post) {
   const e=editorState;
   const pl=getPillar(e.pillar);
+  const platDef=getPlatformDef(e.platform);
+  const otherPlatform = e.platform==="linkedin" ? "Instagram" : "LinkedIn";
+  const words=wordCount(e.body);
   let html = '<div style="flex:1;overflow:hidden;display:flex;flex-direction:column"><div class="topbar"><button class="btn btn-ghost btn-sm" id="editor-back-btn" onclick="goBackFromEditor(\''+post.id+'\')">← Back</button><div style="flex:1;display:flex;align-items:center;gap:10px;min-width:0">'
     + (pl?'<div style="width:10px;height:10px;border-radius:2px;background:'+pl.color+';flex-shrink:0"></div>':"")
     + '<span id="editor-title-display" style="font-family:var(--font-display);font-size:16px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(safe(e.title)||'<em style="color:var(--text3);font-style:italic">Untitled post</em>')+'</span>'
@@ -864,24 +886,38 @@ function renderEditor(post) {
     + '<button class="btn btn-danger btn-sm" onclick="deletePost(\''+post.id+'\')">Delete</button></div>'
     + '<div class="editor-form">'
     + '<div class="form-group"><label class="form-label">Title</label><input class="form-input" value="'+safe(e.title)+'" oninput="editorState.title=this.value;scheduleAutosave(\''+post.id+'\');const d=document.getElementById(\'editor-title-display\');if(d)d.innerHTML=this.value||\'<em style=color:var(--text3);font-style:italic>Untitled post</em>\'" placeholder="What\'s the core idea in a line?"></div>'
+    + '<div class="form-row">'
     + '<div class="form-group"><label class="form-label">Pillar</label><select class="form-input form-select" onchange="editorState.pillar=this.value;scheduleAutosave(\''+post.id+'\')">';
   PILLARS.forEach(function(p){ html += '<option value="'+p.id+'" '+(e.pillar===p.id?"selected":"")+'>'+p.label+'</option>'; });
   html += '</select></div>'
+    + '<div class="form-group"><label class="form-label">Platform</label><select class="form-input form-select" onchange="handlePlatformChange(this.value)">';
+  PLATFORMS_DEF.forEach(function(p){ html += '<option value="'+p.id+'" '+(e.platform===p.id?"selected":"")+'>'+p.label+'</option>'; });
+  html += '</select></div></div>'
     + '<div class="form-group"><label class="form-label">Status</label><div class="status-chip-row" id="status-chips">'+renderStatusChips()+'</div></div>'
-    + '<div class="form-group"><label class="form-label">Platforms</label><div class="platform-checks" id="platform-checks">'+renderPlatformChecks()+'</div></div>'
     + '<div class="form-group"><label class="form-label">Photos</label><div id="photos-ready-check">'+renderPhotosReadyCheck()+'</div></div>'
-    + '<div class="form-group"><label class="form-label">Body Text</label><div id="platform-body-section">'+renderPlatformBodySection()+'</div></div>'
-    + '<div class="form-group"><label class="form-label">Notes</label><textarea class="form-input form-textarea" oninput="editorState.notes=this.value;scheduleAutosave(\''+post.id+'\')" placeholder="Links, shoot references, what triggered this idea.">'+safe(e.notes)+'</textarea></div>'
+    + '<div class="form-group"><label class="form-label">Body Text</label>'
+    + '<div style="display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap;margin-bottom:6px">'
+    + '<button class="btn btn-copy" onclick="copyToClipboard(editorState.body,this,\'Copied\')">📋 Copy text</button>'
+    + '<button class="btn btn-copy" onclick="copyBodyWithTidyPrompt(this)">✨ Copy + Prompt for Claude</button>'
+    + '</div>'
+    + '<textarea class="form-input form-textarea tall" oninput="editorState.body=this.value;scheduleAutosave(\''+post.id+'\');updateWordCount()" placeholder="Write your post here.">'+safe(e.body)+'</textarea>'
+    + '<div class="word-count-row"><span class="word-count-text" id="word-count-display">'+words+' word'+(words!==1?"s":"")+' · '+e.body.length+' chars · ideal range '+platDef.wordRange[0]+'–'+platDef.wordRange[1]+' words</span></div>'
+    + '</div>'
     + '<div class="form-group"><label class="form-label">Published Date</label><div id="pub-date-block">'+renderPublishedDateBlock()+'</div></div>'
+    + '<div id="post-url-wrap">'+renderPostUrlSection()+'</div>'
     + '<div id="performance-section">'+renderPerformanceSection()+'</div>'
-    + '<button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px;padding:12px" onclick="manualSave(\''+post.id+'\')">💾 Save Now</button>'
+    + '<hr class="section-divider">'
+    + '<div class="section-heading">Duplicate</div>'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
+    + '<button class="btn btn-ghost btn-sm" onclick="duplicatePost(\''+post.id+'\')">🔁 Duplicate for '+otherPlatform+'</button>'
+    + '</div>'
     + '</div></div>';
   return html;
 }
 function renderSidebar() {
   const counts=PILLARS.reduce(function(acc,p){acc[p.id]=state.posts.filter(function(x){return x.pillar===p.id;}).length;return acc;},{});
-  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v3.0</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
-  [{id:"dashboard",label:"Dashboard"},{id:"library",label:"Post Library"},{id:"cadence",label:"Cadence"}].forEach(function(item){
+  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v3.2</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
+  [{id:"dashboard",label:"Dashboard"},{id:"library",label:"Post Library"},{id:"cadence",label:"Post Cadence"}].forEach(function(item){
     html += '<button class="nav-item '+(state.view===item.id?"active":"")+'" onclick="navigate(\''+item.id+'\')">'+item.label+'</button>';
   });
   html += '<div class="sidebar-section-label" style="margin-top:8px">Pillars</div>';
@@ -889,15 +925,26 @@ function renderSidebar() {
     html += '<button class="nav-item" onclick="state.filterPillar=\''+p.id+'\';navigate(\'library\')"><div class="nav-dot" style="background:'+p.color+'"></div>'+p.short+'<span class="nav-count">'+(counts[p.id]||0)+'</span></button>';
   });
   html += '</nav><div style="padding:12px 10px;border-top:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:8px">'
+    + '<button class="btn btn-ghost" style="width:100%;justify-content:center;color:#F7F4EF;border-color:rgba(255,255,255,0.15)" onclick="goToFeedbackPost()">💬 Feedback</button>'
     + '<button class="btn btn-primary" style="width:100%;justify-content:center" onclick="state.showNewPost=true;render()">+ New Post</button></div></div>';
   return html;
 }
 function renderBottomNav() {
   return '<div class="bottom-nav">'
-    + '<button class="bottom-nav-item '+(state.view==='dashboard'?'active':'')+'" onclick="navigate(\'dashboard\')"><div class="dot"></div>Dashboard</button>'
+    + '<button class="bottom-nav-item '+(state.view==='dashboard'?'active':'')+'" onclick="navigate(\'dashboard\')">Dashboard</button>'
     + '<button class="bottom-nav-fab" onclick="state.showNewPost=true;render()">+</button>'
-    + '<button class="bottom-nav-item '+(state.view==='library'?'active':'')+'" onclick="navigate(\'library\')"><div class="dot"></div>Library</button>'
+    + '<button class="bottom-nav-item '+(state.view==='library'?'active':'')+'" onclick="navigate(\'library\')">Library</button>'
     + '</div>';
+}
+function renderMobileMenu() {
+  return '<div class="mobile-menu-overlay" onclick="state.showMobileMenu=false;render()"><div class="mobile-menu-panel" onclick="event.stopPropagation()">'
+    + '<button class="mobile-menu-item" onclick="navigate(\'dashboard\')">Dashboard</button>'
+    + '<button class="mobile-menu-item" onclick="navigate(\'library\')">Post Library</button>'
+    + '<button class="mobile-menu-item" onclick="navigate(\'cadence\')">Post Cadence</button>'
+    + '<button class="mobile-menu-item" onclick="goToFeedbackPost()">Feedback</button>'
+    + '<div style="flex:1"></div>'
+    + '<button class="mobile-menu-item" onclick="state.showMobileMenu=false;render()">✕ Close</button>'
+    + '</div></div>';
 }
 function renderSheetBar() {
   const dotClass=state.sheetStatus==="connected"?"connected":state.sheetStatus==="loading"?"loading":"error";
@@ -906,11 +953,18 @@ function renderSheetBar() {
   return '<div class="sheet-bar"><div class="sheet-dot '+dotClass+'"></div><span>Google Sheet</span><span style="color:var(--border2)">·</span><span id="sheet-bar-msg" style="color:var(--text2)">'+msg+'</span><button class="btn btn-ghost btn-sm" style="margin-left:auto;font-size:10px;padding:3px 8px" onclick="loadFromSheet()">↻ Refresh</button></div>';
 }
 function renderNewPostModal() {
-  let html = '<div class="modal-overlay" onclick="state.showNewPost=false;render()"><div class="modal" onclick="event.stopPropagation()"><div class="modal-title">New Post</div><div class="modal-sub">Get the idea down now — refine platforms, body copy and everything else later from the Library.</div><div class="form-group"><label class="form-label">Pillar</label><select class="form-input form-select" id="np-pillar">';
+  let html = '<div class="modal-overlay" onclick="state.showNewPost=false;render()"><div class="modal" onclick="event.stopPropagation()"><div class="modal-title">New Post</div><div class="modal-sub">Get the idea down now — refine everything else later from the Library.</div>'
+    + '<div class="form-row"><div class="form-group"><label class="form-label">Platform</label><select class="form-input form-select" id="np-platform">';
+  PLATFORMS_DEF.forEach(function(p){ html += '<option value="'+p.id+'">'+p.label+'</option>'; });
+  html += '</select></div><div class="form-group"><label class="form-label">Pillar</label><select class="form-input form-select" id="np-pillar">';
   PILLARS.forEach(function(p){ html += '<option value="'+p.id+'">'+p.label+'</option>'; });
-  html += '</select></div><div class="form-group"><label class="form-label">Status</label><select class="form-input form-select" id="np-status">';
+  html += '</select></div></div>'
+    + '<div class="form-group"><label class="form-label">Status</label><select class="form-input form-select" id="np-status">';
   STATUSES.forEach(function(s){ html += '<option value="'+s.id+'">'+s.label+'</option>'; });
-  html += '</select></div><div class="form-group"><label class="form-label">Title (optional)</label><input class="form-input" id="np-title" placeholder="Leave blank to auto-generate from your idea"></div><div class="form-group"><label class="form-label">Your idea</label><textarea class="form-input form-textarea tall" id="np-idea" placeholder="Just get it down. Voice-to-text is fine — tidy it up later." autofocus></textarea></div><div class="form-group"><label class="form-label">Notes</label><textarea class="form-input form-textarea" id="np-notes" placeholder="Links, shoot references, anything else worth keeping alongside this."></textarea></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px"><button class="btn btn-ghost" onclick="state.showNewPost=false;render()">Cancel</button><button class="btn btn-primary" id="np-submit-btn" onclick="createNewPost()">Add Post →</button></div></div></div>';
+  html += '</select></div>'
+    + '<div class="form-group"><label class="form-label">Title (optional)</label><input class="form-input" id="np-title" placeholder="Leave blank to auto-generate from your idea"></div>'
+    + '<div class="form-group"><label class="form-label">Your idea</label><textarea class="form-input form-textarea tall" id="np-idea" placeholder="Just get it down. Voice-to-text is fine — tidy it up later." autofocus></textarea></div>'
+    + '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px"><button class="btn btn-ghost" onclick="state.showNewPost=false;render()">Cancel</button><button class="btn btn-primary" id="np-submit-btn" onclick="createNewPost()">Add Post →</button></div></div></div>';
   return html;
 }
 function renderMain() {
@@ -927,18 +981,19 @@ function renderMain() {
       html='<div class="empty"><div class="empty-title">Post not found</div></div>';
     }
   }else if(state.view==="library"){
-    html='<div class="topbar"><span class="topbar-title">🟠 Post Library</span><button class="btn btn-primary btn-sm topbar-new-btn" onclick="state.showNewPost=true;render()">+ New Post</button></div>'+renderLibrary();
+    html='<div class="topbar"><span class="topbar-title"><span class="topbar-emoji">🟠</span> Post Library</span><button class="btn btn-primary btn-sm topbar-new-btn" onclick="state.showNewPost=true;render()">+ New Post</button><button class="btn btn-ghost btn-sm mobile-menu-btn" onclick="state.showMobileMenu=true;render()">☰</button></div>'+renderLibrary();
   }else if(state.view==="cadence"){
-    html='<div class="topbar"><span class="topbar-title">🟠 Cadence</span></div>'+renderCadence();
+    html='<div class="topbar"><span class="topbar-title"><span class="topbar-emoji">🟠</span> Post Cadence</span><button class="btn btn-ghost btn-sm mobile-menu-btn" onclick="state.showMobileMenu=true;render()">☰</button></div>'+renderCadence();
   }else{
-    html='<div class="topbar"><span class="topbar-title">🟠 Dashboard</span></div>'+renderDashboard();
+    html='<div class="topbar"><span class="topbar-title"><span class="topbar-emoji">🟠</span> Dashboard</span><button class="btn btn-ghost btn-sm mobile-menu-btn" onclick="state.showMobileMenu=true;render()">☰</button></div>'+renderDashboard();
   }
   main.innerHTML=html+renderSheetBar();
 }
 function render() {
   const app=document.getElementById("app");
   app.innerHTML=renderSidebar()+'<div id="main-area" class="main"></div>'+renderBottomNav()
-    +(state.showNewPost?renderNewPostModal():"");
+    +(state.showNewPost?renderNewPostModal():"")
+    +(state.showMobileMenu?renderMobileMenu():"");
   renderMain();
 }
 render();
