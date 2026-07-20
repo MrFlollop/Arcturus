@@ -74,6 +74,9 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 .status-row:last-child{border-bottom:none}
 .status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.filter-chip{padding:6px 14px;border-radius:20px;font-size:12px;font-family:var(--font-body);cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text2);transition:all 0.15s;-webkit-appearance:none;appearance:none;outline:none}
+.filter-chip:hover{border-color:var(--border2);color:var(--text)}
+.filter-chip.active{border-color:var(--accent);background:var(--accent);color:white}
 .post-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .post-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;cursor:pointer;transition:all 0.15s;box-shadow:var(--shadow)}
 .post-card:hover{border-color:var(--border2);box-shadow:var(--shadow-md);transform:translateY(-1px)}
@@ -960,7 +963,7 @@ function renderEditor(post) {
 }
 function renderSidebar() {
   const counts=PILLARS.reduce(function(acc,p){acc[p.id]=state.posts.filter(function(x){return x.pillar===p.id;}).length;return acc;},{});
-  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v3.4</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
+  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v3.45</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
   [{id:"dashboard",label:"Dashboard"},{id:"library",label:"Post Library"},{id:"cadence",label:"Post Cadence"}].forEach(function(item){
     html += '<button class="nav-item '+(state.view===item.id?"active":"")+'" onclick="navigate(\''+item.id+'\')">'+item.label+'</button>';
   });
