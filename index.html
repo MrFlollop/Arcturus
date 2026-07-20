@@ -55,7 +55,8 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 .btn-copy.copied{background:#E6F0E6;color:#2A6B2A;border-color:#2A6B2A44}
 .content{flex:1;overflow-y:auto;padding:24px}
 .stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.stats-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:0}
 .stat-label{font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);font-family:var(--font-mono);margin-bottom:8px;line-height:1.3}
 .stat-value{font-family:var(--font-display);font-size:32px;line-height:1;display:block;min-height:38px}
 .stat-sub{font-size:11px;color:var(--text3);margin-top:5px;font-family:var(--font-body)}
@@ -156,6 +157,7 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
   .autosave-indicator span{display:none}
   .content{padding:16px}
   .stats-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .stats-grid-3{grid-template-columns:1fr;gap:8px}
   .two-col{grid-template-columns:1fr;gap:12px}
   .post-grid{grid-template-columns:1fr}
   .form-row{grid-template-columns:1fr}
@@ -192,6 +194,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtuMyKcwbM7dzJM4LBl
 const SHEET_TOKEN = "PaR5WgzcM6QeuojXFPeKnX0q9ePyCyDt";
 const CADENCE_TARGET_DAYS = 7;
 const FEEDBACK_TITLE = "Arcturus Feedback & Ideas";
+const FEEDBACK_POST_ID = "arcturus-feedback-post";
 const PILLARS = [
   {id:"p1",label:"Running a Creative Agency",short:"Agency",color:"#C25B3F"},
   {id:"p2",label:"Industry Perspective",short:"Industry",color:"#4A7C6F"},
@@ -214,7 +217,7 @@ const PLATFORM_TIDY_PROMPTS = {
   instagram: "Please suggest 5–8 relevant hashtags for this Instagram caption, and tidy the copy slightly if needed — keep it casual and authentic, not polished."
 };
 let state = {
-  posts:[],view:"dashboard",editingId:null,showNewPost:false,showMobileMenu:false,
+  posts:[],view:"dashboard",editingId:null,showNewPost:false,showMobileMenu:false,showUrlModal:false,
   filterPillar:null,filterStatus:null,search:"",sortBy:"updated_desc",
   loading:true,sheetStatus:"loading",sheetMessage:"Connecting…",pendingSync:[],
 };
@@ -433,9 +436,17 @@ function duplicatePost(postId) {
   navigate("editor",newPost.id);
 }
 function goToFeedbackPost() {
-  const existing=state.posts.find(function(p){return p.title===FEEDBACK_TITLE;});
-  if(existing){ navigate("editor",existing.id); return; }
-  const post=blankPost({title:FEEDBACK_TITLE,pillar:"p1",platform:"linkedin",status:"idea"});
+  if(state.loading){
+    showToast("Still loading your posts — try again in a moment",true);
+    return;
+  }
+  const matches=state.posts.filter(function(p){return p.id===FEEDBACK_POST_ID||p.title===FEEDBACK_TITLE;});
+  if(matches.length>0){
+    matches.sort(function(a,b){return (b.body||"").length-(a.body||"").length;});
+    navigate("editor",matches[0].id);
+    return;
+  }
+  const post=blankPost({id:FEEDBACK_POST_ID,title:FEEDBACK_TITLE,pillar:"p1",platform:"linkedin",status:"idea"});
   state.posts.push(post);
   savePost(post);
   navigate("editor",post.id);
@@ -618,7 +629,7 @@ function renderCadence() {
   const readyWithDates=state.posts.filter(function(p){return p.status==="ready"&&p.suggested_date;});
   readyWithDates.sort(function(a,b){return new Date(a.suggested_date)-new Date(b.suggested_date);});
   let html='<div class="content">';
-  html += '<div class="section-heading">Posting Pace</div><div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">';
+  html += '<div class="section-heading">Posting Pace</div><div class="stats-grid-3">';
   ["linkedin","work_ig","personal_ig"].forEach(function(trackKey){
     const stats=computeTrackStats(trackKey);
     let paceText, paceColor;
@@ -654,6 +665,21 @@ function renderCadence() {
         + '<input type="date" class="form-input" style="width:150px;padding:6px 8px;font-size:12px" value="'+p.suggested_date.slice(0,10)+'" onchange="updateSuggestedDate(\''+p.id+'\',this.value)">'
         + '<span class="tag" style="background:'+TRACK_COLORS[trackKey]+'18;color:'+TRACK_COLORS[trackKey]+'">'+TRACK_LABELS[trackKey]+'</span>'
         + '<span style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">'+dayLabel+'</span>'
+        + '<span style="flex:1;font-size:13px;cursor:pointer;min-width:120px" onclick="navigate(\'editor\',\''+p.id+'\')">'+safe(p.title)+'</span>'
+        + '</div>';
+    });
+  }
+  html += '</div></div>';
+  const posted=state.posts.filter(function(p){return p.status==="published"&&p.published_at;}).sort(function(a,b){return new Date(b.published_at)-new Date(a.published_at);});
+  html += '<div class="card"><div class="card-header"><span class="card-title">Recently Posted</span><button class="btn btn-ghost btn-sm" onclick="state.filterStatus=\'published\';navigate(\'library\')">View all →</button></div><div class="card-body">';
+  if(posted.length===0){
+    html += '<div class="empty" style="padding:24px 0"><div class="empty-title">Nothing published yet</div></div>';
+  } else {
+    posted.slice(0,15).forEach(function(p){
+      const trackKey=getCadenceTrack(p);
+      html += '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);flex-wrap:wrap">'
+        + '<span style="font-size:10px;color:var(--text3);font-family:var(--font-mono);flex-shrink:0">'+formatDate(p.published_at)+'</span>'
+        + '<span class="tag" style="background:'+TRACK_COLORS[trackKey]+'18;color:'+TRACK_COLORS[trackKey]+'">'+TRACK_LABELS[trackKey]+'</span>'
         + '<span style="flex:1;font-size:13px;cursor:pointer;min-width:120px" onclick="navigate(\'editor\',\''+p.id+'\')">'+safe(p.title)+'</span>'
         + '</div>';
     });
@@ -775,14 +801,28 @@ function initEditor(post) {
     photos_ready:parseBool(post.photos_ready),suggested_date:post.suggested_date||"",
   };
 }
-function promptForPostUrl(postId) {
+function openUrlPrompt() {
+  state.showUrlModal=true;
+  render();
+}
+function saveUrlFromModal() {
+  const input=document.getElementById("url-modal-input");
+  const val=input?input.value.trim():"";
+  editorState.linkedin_url=val;
+  state.showUrlModal=false;
+  render();
+  scheduleAutosave(editorState._postId);
+}
+function renderUrlModal() {
   const platLabel=getPlatformDef(editorState.platform).label;
-  const val=prompt("What's the "+platLabel+" URL for this post? (or type NA)");
-  if(val===null)return;
-  editorState.linkedin_url=val.trim();
-  const el=document.getElementById("post-url-block");
-  if(el)el.innerHTML=renderPostUrlBlock();
-  scheduleAutosave(postId);
+  return '<div class="modal-overlay" onclick="state.showUrlModal=false;render()"><div class="modal" onclick="event.stopPropagation()" style="width:400px">'
+    + '<div class="modal-title">'+platLabel+' URL</div>'
+    + '<div class="modal-sub">Paste the live post link once it is up, or type NA if you are not tracking this one.</div>'
+    + '<div class="form-group"><input class="form-input" id="url-modal-input" value="'+safe(editorState.linkedin_url||"")+'" placeholder="https://..." autofocus></div>'
+    + '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">'
+    + '<button class="btn btn-ghost" onclick="state.showUrlModal=false;render()">Cancel</button>'
+    + '<button class="btn btn-primary" onclick="saveUrlFromModal()">Save</button>'
+    + '</div></div></div>';
 }
 function renderPostUrlBlock() {
   const platLabel=getPlatformDef(editorState.platform).label;
@@ -790,10 +830,10 @@ function renderPostUrlBlock() {
     const isUrl = /^https?:\/\//.test(editorState.linkedin_url);
     return '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
       + (isUrl ? '<a href="'+safe(editorState.linkedin_url)+'" target="_blank" class="post-url-link">View post ↗</a>' : '<span style="font-size:12px;color:var(--text3);font-family:var(--font-mono)">'+safe(editorState.linkedin_url)+'</span>')
-      + '<button class="btn btn-ghost btn-sm" onclick="promptForPostUrl(\''+editorState._postId+'\')">✏️ Edit</button>'
+      + '<button class="btn btn-ghost btn-sm" onclick="openUrlPrompt()">✏️ Edit</button>'
       + '</div>';
   }
-  return '<button class="btn btn-ghost btn-sm" onclick="promptForPostUrl(\''+editorState._postId+'\')">+ Add '+platLabel+' URL</button>';
+  return '<button class="btn btn-ghost btn-sm" onclick="openUrlPrompt()">+ Add '+platLabel+' URL</button>';
 }
 function handleStatusChip(val) {
   const wasPublished = editorState.status==="published";
@@ -813,7 +853,7 @@ function handleStatusChip(val) {
   clearTimeout(autosaveTimer);
   doSaveNow(editorState._postId);
   if(val==="published" && !wasPublished && !editorState.linkedin_url){
-    setTimeout(function(){ promptForPostUrl(editorState._postId); },350);
+    setTimeout(function(){ openUrlPrompt(); },350);
   }
 }
 function togglePhotosReady(postId) {
@@ -993,6 +1033,7 @@ function render() {
   const app=document.getElementById("app");
   app.innerHTML=renderSidebar()+'<div id="main-area" class="main"></div>'+renderBottomNav()
     +(state.showNewPost?renderNewPostModal():"")
+    +(state.showUrlModal?renderUrlModal():"")
     +(state.showMobileMenu?renderMobileMenu():"");
   renderMain();
 }
