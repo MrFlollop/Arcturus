@@ -142,7 +142,7 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes confetti-fall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(115vh) rotate(360deg);opacity:0}}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
-.topbar-emoji{display:none}
+.topbar-brand{display:none}
 .mobile-menu-btn{display:none}
 .mobile-menu-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:150;display:flex;justify-content:flex-end}
 .mobile-menu-panel{width:250px;background:var(--text);color:#F7F4EF;height:100%;padding:20px 14px;padding-top:calc(20px + max(24px,env(safe-area-inset-top)));display:flex;flex-direction:column;gap:6px}
@@ -155,7 +155,7 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
   .main{width:100%}
   .topbar{padding:0 16px;height:calc(var(--header-h) + max(24px,env(safe-area-inset-top)));padding-top:max(24px,env(safe-area-inset-top))}
   .mobile-menu-btn{display:inline-flex}
-  .topbar-emoji{display:inline}
+  .topbar-brand{display:inline-flex;align-items:center;gap:4px;font-family:var(--font-logo);font-size:15px;letter-spacing:0.04em;color:var(--accent);margin-right:8px;flex-shrink:0}
   .autosave-indicator span{display:none}
   .content{padding:16px}
   .stats-grid{grid-template-columns:repeat(2,1fr);gap:8px}
@@ -194,7 +194,8 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtuMyKcwbM7dzJM4LBl6sWBRqRYoMcP4BcQOH7NJb_WHqEi0MV-6E0V_VIKDkRrl4/exec";
 const SHEET_TOKEN = "PaR5WgzcM6QeuojXFPeKnX0q9ePyCyDt";
-const CADENCE_TARGET_DAYS = 7;
+const TRACK_TARGET_DAYS = {linkedin:3, work_ig:7, personal_ig:7};
+function getTrackTarget(trackKey) { return TRACK_TARGET_DAYS[trackKey] || 7; }
 const FEEDBACK_TITLE = "Arcturus Feedback & Ideas";
 const FEEDBACK_POST_ID = "arcturus-feedback-post";
 const PILLARS = [
@@ -214,13 +215,9 @@ const PLATFORMS_DEF = [
   {id:"linkedin",label:"LinkedIn",cls:"li",color:"#0A66C2",wordRange:[150,300]},
   {id:"instagram",label:"Instagram",cls:"ig",color:"#E1306C",wordRange:[50,150]},
 ];
-const PLATFORM_TIDY_PROMPTS = {
-  linkedin: "Please tidy this LinkedIn post up for me — sharpen the opening hook, keep it in my voice and UK English, punchy rather than corporate. Suggest a tightened version if it helps.",
-  instagram: "Please suggest 5–8 relevant hashtags for this Instagram caption, and tidy the copy slightly if needed — keep it casual and authentic, not polished."
-};
 let state = {
   posts:[],view:"dashboard",editingId:null,showNewPost:false,showMobileMenu:false,showUrlModal:false,
-  filterPillar:null,filterStatus:null,search:"",sortBy:"updated_desc",
+  filterPillar:null,filterPlatform:null,filterStatus:null,search:"",sortBy:"updated_desc",
   loading:true,sheetStatus:"loading",sheetMessage:"Connecting…",pendingSync:[],
 };
 let editorState = {};
@@ -321,10 +318,51 @@ async function copyToClipboard(text,btnEl,label) {
     showToast("Copy failed — try selecting manually",true);
   }
 }
-function copyBodyWithTidyPrompt(btnEl) {
-  const suffix = PLATFORM_TIDY_PROMPTS[editorState.platform] || "";
-  const combined = editorState.body + (editorState.body && suffix ? "\n\n---\n" : "") + suffix;
-  copyToClipboard(combined, btnEl, "Copied with prompt");
+function getPostMetrics(post) {
+  const views=parseFloat(post.views), likes=parseFloat(post.likes), comments=parseFloat(post.comments), shares=parseFloat(post.shares);
+  const complete = post.views!==""&&post.views!==undefined&&post.views!==null &&
+                    post.likes!==""&&post.likes!==undefined&&post.likes!==null &&
+                    post.comments!==""&&post.comments!==undefined&&post.comments!==null &&
+                    post.shares!==""&&post.shares!==undefined&&post.shares!==null &&
+                    !isNaN(views)&&!isNaN(likes)&&!isNaN(comments)&&!isNaN(shares);
+  if(!complete || !(views>0)) return null;
+  return {views:views,likes:likes,comments:comments,shares:shares,er:(likes+comments+shares)/views};
+}
+function verdictLabel(er,baselineAvg) {
+  if(baselineAvg!==null && baselineAvg>0){
+    const ratio=er/baselineAvg;
+    if(ratio>=1.3) return "Strong";
+    if(ratio<=0.7) return "Weak";
+    return "Average";
+  }
+  if(er>=0.04) return "Strong";
+  if(er>=0.02) return "Average";
+  return "Weak";
+}
+function verdictBadge(v) {
+  if(!v) return "";
+  const colors={Strong:"#10B981",Average:"#F59E0B",Weak:"#DC2626"};
+  const c=colors[v]||"var(--text3)";
+  return '<span class="tag" style="background:'+c+'18;color:'+c+'">'+v+'</span>';
+}
+function ensureVerdicts() {
+  ["linkedin","instagram"].forEach(function(platformId){
+    const platformPosts=state.posts.filter(function(p){return p.platform===platformId&&p.status==="published"&&p.published_at;})
+      .sort(function(a,b){return new Date(a.published_at)-new Date(b.published_at);});
+    platformPosts.forEach(function(post,idx){
+      if(post.verdict) return;
+      const m=getPostMetrics(post);
+      if(!m) return;
+      const priorScored=platformPosts.slice(0,idx).map(function(p2){return {post:p2,m:getPostMetrics(p2)};}).filter(function(x){return x.m;});
+      const last5=priorScored.slice(-5);
+      let baselineAvg=null;
+      if(last5.length>=3){
+        baselineAvg=last5.reduce(function(sum,x){return sum+x.m.er;},0)/last5.length;
+      }
+      post.verdict=verdictLabel(m.er,baselineAvg);
+      savePost(Object.assign({},post));
+    });
+  });
 }
 async function loadFromSheet() {
   state.loading=true;state.sheetStatus="loading";state.sheetMessage="Loading from sheet…";render();
@@ -337,6 +375,7 @@ async function loadFromSheet() {
       return Object.assign({},p,{platform:platform,body:body,photos_ready:parseBool(p.photos_ready)});
     });
     ensureSuggestedDates();
+    ensureVerdicts();
     state.loading=false;state.sheetStatus="connected";state.sheetMessage="Sheet connected";render();
   } catch(err) {
     state.loading=false;state.sheetStatus="error";state.sheetMessage="Error: "+err.message;render();
@@ -471,11 +510,9 @@ async function doSaveNow(postId) {
   }
   await savePost(toSave);
 }
-async function goBackFromEditor(postId) {
-  const btn=document.getElementById("editor-back-btn");
-  if(btn){btn.disabled=true;btn.textContent="Saving…";}
+function goBackFromEditor(postId) {
   clearTimeout(autosaveTimer);
-  await doSaveNow(postId);
+  doSaveNow(postId);
   navigate("library");
 }
 function getCadenceTrack(post) {
@@ -495,12 +532,13 @@ function computeOverdue() {
   const tracks=["linkedin","personal_ig","work_ig"];
   const result=[];
   tracks.forEach(function(trackKey){
+    const target=getTrackTarget(trackKey);
     const last=computeLastPublished(trackKey);
     const daysSinceLast = last ? daysSince(last.published_at) : null;
-    if(daysSinceLast===null || daysSinceLast > CADENCE_TARGET_DAYS) {
+    if(daysSinceLast===null || daysSinceLast > target) {
       result.push({
         track:trackKey,
-        daysOverdue: daysSinceLast===null ? null : daysSinceLast-CADENCE_TARGET_DAYS,
+        daysOverdue: daysSinceLast===null ? null : daysSinceLast-target,
         lastTitle: last ? last.title : null,
         neverPosted: daysSinceLast===null
       });
@@ -518,6 +556,7 @@ function computeTrackStats(trackKey) {
 function ensureSuggestedDates() {
   const tracks=["linkedin","personal_ig","work_ig"];
   tracks.forEach(function(trackKey){
+    const target=getTrackTarget(trackKey);
     const trackReady=state.posts.filter(function(p){return p.status==="ready"&&getCadenceTrack(p)===trackKey;});
     const withDate=trackReady.filter(function(p){return p.suggested_date;});
     const withoutDate=trackReady.filter(function(p){return !p.suggested_date;}).sort(function(a,b){return new Date(a.created_at||0)-new Date(b.created_at||0);});
@@ -527,13 +566,13 @@ function ensureSuggestedDates() {
       baseline=withDate.reduce(function(max,p){const d=new Date(p.suggested_date);return d>max?d:max;},new Date(0));
     } else {
       const last=computeLastPublished(trackKey);
-      baseline = last ? new Date(last.published_at) : new Date(Date.now()-CADENCE_TARGET_DAYS*24*60*60*1000);
+      baseline = last ? new Date(last.published_at) : new Date(Date.now()-target*24*60*60*1000);
     }
-    let cursor=new Date(Math.max(baseline.getTime()+CADENCE_TARGET_DAYS*24*60*60*1000,Date.now()));
+    let cursor=new Date(Math.max(baseline.getTime()+target*24*60*60*1000,Date.now()));
     withoutDate.forEach(function(p){
       p.suggested_date=cursor.toISOString();
       savePost(Object.assign({},p));
-      cursor=new Date(cursor.getTime()+CADENCE_TARGET_DAYS*24*60*60*1000);
+      cursor=new Date(cursor.getTime()+target*24*60*60*1000);
     });
   });
 }
@@ -599,7 +638,7 @@ function renderDashboard() {
     + (todayStrip.overdueCount>0 ? '<span style="color:#DC2626;font-weight:600;font-size:13px">⚠ '+todayStrip.overdueCount+' overdue</span>' : '<span style="color:#10B981;font-size:13px">✓ On track</span>')
     + '<span style="color:var(--text3)">·</span>'
     + '<span style="color:var(--text2);font-size:13px">'+todayStrip.dueThisWeek+' due this week</span>'
-    + '<span style="margin-left:auto;color:var(--text3);font-size:11px">Post Cadence →</span>'
+    + '<span style="margin-left:auto;color:var(--text3);font-size:11px">Metrics →</span>'
     + '</div>';
   if(shouldShowBackupNudge()){
     html += '<div class="card" id="backup-nudge" style="margin-bottom:16px;padding:12px 16px;display:flex;align-items:center;gap:10px;background:var(--bg2);flex-wrap:wrap">'
@@ -625,6 +664,16 @@ function renderDashboard() {
   html += '</div></div>';
   return html;
 }
+function computeEngagementSnapshot(platformId) {
+  const scored=state.posts.filter(function(p){return p.platform===platformId&&p.status==="published"&&getPostMetrics(p);})
+    .sort(function(a,b){return new Date(b.published_at)-new Date(a.published_at);});
+  if(scored.length===0) return null;
+  const recent=scored.slice(0,10);
+  const avgER=recent.reduce(function(sum,p){return sum+getPostMetrics(p).er;},0)/recent.length;
+  const verdictCounts={Strong:0,Average:0,Weak:0};
+  recent.forEach(function(p){ if(p.verdict&&verdictCounts.hasOwnProperty(p.verdict)) verdictCounts[p.verdict]++; });
+  return {avgER:avgER,verdictCounts:verdictCounts,latestDataDate:scored[0].published_at,sampleSize:recent.length};
+}
 function renderCadence() {
   ensureSuggestedDates();
   const overdue=computeOverdue();
@@ -633,15 +682,41 @@ function renderCadence() {
   let html='<div class="content">';
   html += '<div class="section-heading">Posting Pace</div><div class="stats-grid-3">';
   ["linkedin","work_ig","personal_ig"].forEach(function(trackKey){
+    const target=getTrackTarget(trackKey);
     const stats=computeTrackStats(trackKey);
     let paceText, paceColor;
     if(stats.avgDays===null){ paceText="Not enough data yet"; paceColor="var(--text3)"; }
     else {
-      const ratio=stats.avgDays/CADENCE_TARGET_DAYS;
+      const ratio=stats.avgDays/target;
       paceText="every "+stats.avgDays.toFixed(1)+" days";
       paceColor = ratio<=0.9 ? "#10B981" : ratio<=1.15 ? "#F59E0B" : "#DC2626";
     }
-    html += '<div class="stat-card"><div class="stat-label" style="color:'+TRACK_COLORS[trackKey]+'">'+TRACK_LABELS[trackKey]+'</div><span class="stat-value" style="font-size:16px;color:'+paceColor+'">'+paceText+'</span><div class="stat-sub">target every '+CADENCE_TARGET_DAYS+' days</div></div>';
+    html += '<div class="stat-card"><div class="stat-label" style="color:'+TRACK_COLORS[trackKey]+'">'+TRACK_LABELS[trackKey]+'</div><span class="stat-value" style="font-size:16px;color:'+paceColor+'">'+paceText+'</span><div class="stat-sub">target every '+target+' days</div></div>';
+  });
+  html += '</div>';
+  html += '<div class="section-heading">Engagement Snapshot</div>';
+  html += '<div class="card" style="margin-bottom:12px"><div class="card-body" style="font-size:11px;color:var(--text3);line-height:1.7;padding:12px 16px">'
+    + '<span style="color:#10B981;font-weight:600">Strong</span> = 30%+ above this platform\'s recent average &nbsp;·&nbsp; '
+    + '<span style="color:#F59E0B;font-weight:600">Average</span> = within the usual range &nbsp;·&nbsp; '
+    + '<span style="color:#DC2626;font-weight:600">Weak</span> = 30%+ below average. New platforms use flat bands (≥4% Strong, 2–4% Average, &lt;2% Weak) until there is enough history to compare against. Verdicts are locked in once calculated and do not change later.'
+    + '</div></div>';
+  html += '<div class="two-col" style="margin-bottom:16px">';
+  PLATFORMS_DEF.forEach(function(plat){
+    const snap=computeEngagementSnapshot(plat.id);
+    html += '<div class="card"><div class="card-header"><span class="card-title" style="color:'+plat.color+'">'+plat.label+'</span></div><div class="card-body">';
+    if(!snap){
+      html += '<div class="empty" style="padding:16px 0"><div class="empty-title">No scored posts yet</div></div>';
+    } else {
+      html += '<div style="font-family:var(--font-display);font-size:26px;line-height:1">'+(snap.avgER*100).toFixed(1)+'%</div>';
+      html += '<div style="font-size:11px;color:var(--text3);margin-bottom:12px">average engagement rate, last '+snap.sampleSize+' scored post'+(snap.sampleSize!==1?"s":"")+'</div>';
+      html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">';
+      ["Strong","Average","Weak"].forEach(function(v){
+        if(snap.verdictCounts[v]>0) html += '<span style="display:inline-flex;align-items:center;gap:4px">'+verdictBadge(v)+'<span style="font-size:11px;color:var(--text3)">×'+snap.verdictCounts[v]+'</span></span>';
+      });
+      html += '</div>';
+      html += '<div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">Data through '+formatDate(snap.latestDataDate)+'</div>';
+    }
+    html += '</div></div>';
   });
   html += '</div>';
   if(overdue.length>0){
@@ -683,6 +758,7 @@ function renderCadence() {
         + '<span style="font-size:10px;color:var(--text3);font-family:var(--font-mono);flex-shrink:0">'+formatDate(p.published_at)+'</span>'
         + '<span class="tag" style="background:'+TRACK_COLORS[trackKey]+'18;color:'+TRACK_COLORS[trackKey]+'">'+TRACK_LABELS[trackKey]+'</span>'
         + '<span style="flex:1;font-size:13px;cursor:pointer;min-width:120px" onclick="navigate(\'editor\',\''+p.id+'\')">'+safe(p.title)+'</span>'
+        + verdictBadge(p.verdict)
         + '</div>';
     });
   }
@@ -749,6 +825,7 @@ function renderLibraryStats() {
 function renderLibrary() {
   let filtered=state.posts.filter(function(p){
     if(state.filterPillar&&p.pillar!==state.filterPillar)return false;
+    if(state.filterPlatform&&p.platform!==state.filterPlatform)return false;
     if(state.filterStatus&&p.status!==state.filterStatus)return false;
     if(state.search){
       const q=state.search.toLowerCase();
@@ -762,6 +839,8 @@ function renderLibrary() {
     + '<button class="btn btn-ghost btn-sm" onclick="surpriseMe()">🎲 Surprise me</button>'
     + '<select class="form-input form-select" style="width:145px;padding:5px 26px 5px 10px;font-size:12px" onchange="state.filterPillar=this.value||null;renderMain()"><option value="">All Pillars</option>';
   PILLARS.forEach(function(p){ html += '<option value="'+p.id+'" '+(state.filterPillar===p.id?"selected":"")+'>'+p.short+'</option>'; });
+  html += '</select><select class="form-input form-select" style="width:130px;padding:5px 26px 5px 10px;font-size:12px" onchange="state.filterPlatform=this.value||null;renderMain()"><option value="">All Platforms</option>';
+  PLATFORMS_DEF.forEach(function(p){ html += '<option value="'+p.id+'" '+(state.filterPlatform===p.id?"selected":"")+'>'+p.label+'</option>'; });
   html += '</select><select class="form-input form-select" style="width:145px;padding:5px 26px 5px 10px;font-size:12px" onchange="state.sortBy=this.value;renderMain()">';
   [["updated_desc","Last edited"],["updated_asc","Oldest first"],["title_asc","Title A–Z"],["status","Status"],["pillar","Pillar"]].forEach(function(opt){
     html += '<option value="'+opt[0]+'" '+(state.sortBy===opt[0]?"selected":"")+'>'+opt[1]+'</option>';
@@ -905,19 +984,12 @@ function renderPostUrlSection() {
 }
 function renderPerformanceSection() {
   if(editorState.status!=="published")return"";
-  let html = '<hr class="section-divider"><div class="section-heading">Post Performance</div><div class="perf-grid">';
+  const vb=verdictBadge(editorState.verdict);
+  let html = '<hr class="section-divider"><div class="section-heading">Post Performance <span style="font-weight:400;text-transform:none;letter-spacing:normal">— filled in automatically from your metrics tracking</span></div><div class="perf-grid">';
   ["views","likes","comments","shares"].forEach(function(f){
-    html += '<div class="perf-stat"><div class="perf-stat-label">'+(f.charAt(0).toUpperCase()+f.slice(1))+'</div><div class="perf-stat-value">'+(editorState[f]||"—")+'</div></div>';
+    html += '<div class="perf-stat"><div class="perf-stat-label">'+(f.charAt(0).toUpperCase()+f.slice(1))+'</div><div class="perf-stat-value">'+(editorState[f]!==""&&editorState[f]!==undefined&&editorState[f]!==null?editorState[f]:"—")+'</div></div>';
   });
-  html += '</div><div class="form-row">';
-  ["views","likes","comments","shares"].forEach(function(f){
-    html += '<div class="form-group"><label class="form-label">'+(f.charAt(0).toUpperCase()+f.slice(1))+'</label><input class="form-input" type="number" value="'+safe(String(editorState[f]||""))+'" oninput="editorState[\''+f+'\']=this.value;scheduleAutosave(\''+editorState._postId+'\')" placeholder="0"></div>';
-  });
-  html += '</div><div class="form-group"><label class="form-label">Verdict</label><select class="form-input form-select" onchange="editorState.verdict=this.value;scheduleAutosave(\''+editorState._postId+'\')"><option value="">— select —</option>';
-  ["Strong traction","Good traction","Steady","Low traction","No traction","Too early to tell"].forEach(function(v){
-    html += '<option value="'+v+'" '+(editorState.verdict===v?"selected":"")+'>'+v+'</option>';
-  });
-  html += '</select></div>';
+  html += '</div><div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text3)">Verdict: '+(vb||'<span style="color:var(--text3)">Not enough data yet</span>')+'</div>';
   return html;
 }
 function renderEditor(post) {
@@ -945,7 +1017,6 @@ function renderEditor(post) {
     + '<div class="form-group"><label class="form-label">Body Text</label>'
     + '<div style="display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap;margin-bottom:6px">'
     + '<button class="btn btn-copy" onclick="copyToClipboard(editorState.body,this,\'Copied\')">📋 Copy text</button>'
-    + '<button class="btn btn-copy" onclick="copyBodyWithTidyPrompt(this)">✨ Copy + Prompt for Claude</button>'
     + '</div>'
     + '<textarea class="form-input form-textarea tall" oninput="editorState.body=this.value;scheduleAutosave(\''+post.id+'\');updateWordCount()" placeholder="Write your post here.">'+safe(e.body)+'</textarea>'
     + '<div class="word-count-row"><span class="word-count-text" id="word-count-display">'+words+' word'+(words!==1?"s":"")+' · '+e.body.length+' chars · ideal range '+platDef.wordRange[0]+'–'+platDef.wordRange[1]+' words</span></div>'
@@ -963,8 +1034,8 @@ function renderEditor(post) {
 }
 function renderSidebar() {
   const counts=PILLARS.reduce(function(acc,p){acc[p.id]=state.posts.filter(function(x){return x.pillar===p.id;}).length;return acc;},{});
-  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v3.45</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
-  [{id:"dashboard",label:"Dashboard"},{id:"library",label:"Post Library"},{id:"cadence",label:"Post Cadence"}].forEach(function(item){
+  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v4.1</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
+  [{id:"dashboard",label:"Dashboard"},{id:"library",label:"Post Library"},{id:"cadence",label:"Metrics"}].forEach(function(item){
     html += '<button class="nav-item '+(state.view===item.id?"active":"")+'" onclick="navigate(\''+item.id+'\')">'+item.label+'</button>';
   });
   html += '<div class="sidebar-section-label" style="margin-top:8px">Pillars</div>';
@@ -987,7 +1058,7 @@ function renderMobileMenu() {
   return '<div class="mobile-menu-overlay" onclick="state.showMobileMenu=false;render()"><div class="mobile-menu-panel" onclick="event.stopPropagation()">'
     + '<button class="mobile-menu-item" onclick="navigate(\'dashboard\')">Dashboard</button>'
     + '<button class="mobile-menu-item" onclick="navigate(\'library\')">Post Library</button>'
-    + '<button class="mobile-menu-item" onclick="navigate(\'cadence\')">Post Cadence</button>'
+    + '<button class="mobile-menu-item" onclick="navigate(\'cadence\')">Metrics</button>'
     + '<button class="mobile-menu-item" onclick="goToFeedbackPost()">Feedback</button>'
     + '<div style="flex:1"></div>'
     + '<button class="mobile-menu-item" onclick="state.showMobileMenu=false;render()">✕ Close</button>'
@@ -1028,11 +1099,11 @@ function renderMain() {
       html='<div class="empty"><div class="empty-title">Post not found</div></div>';
     }
   }else if(state.view==="library"){
-    html='<div class="topbar"><span class="topbar-title"><span class="topbar-emoji">🟠</span> Post Library</span><button class="btn btn-ghost btn-sm mobile-menu-btn" onclick="state.showMobileMenu=true;render()">☰</button></div>'+renderLibrary();
+    html='<div class="topbar"><span class="topbar-title"><span class="topbar-brand">🟠 ARCTURUS</span>Post Library</span><button class="btn btn-ghost btn-sm mobile-menu-btn" onclick="state.showMobileMenu=true;render()">☰</button></div>'+renderLibrary();
   }else if(state.view==="cadence"){
-    html='<div class="topbar"><span class="topbar-title"><span class="topbar-emoji">🟠</span> Post Cadence</span><button class="btn btn-ghost btn-sm mobile-menu-btn" onclick="state.showMobileMenu=true;render()">☰</button></div>'+renderCadence();
+    html='<div class="topbar"><span class="topbar-title"><span class="topbar-brand">🟠 ARCTURUS</span>Metrics</span><button class="btn btn-ghost btn-sm mobile-menu-btn" onclick="state.showMobileMenu=true;render()">☰</button></div>'+renderCadence();
   }else{
-    html='<div class="topbar"><span class="topbar-title"><span class="topbar-emoji">🟠</span> Dashboard</span><button class="btn btn-ghost btn-sm mobile-menu-btn" onclick="state.showMobileMenu=true;render()">☰</button></div>'+renderDashboard();
+    html='<div class="topbar"><span class="topbar-title"><span class="topbar-brand">🟠 ARCTURUS</span>Dashboard</span><button class="btn btn-ghost btn-sm mobile-menu-btn" onclick="state.showMobileMenu=true;render()">☰</button></div>'+renderDashboard();
   }
   main.innerHTML=html+renderSheetBar();
 }
