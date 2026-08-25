@@ -60,7 +60,7 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 .btn-copy:hover{background:var(--bg3);color:var(--text)}
 .btn-copy.copied{background:#E6F0E6;color:#2A6B2A;border-color:#2A6B2A44}
 .content{flex:1;overflow-y:auto;padding:24px}
-.view-enter{animation:viewFade 0.22s var(--ease)}
+.view-enter{animation:viewFade 0.22s var(--ease);flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
 @keyframes viewFade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 .stats-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:24px}
 .stats-grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
