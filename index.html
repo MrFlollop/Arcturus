@@ -103,6 +103,8 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 .status-chip-row{display:flex;gap:8px;flex-wrap:wrap}
 .status-chip{padding:10px 16px;border-radius:20px;font-size:13px;font-family:var(--font-body);font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);transition:all 0.15s var(--ease);min-height:40px;display:flex;align-items:center;gap:6px}
 .status-chip:active{transform:scale(0.97)}
+.status-filter-chip{padding:6px 14px;border-radius:20px;font-size:12px;font-family:var(--font-body);font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);transition:all 0.15s var(--ease);display:inline-flex;align-items:center;gap:6px}
+.status-filter-chip .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .word-count-row{display:flex;align-items:center;justify-content:space-between;margin-top:6px;padding:0 2px}
 .word-count-text{font-size:10px;color:var(--text3);font-family:var(--font-mono)}
 .perf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
@@ -116,6 +118,7 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 .form-input:focus{border-color:var(--accent)}
 .form-textarea{resize:vertical;min-height:100px;line-height:1.6}
 .form-textarea.tall{min-height:220px}
+.form-textarea.short{min-height:70px}
 .form-select{appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238C877F' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .section-divider{border:none;border-top:1px solid var(--border);margin:24px 0}
@@ -165,6 +168,31 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 .growth-chart-wrap{padding:4px 0 8px}
 .growth-svg{width:100%;height:auto;display:block}
 .growth-empty{padding:20px 0}
+.platform-section-label{display:flex;align-items:center;gap:8px;margin:20px 0 10px}
+.platform-section-label:first-child{margin-top:0}
+.platform-section-label img{width:18px;height:18px}
+.platform-section-label span{font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text2);font-family:var(--font-mono)}
+/* CALENDAR */
+.cal-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.cal-nav-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.15s var(--ease)}
+.cal-nav-btn:hover{background:var(--bg2);border-color:var(--border2)}
+.cal-month-label{font-family:var(--font-display);font-size:19px;flex:1}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:20px}
+.cal-weekday{font-size:10px;font-family:var(--font-mono);color:var(--text3);text-align:center;padding-bottom:4px;letter-spacing:0.06em;text-transform:uppercase}
+.cal-cell{min-height:88px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px;display:flex;flex-direction:column;gap:3px;transition:border-color 0.15s var(--ease),background 0.15s var(--ease)}
+.cal-cell.other-month{background:var(--bg2);opacity:0.5}
+.cal-cell.today{border-color:var(--accent);border-width:1.5px}
+.cal-cell.drag-over{border-color:var(--accent);background:#C25B3F0C}
+.cal-cell-date{font-size:10px;font-family:var(--font-mono);color:var(--text3)}
+.cal-card{padding:3px 6px;border-radius:4px;font-size:10px;font-family:var(--font-body);font-weight:500;cursor:grab;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px}
+.cal-card:active{cursor:grabbing}
+.cal-card img{width:10px;height:10px;flex-shrink:0}
+.cal-tray{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:16px}
+.cal-tray-cards{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.cal-tray-card{padding:8px 12px;border-radius:20px;border:1.5px dashed var(--border2);background:var(--bg2);font-size:12px;cursor:grab;display:flex;align-items:center;gap:6px;transition:all 0.15s var(--ease)}
+.cal-tray-card:active{cursor:grabbing}
+.cal-tray-card img{width:13px;height:13px}
+.cal-tray.drag-over{border-color:var(--accent);background:#C25B3F08}
 @media (max-width: 860px){
   .sidebar{display:none}
   .app{padding-bottom:calc(var(--bottom-nav-h) + env(safe-area-inset-bottom) + 8px)}
@@ -181,6 +209,9 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
   .form-row{grid-template-columns:1fr}
   .perf-grid{grid-template-columns:repeat(2,1fr)}
   .editor-form{padding:16px}
+  .cal-grid{grid-template-columns:repeat(7,1fr);gap:3px}
+  .cal-cell{min-height:60px;padding:4px}
+  .cal-card{font-size:9px}
   .bottom-nav{
     display:flex;position:fixed;bottom:0;left:0;right:0;
     height:calc(var(--bottom-nav-h) + env(safe-area-inset-bottom) + 8px);
@@ -250,12 +281,14 @@ function platformBadge(platformId, size) {
 
 let state = {
   posts:[],view:"overview",editingId:null,showNewPost:false,showMobileMenu:false,showUrlModal:false,
-  filterPillar:null,filterPlatform:null,filterStatus:null,search:"",sortBy:"updated_desc",
+  filterPillar:null,filterPlatform:null,filterStatuses:[],search:"",sortBy:"updated_desc",
   loading:true,sheetStatus:"loading",sheetMessage:"Connecting…",pendingSync:[],
+  calMonth:new Date().getMonth(),calYear:new Date().getFullYear(),
 };
 let editorState = {};
 let autosaveTimer = null;
 let isCreatingPost = false;
+let draggedPostId = null;
 async function sheetRead() {
   const res = await fetch(SCRIPT_URL + "?token=" + encodeURIComponent(SHEET_TOKEN));
   const data = await res.json();
@@ -304,10 +337,10 @@ function statusTag(id) {
   const s=getStatus(id);if(!s)return"";
   return '<span class="tag" style="background:'+s.color+'18;color:'+s.color+'">'+s.label+'</span>';
 }
-function photosReadyTag(post) {
-  if(!post.platform) return "";
-  if(parseBool(post.photos_ready)) return '<span class="tag" style="background:#10B98118;color:#10B981">📷 Ready</span>';
-  return '<span class="tag" style="background:var(--bg2);color:var(--text3)">📷 Pending</span>';
+function photoBriefTag(post) {
+  const brief=(post.photo_brief||"").trim();
+  if(!brief) return "";
+  return '<span class="tag" style="background:#B8860B18;color:#B8860B" title="'+safe(brief)+'">📷 Brief</span>';
 }
 let toastTimer;
 function showToast(msg,isError) {
@@ -382,6 +415,9 @@ function getGrowthEntries() {
     .filter(function(g){ return g.date && !isNaN(g.connections); })
     .sort(function(a,b){ return new Date(a.date)-new Date(b.date); });
 }
+// NOTE: verdicts are computed SEPARATELY per platform — each platform's baseline
+// only ever looks at that platform's own prior scored posts, never mixed together,
+// since LinkedIn and Instagram engagement ranges aren't comparable.
 function ensureVerdicts() {
   ["linkedin","instagram"].forEach(function(platformId){
     const platformPosts=state.posts.filter(function(p){return p.platform===platformId&&p.status==="published"&&p.published_at;})
@@ -410,7 +446,8 @@ async function loadFromSheet() {
       const legacyPlatforms=parsePlatformsLegacy(p.platforms);
       const platform = p.platform || (legacyPlatforms.indexOf("linkedin")!==-1?"linkedin":(legacyPlatforms.indexOf("instagram")!==-1?"instagram":"instagram"));
       const body = p.body || p.body_linkedin || p.body_instagram || p.body_threads || p.notes || "";
-      return Object.assign({},p,{platform:platform,body:body,photos_ready:parseBool(p.photos_ready)});
+      const post_url = p.post_url || p.linkedin_url || "";
+      return Object.assign({},p,{platform:platform,body:body,post_url:post_url,photo_brief:p.photo_brief||""});
     });
     ensureSuggestedDates();
     ensureVerdicts();
@@ -463,8 +500,8 @@ async function deletePost(id) {
 function blankPost(overrides) {
   return Object.assign({
     id:genId(),title:"",pillar:"p1",status:"idea",platform:"linkedin",body:"",
-    published_at:"",linkedin_url:"",views:"",likes:"",comments:"",shares:"",verdict:"",
-    photos_ready:false,suggested_date:"",
+    published_at:"",post_url:"",views:"",likes:"",comments:"",shares:"",verdict:"",
+    photo_brief:"",suggested_date:"",
     created_at:new Date().toISOString(),updated_at:new Date().toISOString(),
   }, overrides||{});
 }
@@ -507,7 +544,7 @@ function duplicatePost(postId) {
     status:"draft",
     platform:newPlatform,
     body:orig.body||"",
-    photos_ready:orig.photos_ready,
+    photo_brief:orig.photo_brief||"",
   });
   state.posts.push(newPost);
   savePost(newPost);
@@ -715,6 +752,24 @@ function computeEngagementSnapshot(platformId) {
   recent.forEach(function(p){ if(p.verdict&&verdictCounts.hasOwnProperty(p.verdict)) verdictCounts[p.verdict]++; });
   return {avgER:avgER,verdictCounts:verdictCounts,latestDataDate:scored[0].published_at,sampleSize:recent.length};
 }
+function renderEngagementCard(platformId,color,label) {
+  const snap=computeEngagementSnapshot(platformId);
+  let html='<div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title" style="color:'+color+'">'+label+' Engagement</span></div><div class="card-body">';
+  if(!snap){
+    html += '<div class="empty" style="padding:16px 0"><div class="empty-title">No scored posts yet</div></div>';
+  } else {
+    html += '<div style="font-family:var(--font-display);font-size:26px;line-height:1">'+(snap.avgER*100).toFixed(1)+'%</div>';
+    html += '<div style="font-size:11px;color:var(--text3);margin-bottom:12px">average engagement rate, last '+snap.sampleSize+' scored post'+(snap.sampleSize!==1?"s":"")+'</div>';
+    html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">';
+    ["Strong","Average","Weak"].forEach(function(v){
+      if(snap.verdictCounts[v]>0) html += '<span style="display:inline-flex;align-items:center;gap:4px">'+verdictBadge(v)+'<span style="font-size:11px;color:var(--text3)">×'+snap.verdictCounts[v]+'</span></span>';
+    });
+    html += '</div>';
+    html += '<div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">Data through '+formatDate(snap.latestDataDate)+' · Strong = 30%+ above '+label+'\'s own recent average, Weak = 30%+ below</div>';
+  }
+  html += '</div></div>';
+  return html;
+}
 function renderOverview() {
   ensureSuggestedDates();
   const todayStrip=getTodayStripSummary();
@@ -737,23 +792,14 @@ function renderOverview() {
       + '</div>';
   }
 
-  html += '<div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title" style="color:#0A66C2">LinkedIn Growth</span></div><div class="card-body">'+renderGrowthChart()+'</div></div>';
+  // LinkedIn section — growth chart (real connections figure) + LinkedIn-only engagement
+  html += '<div class="platform-section-label">'+platformBadge("linkedin",18)+'<span>LinkedIn</span></div>';
+  html += '<div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title" style="color:#0A66C2">Connections Growth</span></div><div class="card-body">'+renderGrowthChart()+'</div></div>';
+  html += renderEngagementCard("linkedin","#0A66C2","LinkedIn");
 
-  const snap=computeEngagementSnapshot("linkedin");
-  html += '<div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title" style="color:#0A66C2">Engagement Snapshot</span></div><div class="card-body">';
-  if(!snap){
-    html += '<div class="empty" style="padding:16px 0"><div class="empty-title">No scored posts yet</div></div>';
-  } else {
-    html += '<div style="font-family:var(--font-display);font-size:26px;line-height:1">'+(snap.avgER*100).toFixed(1)+'%</div>';
-    html += '<div style="font-size:11px;color:var(--text3);margin-bottom:12px">average engagement rate, last '+snap.sampleSize+' scored post'+(snap.sampleSize!==1?"s":"")+'</div>';
-    html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">';
-    ["Strong","Average","Weak"].forEach(function(v){
-      if(snap.verdictCounts[v]>0) html += '<span style="display:inline-flex;align-items:center;gap:4px">'+verdictBadge(v)+'<span style="font-size:11px;color:var(--text3)">×'+snap.verdictCounts[v]+'</span></span>';
-    });
-    html += '</div>';
-    html += '<div style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">Data through '+formatDate(snap.latestDataDate)+' · Strong = 30%+ above recent average, Weak = 30%+ below</div>';
-  }
-  html += '</div></div>';
+  // Instagram section — engagement only (no connection-count tracking exists for IG yet)
+  html += '<div class="platform-section-label">'+platformBadge("instagram",18)+'<span>Instagram</span></div>';
+  html += renderEngagementCard("instagram","#E1306C","Instagram");
 
   if(overdue.length>0){
     html += '<div class="card" style="margin-bottom:16px;border-color:#DC262644"><div class="card-header"><span class="card-title" style="color:#DC2626">⚠ Overdue</span></div><div class="card-body">';
@@ -767,7 +813,7 @@ function renderOverview() {
     html += '</div></div>';
   }
 
-  html += '<div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title">Upcoming</span></div><div class="card-body">';
+  html += '<div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title">Upcoming</span><button class="btn btn-ghost btn-sm" onclick="navigate(\'calendar\')">📅 Calendar →</button></div><div class="card-body">';
   if(readyWithDates.length===0){
     html += '<div class="empty" style="padding:24px 0"><div class="empty-title">Nothing scheduled yet</div><div class="empty-sub">Mark a post Ready and it will get a suggested date here.</div></div>';
   } else {
@@ -786,7 +832,7 @@ function renderOverview() {
   html += '</div></div>';
 
   const posted=state.posts.filter(function(p){return p.status==="published"&&p.published_at&&!isGrowthRow(p);}).sort(function(a,b){return new Date(b.published_at)-new Date(a.published_at);});
-  html += '<div class="card"><div class="card-header"><span class="card-title">Recently Posted</span><button class="btn btn-ghost btn-sm" onclick="state.filterStatus=\'published\';navigate(\'library\')">View all →</button></div><div class="card-body">';
+  html += '<div class="card"><div class="card-header"><span class="card-title">Recently Posted</span><button class="btn btn-ghost btn-sm" onclick="state.filterStatuses=[\'published\'];navigate(\'library\')">View all →</button></div><div class="card-body">';
   if(posted.length===0){
     html += '<div class="empty" style="padding:24px 0"><div class="empty-title">Nothing published yet</div></div>';
   } else {
@@ -811,7 +857,7 @@ function renderLibrary() {
     if(isGrowthRow(p)) return false;
     if(state.filterPillar&&p.pillar!==state.filterPillar)return false;
     if(state.filterPlatform&&p.platform!==state.filterPlatform)return false;
-    if(state.filterStatus&&p.status!==state.filterStatus)return false;
+    if(state.filterStatuses.length>0&&state.filterStatuses.indexOf(p.status)===-1)return false;
     if(state.search){
       const q=state.search.toLowerCase();
       return (p.title||"").toLowerCase().indexOf(q)!==-1||(p.body||"").toLowerCase().indexOf(q)!==-1;
@@ -838,11 +884,15 @@ function renderLibrary() {
   });
   html += '</select>'
     + '<span style="margin-left:auto;font-size:12px;color:var(--text3);font-family:var(--font-mono)">'+filtered.length+' post'+(filtered.length!==1?"s":"")+'</span></div>';
+  // Multi-select status filter — clicking toggles a status in/out of state.filterStatuses.
+  // Empty array means "show all statuses" (equivalent to the old null default).
   html += '<div class="filters">';
-  html += '<button class="filter-chip '+(state.filterStatus===null?"active":"")+'" onclick="state.filterStatus=null;renderMain()">All Statuses</button>';
+  html += '<button class="status-filter-chip" style="'+(state.filterStatuses.length===0?"border-color:var(--accent);background:var(--accent);color:white":"")+'" onclick="state.filterStatuses=[];renderMain()">All</button>';
   STATUSES.forEach(function(s){
-    const active=state.filterStatus===s.id;
-    html += '<button class="filter-chip '+(active?"active":"")+'" style="'+(active?"":"border-color:"+s.color+"44;color:"+s.color)+'" onclick="state.filterStatus=state.filterStatus===\''+s.id+'\'?null:\''+s.id+'\';renderMain()">'+s.label+'</button>';
+    const active=state.filterStatuses.indexOf(s.id)!==-1;
+    html += '<button class="status-filter-chip" style="'+(active?"border-color:"+s.color+";background:"+s.color+";color:white":"border-color:"+s.color+"44;color:"+s.color)+'" onclick="toggleStatusFilter(\''+s.id+'\')">'
+      + (active?'':'<span class="dot" style="background:'+s.color+'"></span>')
+      + s.label+'</button>';
   });
   html += '</div>';
   if(filtered.length===0){
@@ -853,7 +903,7 @@ function renderLibrary() {
       const pl=getPillar(p.pillar);
       html += '<div class="post-card" onclick="navigate(\'editor\',\''+p.id+'\')"><div class="post-card-pillar-bar" style="background:'+(pl?pl.color:"var(--border)")+'"></div><div class="post-card-title">'+(safe(p.title)||'<em style="color:var(--text3);font-weight:400">Untitled post</em>')+'</div>'
         + (p.body?'<div class="post-card-body">'+safe(p.body)+'</div>':"")
-        + '<div class="post-card-meta">'+pillarTag(p.pillar)+statusTag(p.status)+platformBadge(p.platform,16)+photosReadyTag(p)
+        + '<div class="post-card-meta">'+pillarTag(p.pillar)+statusTag(p.status)+platformBadge(p.platform,16)+photoBriefTag(p)
         + (p.published_at?'<span class="tag" style="background:#6B728018;color:#6B7280;margin-left:auto">'+formatDate(p.published_at)+'</span>':'<span class="post-card-date">'+formatDate(p.updated_at)+'</span>')
         + '</div></div>';
     });
@@ -862,20 +912,143 @@ function renderLibrary() {
   html += '</div>';
   return html;
 }
+function toggleStatusFilter(statusId) {
+  const idx=state.filterStatuses.indexOf(statusId);
+  if(idx===-1) state.filterStatuses.push(statusId);
+  else state.filterStatuses.splice(idx,1);
+  renderMain();
+}
 function surpriseMe() {
   const drafts=state.posts.filter(function(p){return p.status==="draft"&&!isGrowthRow(p);});
   if(drafts.length===0){ showToast("No drafts sitting around right now",true); return; }
   const pick=drafts[Math.floor(Math.random()*drafts.length)];
   navigate("editor",pick.id);
 }
+
+// ── CALENDAR ─────────────────────────────────────────────────────
+// Shows only status=ready posts, placed on suggested_date. Unscheduled ready
+// posts sit in a tray above the grid and can be dragged onto a day — dragging
+// ONLY ever updates suggested_date, never status or any other field. No
+// status-change controls exist anywhere in this view by design.
+function getCalendarReadyPosts() {
+  return state.posts.filter(function(p){ return p.status==="ready" && !isGrowthRow(p); });
+}
+function calMonthLabel() {
+  const d=new Date(state.calYear,state.calMonth,1);
+  return d.toLocaleDateString("en-GB",{month:"long",year:"numeric"});
+}
+function calShiftMonth(delta) {
+  let m=state.calMonth+delta, y=state.calYear;
+  if(m<0){m=11;y--;} if(m>11){m=0;y++;}
+  state.calMonth=m; state.calYear=y;
+  renderMain();
+}
+function calCardHTML(post) {
+  const trackKey=getCadenceTrack(post);
+  const color=TRACK_COLORS[trackKey];
+  return '<div class="cal-card" draggable="true" style="background:'+color+'18;color:'+color+'" '
+    + 'ondragstart="draggedPostId=\''+post.id+'\';event.dataTransfer.effectAllowed=\'move\'" '
+    + 'onclick="event.stopPropagation();navigate(\'editor\',\''+post.id+'\')" title="'+safe(post.title)+'">'
+    + platformBadge(post.platform,10)+'<span style="overflow:hidden;text-overflow:ellipsis">'+safe(post.title||"Untitled")+'</span></div>';
+}
+function renderCalendar() {
+  const readyPosts=getCalendarReadyPosts();
+  const scheduled=readyPosts.filter(function(p){return p.suggested_date;});
+  const unscheduled=readyPosts.filter(function(p){return !p.suggested_date;});
+
+  let html='<div class="content">';
+
+  // Unscheduled tray
+  html += '<div class="cal-tray" id="cal-tray" ondragover="event.preventDefault();document.getElementById(\'cal-tray\').classList.add(\'drag-over\')" ondragleave="document.getElementById(\'cal-tray\').classList.remove(\'drag-over\')" ondrop="handleTrayDrop(event)">';
+  html += '<div class="section-heading" style="margin-bottom:0">Unscheduled — drag onto a day</div>';
+  if(unscheduled.length===0){
+    html += '<div style="font-size:12px;color:var(--text3);margin-top:8px">Nothing waiting — every Ready post has a date.</div>';
+  } else {
+    html += '<div class="cal-tray-cards">';
+    unscheduled.forEach(function(p){
+      html += '<div class="cal-tray-card" draggable="true" ondragstart="draggedPostId=\''+p.id+'\';event.dataTransfer.effectAllowed=\'move\'" onclick="navigate(\'editor\',\''+p.id+'\')">'
+        + platformBadge(p.platform,13)+safe(p.title||"Untitled")+'</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // Month header
+  html += '<div class="cal-header">'
+    + '<button class="cal-nav-btn" onclick="calShiftMonth(-1)">‹</button>'
+    + '<span class="cal-month-label">'+calMonthLabel()+'</span>'
+    + '<button class="cal-nav-btn" onclick="calShiftMonth(1)">›</button>'
+    + '<button class="btn btn-ghost btn-sm" onclick="state.calMonth=new Date().getMonth();state.calYear=new Date().getFullYear();renderMain()">Today</button>'
+    + '</div>';
+
+  // Grid
+  const firstOfMonth=new Date(state.calYear,state.calMonth,1);
+  const startWeekday=(firstOfMonth.getDay()+6)%7; // Monday=0
+  const daysInMonth=new Date(state.calYear,state.calMonth+1,0).getDate();
+  const daysInPrevMonth=new Date(state.calYear,state.calMonth,0).getDate();
+  const todayKey=new Date().toDateString();
+
+  const cells=[];
+  for(let i=0;i<startWeekday;i++){
+    const dayNum=daysInPrevMonth-startWeekday+1+i;
+    cells.push({dayNum:dayNum,otherMonth:true,dateObj:new Date(state.calYear,state.calMonth-1,dayNum)});
+  }
+  for(let d=1;d<=daysInMonth;d++){
+    cells.push({dayNum:d,otherMonth:false,dateObj:new Date(state.calYear,state.calMonth,d)});
+  }
+  while(cells.length%7!==0 || cells.length<35){
+    const dayNum=cells.length-startWeekday-daysInMonth+1;
+    cells.push({dayNum:dayNum,otherMonth:true,dateObj:new Date(state.calYear,state.calMonth+1,dayNum)});
+  }
+
+  html += '<div class="cal-grid">';
+  ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].forEach(function(wd){ html += '<div class="cal-weekday">'+wd+'</div>'; });
+  cells.forEach(function(cell){
+    const cellKey=cell.dateObj.toDateString();
+    const isToday=cellKey===todayKey;
+    const dateStr=cell.dateObj.getFullYear()+"-"+String(cell.dateObj.getMonth()+1).padStart(2,"0")+"-"+String(cell.dateObj.getDate()).padStart(2,"0");
+    const postsOnDay=scheduled.filter(function(p){ return p.suggested_date && p.suggested_date.slice(0,10)===dateStr; });
+    html += '<div class="cal-cell'+(cell.otherMonth?" other-month":"")+(isToday?" today":"")+'" '
+      + 'ondragover="event.preventDefault();this.classList.add(\'drag-over\')" '
+      + 'ondragleave="this.classList.remove(\'drag-over\')" '
+      + 'ondrop="handleCalDrop(event,\''+dateStr+'\')">'
+      + '<span class="cal-cell-date">'+cell.dayNum+'</span>';
+    postsOnDay.forEach(function(p){ html += calCardHTML(p); });
+    html += '</div>';
+  });
+  html += '</div>';
+
+  html += '</div>';
+  return html;
+}
+function handleCalDrop(evt,dateStr) {
+  evt.preventDefault();
+  evt.currentTarget.classList.remove("drag-over");
+  if(!draggedPostId) return;
+  updateSuggestedDate(draggedPostId,dateStr);
+  draggedPostId=null;
+}
+function handleTrayDrop(evt) {
+  evt.preventDefault();
+  document.getElementById("cal-tray").classList.remove("drag-over");
+  if(!draggedPostId) return;
+  const post=state.posts.find(function(p){return p.id===draggedPostId;});
+  if(post){
+    post.suggested_date="";
+    savePost(Object.assign({},post));
+    render();
+  }
+  draggedPostId=null;
+}
+
 function initEditor(post) {
   editorState={
     _postId:post.id,
     title:post.title||"",pillar:post.pillar||"p1",status:post.status||"idea",
     platform:post.platform||"linkedin",body:post.body||"",
-    published_at:post.published_at||null,linkedin_url:post.linkedin_url||"",
+    published_at:post.published_at||null,post_url:post.post_url||"",
     views:post.views||"",likes:post.likes||"",comments:post.comments||"",shares:post.shares||"",verdict:post.verdict||"",
-    photos_ready:parseBool(post.photos_ready),suggested_date:post.suggested_date||"",
+    photo_brief:post.photo_brief||"",suggested_date:post.suggested_date||"",
   };
 }
 function openUrlPrompt() {
@@ -885,7 +1058,7 @@ function openUrlPrompt() {
 function saveUrlFromModal() {
   const input=document.getElementById("url-modal-input");
   const val=input?input.value.trim():"";
-  editorState.linkedin_url=val;
+  editorState.post_url=val;
   state.showUrlModal=false;
   render();
   scheduleAutosave(editorState._postId);
@@ -895,7 +1068,7 @@ function renderUrlModal() {
   return '<div class="modal-overlay" onclick="state.showUrlModal=false;render()"><div class="modal" onclick="event.stopPropagation()" style="width:400px">'
     + '<div class="modal-title">'+platLabel+' URL</div>'
     + '<div class="modal-sub">Paste the live post link once it is up, or type NA if you are not tracking this one.</div>'
-    + '<div class="form-group"><input class="form-input" id="url-modal-input" value="'+safe(editorState.linkedin_url||"")+'" placeholder="https://..." autofocus></div>'
+    + '<div class="form-group"><input class="form-input" id="url-modal-input" value="'+safe(editorState.post_url||"")+'" placeholder="https://..." autofocus></div>'
     + '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">'
     + '<button class="btn btn-ghost" onclick="state.showUrlModal=false;render()">Cancel</button>'
     + '<button class="btn btn-primary" onclick="saveUrlFromModal()">Save</button>'
@@ -903,10 +1076,10 @@ function renderUrlModal() {
 }
 function renderPostUrlBlock() {
   const platLabel=getPlatformDef(editorState.platform).label;
-  if(editorState.linkedin_url){
-    const isUrl = /^https?:\/\//.test(editorState.linkedin_url);
+  if(editorState.post_url){
+    const isUrl = /^https?:\/\//.test(editorState.post_url);
     return '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
-      + (isUrl ? '<a href="'+safe(editorState.linkedin_url)+'" target="_blank" class="post-url-link">View post ↗</a>' : '<span style="font-size:12px;color:var(--text3);font-family:var(--font-mono)">'+safe(editorState.linkedin_url)+'</span>')
+      + (isUrl ? '<a href="'+safe(editorState.post_url)+'" target="_blank" class="post-url-link">View post ↗</a>' : '<span style="font-size:12px;color:var(--text3);font-family:var(--font-mono)">'+safe(editorState.post_url)+'</span>')
       + '<button class="btn btn-ghost btn-sm" onclick="openUrlPrompt()">✏️ Edit</button>'
       + '</div>';
   }
@@ -929,20 +1102,9 @@ function handleStatusChip(val) {
   if(urlEl)urlEl.innerHTML=renderPostUrlSection();
   clearTimeout(autosaveTimer);
   doSaveNow(editorState._postId);
-  if(val==="published" && !wasPublished && !editorState.linkedin_url){
+  if(val==="published" && !wasPublished && !editorState.post_url){
     setTimeout(function(){ openUrlPrompt(); },350);
   }
-}
-function togglePhotosReady(postId) {
-  editorState.photos_ready=!editorState.photos_ready;
-  const el=document.getElementById("photos-ready-check");
-  if(el)el.innerHTML=renderPhotosReadyCheck();
-  clearTimeout(autosaveTimer);
-  doSaveNow(postId);
-}
-function renderPhotosReadyCheck() {
-  const checked=!!editorState.photos_ready;
-  return '<div class="status-chip" style="'+(checked?"border-color:#10B981;background:#10B98108;color:#10B981":"")+'" onclick="togglePhotosReady(\''+editorState._postId+'\')"><input type="checkbox" style="display:none" '+(checked?"checked":"")+'> 📷 Photos ready</div>';
 }
 function handlePlatformChange(val) {
   editorState.platform=val;
@@ -1004,7 +1166,7 @@ function renderEditor(post) {
   PLATFORMS_DEF.forEach(function(p){ html += '<option value="'+p.id+'" '+(e.platform===p.id?"selected":"")+'>'+p.label+'</option>'; });
   html += '</select></div></div>'
     + '<div class="form-group"><label class="form-label">Status</label><div class="status-chip-row" id="status-chips">'+renderStatusChips()+'</div></div>'
-    + '<div class="form-group"><label class="form-label">Photos</label><div id="photos-ready-check">'+renderPhotosReadyCheck()+'</div></div>'
+    + '<div class="form-group"><label class="form-label">Photo Brief</label><textarea class="form-input form-textarea short" oninput="editorState.photo_brief=this.value;scheduleAutosave(\''+post.id+'\')" placeholder="What photos does this post need before it goes to Buffer? e.g. \'wide shot of the set, plus a close-up of the FatJoe branding\'">'+safe(e.photo_brief)+'</textarea></div>'
     + '<div class="form-group"><label class="form-label">Body Text</label>'
     + '<div style="display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap;margin-bottom:6px">'
     + '<button class="btn btn-copy" onclick="copyToClipboard(editorState.body,this,\'Copied\')">📋 Copy text</button>'
@@ -1025,8 +1187,8 @@ function renderEditor(post) {
 }
 function renderSidebar() {
   const counts=PILLARS.reduce(function(acc,p){acc[p.id]=state.posts.filter(function(x){return x.pillar===p.id&&!isGrowthRow(x);}).length;return acc;},{});
-  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v5.0</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
-  [{id:"overview",label:"Overview"},{id:"library",label:"Post Library"}].forEach(function(item){
+  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v6.0</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
+  [{id:"overview",label:"Overview"},{id:"library",label:"Post Library"},{id:"calendar",label:"Calendar"}].forEach(function(item){
     html += '<button class="nav-item '+(state.view===item.id?"active":"")+'" onclick="navigate(\''+item.id+'\')">'+item.label+'</button>';
   });
   html += '<div class="sidebar-section-label" style="margin-top:8px">Pillars</div>';
@@ -1041,6 +1203,7 @@ function renderSidebar() {
 function renderBottomNav() {
   return '<div class="bottom-nav">'
     + '<button class="bottom-nav-item '+(state.view==='overview'?'active':'')+'" onclick="navigate(\'overview\')">Overview</button>'
+    + '<button class="bottom-nav-item '+(state.view==='calendar'?'active':'')+'" onclick="navigate(\'calendar\')">Calendar</button>'
     + '<button class="bottom-nav-fab" onclick="state.showNewPost=true;render()">+</button>'
     + '<button class="bottom-nav-item '+(state.view==='library'?'active':'')+'" onclick="navigate(\'library\')">Library</button>'
     + '</div>';
@@ -1049,6 +1212,7 @@ function renderMobileMenu() {
   return '<div class="mobile-menu-overlay" onclick="state.showMobileMenu=false;render()"><div class="mobile-menu-panel" onclick="event.stopPropagation()">'
     + '<button class="mobile-menu-item" onclick="navigate(\'overview\')">Overview</button>'
     + '<button class="mobile-menu-item" onclick="navigate(\'library\')">Post Library</button>'
+    + '<button class="mobile-menu-item" onclick="navigate(\'calendar\')">Calendar</button>'
     + '<button class="mobile-menu-item" onclick="goToFeedbackPost()">Feedback</button>'
     + '<div style="flex:1"></div>'
     + '<button class="mobile-menu-item" onclick="state.showMobileMenu=false;render()">✕ Close</button>'
@@ -1090,6 +1254,8 @@ function renderMain() {
     }
   }else if(state.view==="library"){
     html='<div class="topbar"><span class="topbar-title"><span class="topbar-brand">🟠 ARCTURUS</span>Post Library</span><button class="btn btn-ghost btn-sm mobile-menu-btn" onclick="state.showMobileMenu=true;render()">☰</button></div><div class="view-enter">'+renderLibrary()+'</div>';
+  }else if(state.view==="calendar"){
+    html='<div class="topbar"><span class="topbar-title"><span class="topbar-brand">🟠 ARCTURUS</span>Calendar</span><button class="btn btn-ghost btn-sm mobile-menu-btn" onclick="state.showMobileMenu=true;render()">☰</button></div><div class="view-enter">'+renderCalendar()+'</div>';
   }else{
     html='<div class="topbar"><span class="topbar-title"><span class="topbar-brand">🟠 ARCTURUS</span>Overview</span><button class="btn btn-ghost btn-sm mobile-menu-btn" onclick="state.showMobileMenu=true;render()">☰</button></div><div class="view-enter">'+renderOverview()+'</div>';
   }
