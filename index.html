@@ -243,7 +243,7 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtuMyKcwbM7dzJM4LBl6sWBRqRYoMcP4BcQOH7NJb_WHqEi0MV-6E0V_VIKDkRrl4/exec";
 const SHEET_TOKEN = "PaR5WgzcM6QeuojXFPeKnX0q9ePyCyDt";
-const TRACK_TARGET_DAYS = {linkedin:3, work_ig:7, personal_ig:7};
+const TRACK_TARGET_DAYS = {linkedin:3, instagram:7};
 function getTrackTarget(trackKey) { return TRACK_TARGET_DAYS[trackKey] || 7; }
 const FEEDBACK_TITLE = "Arcturus Feedback & Ideas";
 const FEEDBACK_POST_ID = "arcturus-feedback-post";
@@ -283,7 +283,7 @@ let state = {
   posts:[],view:"overview",editingId:null,showNewPost:false,showMobileMenu:false,showUrlModal:false,
   filterPillar:null,filterPlatform:null,filterStatuses:[],search:"",sortBy:"updated_desc",
   loading:true,sheetStatus:"loading",sheetMessage:"Connecting…",pendingSync:[],
-  calMonth:new Date().getMonth(),calYear:new Date().getFullYear(),
+  calWeekOffset:0,
 };
 let editorState = {};
 let autosaveTimer = null;
@@ -382,14 +382,15 @@ async function copyToClipboard(text,btnEl,label) {
   }
 }
 function getPostMetrics(post) {
-  const views=parseFloat(post.views), likes=parseFloat(post.likes), comments=parseFloat(post.comments), shares=parseFloat(post.shares);
-  const complete = post.views!==""&&post.views!==undefined&&post.views!==null &&
-                    post.likes!==""&&post.likes!==undefined&&post.likes!==null &&
-                    post.comments!==""&&post.comments!==undefined&&post.comments!==null &&
-                    post.shares!==""&&post.shares!==undefined&&post.shares!==null &&
-                    !isNaN(views)&&!isNaN(likes)&&!isNaN(comments)&&!isNaN(shares);
-  if(!complete || !(views>0)) return null;
-  return {views:views,likes:likes,comments:comments,shares:shares,er:(likes+comments+shares)/views};
+  // Only views is required. Missing likes/comments/shares count as zero rather
+  // than blocking the whole calculation — many scraped posts have views+likes
+  // but no comments/shares captured, and were getting no verdict at all for it.
+  const views=parseFloat(post.views);
+  const hasViews = post.views!==""&&post.views!==undefined&&post.views!==null&&!isNaN(views)&&views>0;
+  if(!hasViews) return null;
+  const likes=parseFloat(post.likes), comments=parseFloat(post.comments), shares=parseFloat(post.shares);
+  const l=isNaN(likes)?0:likes, c=isNaN(comments)?0:comments, s=isNaN(shares)?0:shares;
+  return {views:views,likes:l,comments:c,shares:s,er:(l+c+s)/views};
 }
 function verdictLabel(er,baselineAvg) {
   if(baselineAvg!==null && baselineAvg>0){
@@ -591,35 +592,18 @@ function goBackFromEditor(postId) {
   navigate("library");
 }
 function getCadenceTrack(post) {
-  if(post.platform==="linkedin") return "linkedin";
-  if(post.pillar==="p5") return "personal_ig";
-  return "work_ig";
+  // Single Instagram track — no Personal/Work split. That split existed only
+  // for cadence tracking, produced no real distinction Oli asked for, and was
+  // causing false "overdue" reads when the two were checked separately.
+  return post.platform==="linkedin" ? "linkedin" : "instagram";
 }
-const TRACK_LABELS={linkedin:"LinkedIn",personal_ig:"Personal Instagram",work_ig:"Work Instagram"};
-const TRACK_COLORS={linkedin:"#0A66C2",personal_ig:"#7B4F8E",work_ig:"#E1306C"};
+const TRACK_LABELS={linkedin:"LinkedIn",instagram:"Instagram"};
+const TRACK_COLORS={linkedin:"#0A66C2",instagram:"#E1306C"};
 function computeLastPublished(trackKey) {
   const matches=state.posts.filter(function(p){return p.status==="published"&&p.published_at&&getCadenceTrack(p)===trackKey;});
   if(matches.length===0)return null;
   matches.sort(function(a,b){return new Date(b.published_at)-new Date(a.published_at);});
   return matches[0];
-}
-function computeOverdue() {
-  const tracks=["linkedin","personal_ig","work_ig"];
-  const result=[];
-  tracks.forEach(function(trackKey){
-    const target=getTrackTarget(trackKey);
-    const last=computeLastPublished(trackKey);
-    const daysSinceLast = last ? daysSince(last.published_at) : null;
-    if(daysSinceLast===null || daysSinceLast > target) {
-      result.push({
-        track:trackKey,
-        daysOverdue: daysSinceLast===null ? null : daysSinceLast-target,
-        lastTitle: last ? last.title : null,
-        neverPosted: daysSinceLast===null
-      });
-    }
-  });
-  return result;
 }
 function computeTrackStats(trackKey) {
   const pubs=state.posts.filter(function(p){return p.status==="published"&&p.published_at&&getCadenceTrack(p)===trackKey;}).sort(function(a,b){return new Date(a.published_at)-new Date(b.published_at);});
@@ -629,7 +613,7 @@ function computeTrackStats(trackKey) {
   return {avgDays: totalGap/(pubs.length-1), count:pubs.length};
 }
 function ensureSuggestedDates() {
-  const tracks=["linkedin","personal_ig","work_ig"];
+  const tracks=["linkedin","instagram"];
   tracks.forEach(function(trackKey){
     const target=getTrackTarget(trackKey);
     const trackReady=state.posts.filter(function(p){return p.status==="ready"&&getCadenceTrack(p)===trackKey;});
@@ -659,12 +643,11 @@ function updateSuggestedDate(postId,dateStr) {
   render();
 }
 function getTodayStripSummary() {
-  const overdue=computeOverdue();
   const in7=Date.now()+7*24*60*60*1000;
   const dueThisWeek=state.posts.filter(function(p){
     return p.status==="ready"&&p.suggested_date&&new Date(p.suggested_date).getTime()<=in7&&new Date(p.suggested_date).getTime()>=Date.now()-24*60*60*1000;
   }).length;
-  return {overdueCount:overdue.length,dueThisWeek:dueThisWeek};
+  return {dueThisWeek:dueThisWeek};
 }
 function shouldShowBackupNudge() {
   try {
@@ -773,15 +756,12 @@ function renderEngagementCard(platformId,color,label) {
 function renderOverview() {
   ensureSuggestedDates();
   const todayStrip=getTodayStripSummary();
-  const overdue=computeOverdue();
   const readyWithDates=state.posts.filter(function(p){return p.status==="ready"&&p.suggested_date;});
   readyWithDates.sort(function(a,b){return new Date(a.suggested_date)-new Date(b.suggested_date);});
 
   let html='<div class="content">';
 
   html += '<div class="card" style="margin-bottom:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
-    + (todayStrip.overdueCount>0 ? '<span style="color:#DC2626;font-weight:600;font-size:13px">⚠ '+todayStrip.overdueCount+' overdue</span>' : '<span style="color:#10B981;font-size:13px">✓ On track</span>')
-    + '<span style="color:var(--text3)">·</span>'
     + '<span style="color:var(--text2);font-size:13px">'+todayStrip.dueThisWeek+' due this week</span>'
     + '</div>';
 
@@ -800,18 +780,6 @@ function renderOverview() {
   // Instagram section — engagement only (no connection-count tracking exists for IG yet)
   html += '<div class="platform-section-label">'+platformBadge("instagram",18)+'<span>Instagram</span></div>';
   html += renderEngagementCard("instagram","#E1306C","Instagram");
-
-  if(overdue.length>0){
-    html += '<div class="card" style="margin-bottom:16px;border-color:#DC262644"><div class="card-header"><span class="card-title" style="color:#DC2626">⚠ Overdue</span></div><div class="card-body">';
-    overdue.forEach(function(o){
-      const label=TRACK_LABELS[o.track];
-      let text;
-      if(o.neverPosted){ text=label+" — no posts published yet"; }
-      else { text=label+" — "+o.daysOverdue+" day"+(o.daysOverdue!==1?"s":"")+" overdue"+(o.lastTitle?(' (last: "'+safe(o.lastTitle)+'")'):""); }
-      html += '<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2)">'+text+'</div>';
-    });
-    html += '</div></div>';
-  }
 
   html += '<div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title">Upcoming</span><button class="btn btn-ghost btn-sm" onclick="navigate(\'calendar\')">📅 Calendar →</button></div><div class="card-body">';
   if(readyWithDates.length===0){
@@ -933,14 +901,26 @@ function surpriseMe() {
 function getCalendarReadyPosts() {
   return state.posts.filter(function(p){ return p.status==="ready" && !isGrowthRow(p); });
 }
-function calMonthLabel() {
-  const d=new Date(state.calYear,state.calMonth,1);
-  return d.toLocaleDateString("en-GB",{month:"long",year:"numeric"});
+// Rolling 4-week window anchored to "this week's Monday", shifted by
+// state.calWeekOffset weeks. Replaces the old month grid specifically so a
+// post can be dragged from late one month into early the next without any
+// navigation — both ends of that range are visible in the same view.
+function calWindowStart() {
+  const today=new Date(); today.setHours(0,0,0,0);
+  const dow=(today.getDay()+6)%7; // Monday=0
+  const mondayThisWeek=new Date(today);
+  mondayThisWeek.setDate(today.getDate()-dow);
+  const start=new Date(mondayThisWeek);
+  start.setDate(mondayThisWeek.getDate()+7*state.calWeekOffset);
+  return start;
 }
-function calShiftMonth(delta) {
-  let m=state.calMonth+delta, y=state.calYear;
-  if(m<0){m=11;y--;} if(m>11){m=0;y++;}
-  state.calMonth=m; state.calYear=y;
+function calRangeLabel(start) {
+  const end=new Date(start); end.setDate(start.getDate()+27);
+  const fmt=function(d){ return d.toLocaleDateString("en-GB",{day:"numeric",month:"short"}); };
+  return fmt(start)+' – '+fmt(end)+', '+end.getFullYear();
+}
+function calShiftWeek(delta) {
+  state.calWeekOffset += delta;
   renderMain();
 }
 function calCardHTML(post) {
@@ -973,46 +953,39 @@ function renderCalendar() {
   }
   html += '</div>';
 
-  // Month header
+  // Header — shows the actual visible date range, not a month name, since the
+  // window can (and often will) span two months at once.
+  const start=calWindowStart();
   html += '<div class="cal-header">'
-    + '<button class="cal-nav-btn" onclick="calShiftMonth(-1)">‹</button>'
-    + '<span class="cal-month-label">'+calMonthLabel()+'</span>'
-    + '<button class="cal-nav-btn" onclick="calShiftMonth(1)">›</button>'
-    + '<button class="btn btn-ghost btn-sm" onclick="state.calMonth=new Date().getMonth();state.calYear=new Date().getFullYear();renderMain()">Today</button>'
+    + '<button class="cal-nav-btn" onclick="calShiftWeek(-1)">‹</button>'
+    + '<span class="cal-month-label">'+calRangeLabel(start)+'</span>'
+    + '<button class="cal-nav-btn" onclick="calShiftWeek(1)">›</button>'
+    + '<button class="btn btn-ghost btn-sm" onclick="state.calWeekOffset=0;renderMain()">Today</button>'
     + '</div>';
 
-  // Grid
-  const firstOfMonth=new Date(state.calYear,state.calMonth,1);
-  const startWeekday=(firstOfMonth.getDay()+6)%7; // Monday=0
-  const daysInMonth=new Date(state.calYear,state.calMonth+1,0).getDate();
-  const daysInPrevMonth=new Date(state.calYear,state.calMonth,0).getDate();
+  // Grid — 28 contiguous days (4 weeks) starting from the window start, no month breaks
   const todayKey=new Date().toDateString();
-
   const cells=[];
-  for(let i=0;i<startWeekday;i++){
-    const dayNum=daysInPrevMonth-startWeekday+1+i;
-    cells.push({dayNum:dayNum,otherMonth:true,dateObj:new Date(state.calYear,state.calMonth-1,dayNum)});
-  }
-  for(let d=1;d<=daysInMonth;d++){
-    cells.push({dayNum:d,otherMonth:false,dateObj:new Date(state.calYear,state.calMonth,d)});
-  }
-  while(cells.length%7!==0 || cells.length<35){
-    const dayNum=cells.length-startWeekday-daysInMonth+1;
-    cells.push({dayNum:dayNum,otherMonth:true,dateObj:new Date(state.calYear,state.calMonth+1,dayNum)});
+  for(let i=0;i<28;i++){
+    const d=new Date(start); d.setDate(start.getDate()+i);
+    cells.push(d);
   }
 
   html += '<div class="cal-grid">';
   ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].forEach(function(wd){ html += '<div class="cal-weekday">'+wd+'</div>'; });
-  cells.forEach(function(cell){
-    const cellKey=cell.dateObj.toDateString();
-    const isToday=cellKey===todayKey;
-    const dateStr=cell.dateObj.getFullYear()+"-"+String(cell.dateObj.getMonth()+1).padStart(2,"0")+"-"+String(cell.dateObj.getDate()).padStart(2,"0");
+  cells.forEach(function(d,i){
+    const isToday=d.toDateString()===todayKey;
+    const dateStr=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
     const postsOnDay=scheduled.filter(function(p){ return p.suggested_date && p.suggested_date.slice(0,10)===dateStr; });
-    html += '<div class="cal-cell'+(cell.otherMonth?" other-month":"")+(isToday?" today":"")+'" '
+    // Show the month abbreviation whenever a cell lands on the 1st, or on the very
+    // first cell of the grid, so a month change reads clearly without a hard break.
+    const showMonth = d.getDate()===1 || i===0;
+    const dayLabel = showMonth ? d.getDate()+' '+d.toLocaleDateString("en-GB",{month:"short"}) : String(d.getDate());
+    html += '<div class="cal-cell'+(isToday?" today":"")+'" '
       + 'ondragover="event.preventDefault();this.classList.add(\'drag-over\')" '
       + 'ondragleave="this.classList.remove(\'drag-over\')" '
       + 'ondrop="handleCalDrop(event,\''+dateStr+'\')">'
-      + '<span class="cal-cell-date">'+cell.dayNum+'</span>';
+      + '<span class="cal-cell-date">'+dayLabel+'</span>';
     postsOnDay.forEach(function(p){ html += calCardHTML(p); });
     html += '</div>';
   });
