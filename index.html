@@ -179,7 +179,7 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 .cal-month-label{font-family:var(--font-display);font-size:19px;flex:1}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:20px}
 .cal-weekday{font-size:10px;font-family:var(--font-mono);color:var(--text3);text-align:center;padding-bottom:4px;letter-spacing:0.06em;text-transform:uppercase}
-.cal-cell{min-height:88px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px;display:flex;flex-direction:column;gap:3px;transition:border-color 0.15s var(--ease),background 0.15s var(--ease)}
+.cal-cell{height:88px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px;display:flex;flex-direction:column;gap:3px;overflow:hidden;transition:border-color 0.15s var(--ease),background 0.15s var(--ease)}
 .cal-cell.other-month{background:var(--bg2);opacity:0.5}
 .cal-cell.today{border-color:var(--accent);border-width:1.5px}
 .cal-cell.drag-over{border-color:var(--accent);background:#C25B3F0C}
@@ -210,7 +210,7 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
   .perf-grid{grid-template-columns:repeat(2,1fr)}
   .editor-form{padding:16px}
   .cal-grid{grid-template-columns:repeat(7,1fr);gap:3px}
-  .cal-cell{min-height:60px;padding:4px}
+  .cal-cell{height:60px;padding:4px}
   .cal-card{font-size:9px}
   .bottom-nav{
     display:flex;position:fixed;bottom:0;left:0;right:0;
@@ -342,6 +342,21 @@ function photoBriefTag(post) {
   if(!brief) return "";
   return '<span class="tag" style="background:#B8860B18;color:#B8860B" title="'+safe(brief)+'">📷 Brief</span>';
 }
+function embargoTag(post) {
+  if(!parseBool(post.embargoed)) return "";
+  return '<span class="tag" style="background:#DC262618;color:#DC2626">🔒 Embargo</span>';
+}
+function toggleEmbargo(postId) {
+  editorState.embargoed=!editorState.embargoed;
+  const el=document.getElementById("embargo-check");
+  if(el)el.innerHTML=renderEmbargoCheck();
+  clearTimeout(autosaveTimer);
+  doSaveNow(postId);
+}
+function renderEmbargoCheck() {
+  const checked=!!editorState.embargoed;
+  return '<div class="status-chip" style="'+(checked?"border-color:#DC2626;background:#DC262608;color:#DC2626":"")+'" onclick="toggleEmbargo(\''+editorState._postId+'\')"><input type="checkbox" style="display:none" '+(checked?"checked":"")+'> 🔒 Under embargo</div>';
+}
 let toastTimer;
 function showToast(msg,isError) {
   const t=document.getElementById("toast");
@@ -448,9 +463,8 @@ async function loadFromSheet() {
       const platform = p.platform || (legacyPlatforms.indexOf("linkedin")!==-1?"linkedin":(legacyPlatforms.indexOf("instagram")!==-1?"instagram":"instagram"));
       const body = p.body || p.body_linkedin || p.body_instagram || p.body_threads || p.notes || "";
       const post_url = p.post_url || p.linkedin_url || "";
-      return Object.assign({},p,{platform:platform,body:body,post_url:post_url,photo_brief:p.photo_brief||""});
+      return Object.assign({},p,{platform:platform,body:body,post_url:post_url,photo_brief:p.photo_brief||"",embargoed:parseBool(p.embargoed)});
     });
-    ensureSuggestedDates();
     ensureVerdicts();
     state.loading=false;state.sheetStatus="connected";state.sheetMessage="Sheet connected";render();
   } catch(err) {
@@ -502,7 +516,7 @@ function blankPost(overrides) {
   return Object.assign({
     id:genId(),title:"",pillar:"p1",status:"idea",platform:"linkedin",body:"",
     published_at:"",post_url:"",views:"",likes:"",comments:"",shares:"",verdict:"",
-    photo_brief:"",suggested_date:"",
+    photo_brief:"",suggested_date:"",embargoed:false,
     created_at:new Date().toISOString(),updated_at:new Date().toISOString(),
   }, overrides||{});
 }
@@ -612,29 +626,11 @@ function computeTrackStats(trackKey) {
   for(let i=1;i<pubs.length;i++){ totalGap += (new Date(pubs[i].published_at)-new Date(pubs[i-1].published_at))/(1000*60*60*24); }
   return {avgDays: totalGap/(pubs.length-1), count:pubs.length};
 }
-function ensureSuggestedDates() {
-  const tracks=["linkedin","instagram"];
-  tracks.forEach(function(trackKey){
-    const target=getTrackTarget(trackKey);
-    const trackReady=state.posts.filter(function(p){return p.status==="ready"&&getCadenceTrack(p)===trackKey;});
-    const withDate=trackReady.filter(function(p){return p.suggested_date;});
-    const withoutDate=trackReady.filter(function(p){return !p.suggested_date;}).sort(function(a,b){return new Date(a.created_at||0)-new Date(b.created_at||0);});
-    if(withoutDate.length===0)return;
-    let baseline;
-    if(withDate.length>0){
-      baseline=withDate.reduce(function(max,p){const d=new Date(p.suggested_date);return d>max?d:max;},new Date(0));
-    } else {
-      const last=computeLastPublished(trackKey);
-      baseline = last ? new Date(last.published_at) : new Date(Date.now()-target*24*60*60*1000);
-    }
-    let cursor=new Date(Math.max(baseline.getTime()+target*24*60*60*1000,Date.now()));
-    withoutDate.forEach(function(p){
-      p.suggested_date=cursor.toISOString();
-      savePost(Object.assign({},p));
-      cursor=new Date(cursor.getTime()+target*24*60*60*1000);
-    });
-  });
-}
+// NOTE (v6.2): auto-assignment of suggested_date on load has been removed.
+// Dates are now set directly from the editor's Scheduled Date field, so a
+// Ready post with no date genuinely means "not scheduled yet" — it sits in
+// the Calendar's unscheduled tray until you set one, rather than silently
+// picking a date for you.
 function updateSuggestedDate(postId,dateStr) {
   const post=state.posts.find(function(p){return p.id===postId;});
   if(!post)return;
@@ -678,15 +674,16 @@ function sortPosts(list) {
 }
 
 // ── LINKEDIN GROWTH CHART ───────────────────────────────────────────
-function renderGrowthChart() {
+function renderGrowthChart(compact) {
   const entries=getGrowthEntries();
   if(entries.length===0){
-    return '<div class="empty growth-empty"><div class="empty-title">No growth data yet</div><div class="empty-sub">Once the weekly LinkedIn connections check starts logging, your growth line appears here.</div></div>';
+    return '<div class="empty growth-empty" style="padding:'+(compact?"8px 0":"20px 0")+'"><div class="empty-title">No growth data yet</div><div class="empty-sub">Once the weekly LinkedIn connections check starts logging, your growth line appears here.</div></div>';
   }
+  const numSize = compact ? 22 : 32;
   if(entries.length===1){
-    return '<div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--font-display);font-size:32px">'+entries[0].connections+'</span><span style="font-size:12px;color:var(--text3)">connections as of '+formatDate(entries[0].date)+'</span></div>';
+    return '<div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--font-display);font-size:'+numSize+'px">'+entries[0].connections+'</span><span style="font-size:12px;color:var(--text3)">connections as of '+formatDate(entries[0].date)+'</span></div>';
   }
-  const W=600,H=160,padL=36,padR=12,padT=12,padB=24;
+  const W=600, H=compact?70:160, padL=36,padR=12,padT=8,padB=compact?8:24;
   const vals=entries.map(function(e){return e.connections;});
   const minV=Math.min.apply(null,vals), maxV=Math.max.apply(null,vals);
   const range=(maxV-minV)||1;
@@ -703,24 +700,27 @@ function renderGrowthChart() {
   let dots="";
   entries.forEach(function(e,i){
     if(i===0||i===entries.length-1||i%Math.ceil(entries.length/6)===0){
-      dots += '<circle cx="'+xAt(i).toFixed(1)+'" cy="'+yAt(e.connections).toFixed(1)+'" r="3" fill="#0A66C2" stroke="#fff" stroke-width="1.5"/>';
+      dots += '<circle cx="'+xAt(i).toFixed(1)+'" cy="'+yAt(e.connections).toFixed(1)+'" r="'+(compact?2:3)+'" fill="#0A66C2" stroke="#fff" stroke-width="1.5"/>';
     }
   });
   let html='<div class="growth-chart-wrap">';
-  html += '<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:10px">';
-  html += '<span style="font-family:var(--font-display);font-size:32px">'+last+'</span>';
+  html += '<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:'+(compact?"4px":"10px")+'">';
+  html += '<span style="font-family:var(--font-display);font-size:'+numSize+'px">'+last+'</span>';
   html += '<span style="font-size:12px;color:var(--text3)">connections</span>';
   html += '<span style="font-size:12px;color:'+changeColor+';font-family:var(--font-mono);margin-left:auto">'+changeStr+' since '+formatDateShort(entries[0].date)+'</span>';
   html += '</div>';
-  html += '<svg class="growth-svg" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">';
+  html += '<svg class="growth-svg" style="height:'+H+'px" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">';
   html += '<defs><linearGradient id="growthFade" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0A66C2" stop-opacity="0.18"/><stop offset="100%" stop-color="#0A66C2" stop-opacity="0"/></linearGradient></defs>';
   html += '<path d="'+areaD+'" fill="url(#growthFade)"/>';
   html += '<path d="'+pathD+'" fill="none" stroke="#0A66C2" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
   html += dots;
   html += '</svg>';
-  html += '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:2px">';
-  html += '<span>'+formatDateShort(entries[0].date)+'</span><span>'+formatDateShort(entries[entries.length-1].date)+'</span>';
-  html += '</div></div>';
+  if(!compact){
+    html += '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:2px">';
+    html += '<span>'+formatDateShort(entries[0].date)+'</span><span>'+formatDateShort(entries[entries.length-1].date)+'</span>';
+    html += '</div>';
+  }
+  html += '</div>';
   return html;
 }
 
@@ -738,6 +738,13 @@ function computeEngagementSnapshot(platformId) {
 function renderEngagementCard(platformId,color,label) {
   const snap=computeEngagementSnapshot(platformId);
   let html='<div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title" style="color:'+color+'">'+label+' Engagement</span></div><div class="card-body">';
+  // LinkedIn only: Connections Growth now lives here, compact, above the
+  // engagement figures — merged in per Oli's request rather than sitting as
+  // its own oversized card.
+  if(platformId==="linkedin"){
+    html += '<div style="margin-bottom:14px">'+renderGrowthChart(true)+'</div>';
+    html += '<hr class="section-divider" style="margin:14px 0">';
+  }
   if(!snap){
     html += '<div class="empty" style="padding:16px 0"><div class="empty-title">No scored posts yet</div></div>';
   } else {
@@ -754,15 +761,13 @@ function renderEngagementCard(platformId,color,label) {
   return html;
 }
 function renderOverview() {
-  ensureSuggestedDates();
   const todayStrip=getTodayStripSummary();
-  const readyWithDates=state.posts.filter(function(p){return p.status==="ready"&&p.suggested_date;});
-  readyWithDates.sort(function(a,b){return new Date(a.suggested_date)-new Date(b.suggested_date);});
 
   let html='<div class="content">';
 
   html += '<div class="card" style="margin-bottom:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
     + '<span style="color:var(--text2);font-size:13px">'+todayStrip.dueThisWeek+' due this week</span>'
+    + '<span style="margin-left:auto;color:var(--text3);font-size:11px;cursor:pointer" onclick="navigate(\'calendar\')">📅 Calendar →</span>'
     + '</div>';
 
   if(shouldShowBackupNudge()){
@@ -772,32 +777,15 @@ function renderOverview() {
       + '</div>';
   }
 
-  // LinkedIn section — growth chart (real connections figure) + LinkedIn-only engagement
+  // LinkedIn section — Connections Growth now lives INSIDE the engagement card
+  // (was its own oversized card; merged per Oli's request to sit it alongside
+  // LinkedIn Engagement, using a compact chart rather than the full-size one).
   html += '<div class="platform-section-label">'+platformBadge("linkedin",18)+'<span>LinkedIn</span></div>';
-  html += '<div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title" style="color:#0A66C2">Connections Growth</span></div><div class="card-body">'+renderGrowthChart()+'</div></div>';
   html += renderEngagementCard("linkedin","#0A66C2","LinkedIn");
 
   // Instagram section — engagement only (no connection-count tracking exists for IG yet)
   html += '<div class="platform-section-label">'+platformBadge("instagram",18)+'<span>Instagram</span></div>';
   html += renderEngagementCard("instagram","#E1306C","Instagram");
-
-  html += '<div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title">Upcoming</span><button class="btn btn-ghost btn-sm" onclick="navigate(\'calendar\')">📅 Calendar →</button></div><div class="card-body">';
-  if(readyWithDates.length===0){
-    html += '<div class="empty" style="padding:24px 0"><div class="empty-title">Nothing scheduled yet</div><div class="empty-sub">Mark a post Ready and it will get a suggested date here.</div></div>';
-  } else {
-    readyWithDates.forEach(function(p){
-      const trackKey=getCadenceTrack(p);
-      const days=daysSince(p.suggested_date)!==null ? Math.abs(Math.floor((new Date(p.suggested_date).getTime()-Date.now())/(1000*60*60*24))) : null;
-      const dayLabel = new Date(p.suggested_date).getTime() < Date.now() ? "due now" : (days+" day"+(days!==1?"s":"")+" away");
-      html += '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);flex-wrap:wrap">'
-        + '<input type="date" class="form-input" style="width:150px;padding:6px 8px;font-size:12px" value="'+p.suggested_date.slice(0,10)+'" onchange="updateSuggestedDate(\''+p.id+'\',this.value)">'
-        + '<span class="tag" style="background:'+TRACK_COLORS[trackKey]+'18;color:'+TRACK_COLORS[trackKey]+'">'+TRACK_LABELS[trackKey]+'</span>'
-        + '<span style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">'+dayLabel+'</span>'
-        + '<span style="flex:1;font-size:13px;cursor:pointer;min-width:120px" onclick="navigate(\'editor\',\''+p.id+'\')">'+safe(p.title)+'</span>'
-        + '</div>';
-    });
-  }
-  html += '</div></div>';
 
   const posted=state.posts.filter(function(p){return p.status==="published"&&p.published_at&&!isGrowthRow(p);}).sort(function(a,b){return new Date(b.published_at)-new Date(a.published_at);});
   html += '<div class="card"><div class="card-header"><span class="card-title">Recently Posted</span><button class="btn btn-ghost btn-sm" onclick="state.filterStatuses=[\'published\'];navigate(\'library\')">View all →</button></div><div class="card-body">';
@@ -871,7 +859,7 @@ function renderLibrary() {
       const pl=getPillar(p.pillar);
       html += '<div class="post-card" onclick="navigate(\'editor\',\''+p.id+'\')"><div class="post-card-pillar-bar" style="background:'+(pl?pl.color:"var(--border)")+'"></div><div class="post-card-title">'+(safe(p.title)||'<em style="color:var(--text3);font-weight:400">Untitled post</em>')+'</div>'
         + (p.body?'<div class="post-card-body">'+safe(p.body)+'</div>':"")
-        + '<div class="post-card-meta">'+pillarTag(p.pillar)+statusTag(p.status)+platformBadge(p.platform,16)+photoBriefTag(p)
+        + '<div class="post-card-meta">'+pillarTag(p.pillar)+statusTag(p.status)+platformBadge(p.platform,16)+photoBriefTag(p)+embargoTag(p)
         + (p.published_at?'<span class="tag" style="background:#6B728018;color:#6B7280;margin-left:auto">'+formatDate(p.published_at)+'</span>':'<span class="post-card-date">'+formatDate(p.updated_at)+'</span>')
         + '</div></div>';
     });
@@ -986,7 +974,10 @@ function renderCalendar() {
       + 'ondragleave="this.classList.remove(\'drag-over\')" '
       + 'ondrop="handleCalDrop(event,\''+dateStr+'\')">'
       + '<span class="cal-cell-date">'+dayLabel+'</span>';
-    postsOnDay.forEach(function(p){ html += calCardHTML(p); });
+    postsOnDay.slice(0,2).forEach(function(p){ html += calCardHTML(p); });
+    if(postsOnDay.length>2){
+      html += '<span style="font-size:9px;color:var(--text3);font-family:var(--font-mono);padding-left:2px">+'+(postsOnDay.length-2)+' more</span>';
+    }
     html += '</div>';
   });
   html += '</div>';
@@ -1021,7 +1012,7 @@ function initEditor(post) {
     platform:post.platform||"linkedin",body:post.body||"",
     published_at:post.published_at||null,post_url:post.post_url||"",
     views:post.views||"",likes:post.likes||"",comments:post.comments||"",shares:post.shares||"",verdict:post.verdict||"",
-    photo_brief:post.photo_brief||"",suggested_date:post.suggested_date||"",
+    photo_brief:post.photo_brief||"",suggested_date:post.suggested_date||"",embargoed:parseBool(post.embargoed),
   };
 }
 function openUrlPrompt() {
@@ -1084,6 +1075,10 @@ function handlePlatformChange(val) {
   scheduleAutosave(editorState._postId);
   render();
 }
+function handleSuggestedDateChange(postId,dateStr) {
+  editorState.suggested_date = dateStr ? new Date(dateStr+"T09:00:00").toISOString() : "";
+  scheduleAutosave(postId);
+}
 function renderStatusChips() {
   return STATUSES.map(function(s){
     const active=editorState.status===s.id;
@@ -1139,6 +1134,8 @@ function renderEditor(post) {
   PLATFORMS_DEF.forEach(function(p){ html += '<option value="'+p.id+'" '+(e.platform===p.id?"selected":"")+'>'+p.label+'</option>'; });
   html += '</select></div></div>'
     + '<div class="form-group"><label class="form-label">Status</label><div class="status-chip-row" id="status-chips">'+renderStatusChips()+'</div></div>'
+    + '<div class="form-group"><label class="form-label">Embargo</label><div id="embargo-check">'+renderEmbargoCheck()+'</div></div>'
+    + '<div class="form-group"><label class="form-label">Scheduled Date <span style="font-weight:400;text-transform:none;letter-spacing:normal">— when this should go out. Leave blank to sit unscheduled on the Calendar.</span></label><input type="date" class="form-input" value="'+(e.suggested_date?e.suggested_date.slice(0,10):"")+'" onchange="handleSuggestedDateChange(\''+post.id+'\',this.value)"></div>'
     + '<div class="form-group"><label class="form-label">Photo Brief</label><textarea class="form-input form-textarea short" oninput="editorState.photo_brief=this.value;scheduleAutosave(\''+post.id+'\')" placeholder="What photos does this post need before it goes to Buffer? e.g. \'wide shot of the set, plus a close-up of the FatJoe branding\'">'+safe(e.photo_brief)+'</textarea></div>'
     + '<div class="form-group"><label class="form-label">Body Text</label>'
     + '<div style="display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap;margin-bottom:6px">'
@@ -1160,7 +1157,7 @@ function renderEditor(post) {
 }
 function renderSidebar() {
   const counts=PILLARS.reduce(function(acc,p){acc[p.id]=state.posts.filter(function(x){return x.pillar===p.id&&!isGrowthRow(x);}).length;return acc;},{});
-  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v6.0</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
+  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v6.2</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
   [{id:"overview",label:"Overview"},{id:"library",label:"Post Library"},{id:"calendar",label:"Calendar"}].forEach(function(item){
     html += '<button class="nav-item '+(state.view===item.id?"active":"")+'" onclick="navigate(\''+item.id+'\')">'+item.label+'</button>';
   });
