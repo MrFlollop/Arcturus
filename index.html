@@ -99,6 +99,10 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 .post-card-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .tag{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:500;font-family:var(--font-mono);letter-spacing:0.02em}
 .post-card-date{margin-left:auto;font-size:10px;color:var(--text3);font-family:var(--font-mono)}
+.post-card-embargoed{background:var(--bg2);opacity:0.82}
+.post-card-embargoed:hover{opacity:1}
+.embargo-section-divider{display:flex;align-items:center;gap:10px;margin:22px 0 12px;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#DC2626;font-family:var(--font-mono)}
+.embargo-section-divider::after{content:"";flex:1;height:1px;background:#DC262633}
 .pbadge{display:inline-block;flex-shrink:0}
 .status-chip-row{display:flex;gap:8px;flex-wrap:wrap}
 .status-chip{padding:10px 16px;border-radius:20px;font-size:13px;font-family:var(--font-body);font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);transition:all 0.15s var(--ease);min-height:40px;display:flex;align-items:center;gap:6px}
@@ -808,6 +812,15 @@ function renderOverview() {
 }
 
 // ── LIBRARY ───────────────────────────────────────────────────────
+function cardDisplayDate(p) {
+  // Scheduled date is more relevant than "last edited" once a post is Ready
+  // to go — that's the date that actually matters at this stage. Published
+  // posts keep showing when they went out. Everything else (Idea/Draft) has
+  // no scheduled date yet, so last-edited remains the only honest option.
+  if(p.status==="published"&&p.published_at) return {date:p.published_at,style:"background:#6B728018;color:#6B7280;margin-left:auto"};
+  if(p.status==="ready"&&p.suggested_date) return {date:p.suggested_date,style:"background:#10B98118;color:#10B981;margin-left:auto"};
+  return {date:p.updated_at,style:null};
+}
 function renderLibrary() {
   let filtered=state.posts.filter(function(p){
     if(isGrowthRow(p)) return false;
@@ -821,6 +834,12 @@ function renderLibrary() {
     return true;
   });
   filtered=sortPosts(filtered);
+  // Embargoed Ready posts sink to their own group at the bottom of the grid,
+  // regardless of sort order — the point is keeping "actually postable now"
+  // visually separate from "ready but can't go out yet", which otherwise get
+  // lost in amongst each other when several posts are embargoed at once.
+  const mainPosts=filtered.filter(function(p){ return !(p.status==="ready"&&parseBool(p.embargoed)); });
+  const embargoedReady=filtered.filter(function(p){ return p.status==="ready"&&parseBool(p.embargoed); });
   let html = '<div class="content">'
     + '<div class="filters">'
     + '<input class="form-input" id="lib-search-input" style="width:200px;padding:6px 12px;font-size:12px;border-radius:20px" placeholder="Search posts…" value="'+safe(state.search)+'" oninput="const _p=this.selectionStart;state.search=this.value;renderMain();const _e=document.getElementById(\'lib-search-input\');if(_e){_e.focus();_e.setSelectionRange(_p,_p);}">';
@@ -854,16 +873,29 @@ function renderLibrary() {
   if(filtered.length===0){
     html += '<div class="empty"><div class="empty-title">'+(state.posts.length===0?"Library is empty":"No posts match")+'</div><div class="empty-sub">'+(state.posts.length===0?"Add your first post idea.":"Try adjusting your filters.")+'</div>'+(state.posts.length===0?'<button class="btn btn-primary" style="margin-top:8px" onclick="state.showNewPost=true;render()">+ New Post</button>':"")+'</div>';
   } else {
-    html += '<div class="post-grid">';
-    filtered.forEach(function(p){
+    function postCardHTML(p) {
       const pl=getPillar(p.pillar);
-      html += '<div class="post-card" onclick="navigate(\'editor\',\''+p.id+'\')"><div class="post-card-pillar-bar" style="background:'+(pl?pl.color:"var(--border)")+'"></div><div class="post-card-title">'+(safe(p.title)||'<em style="color:var(--text3);font-weight:400">Untitled post</em>')+'</div>'
+      const dd=cardDisplayDate(p);
+      const embargoed=parseBool(p.embargoed);
+      return '<div class="post-card'+(embargoed?" post-card-embargoed":"")+'" onclick="navigate(\'editor\',\''+p.id+'\')"><div class="post-card-pillar-bar" style="background:'+(pl?pl.color:"var(--border)")+'"></div><div class="post-card-title">'+(safe(p.title)||'<em style="color:var(--text3);font-weight:400">Untitled post</em>')+'</div>'
         + (p.body?'<div class="post-card-body">'+safe(p.body)+'</div>':"")
         + '<div class="post-card-meta">'+pillarTag(p.pillar)+statusTag(p.status)+platformBadge(p.platform,16)+photoBriefTag(p)+embargoTag(p)
-        + (p.published_at?'<span class="tag" style="background:#6B728018;color:#6B7280;margin-left:auto">'+formatDate(p.published_at)+'</span>':'<span class="post-card-date">'+formatDate(p.updated_at)+'</span>')
+        + (dd.style?'<span class="tag" style="'+dd.style+'">'+formatDate(dd.date)+'</span>':'<span class="post-card-date">'+formatDate(dd.date)+'</span>')
         + '</div></div>';
-    });
-    html += '</div>';
+    }
+    if(mainPosts.length>0){
+      html += '<div class="post-grid">';
+      mainPosts.forEach(function(p){ html += postCardHTML(p); });
+      html += '</div>';
+    } else {
+      html += '<div class="empty"><div class="empty-title">No posts match</div><div class="empty-sub">Everything here is embargoed — see below.</div></div>';
+    }
+    if(embargoedReady.length>0){
+      html += '<div class="embargo-section-divider"><span>🔒 Embargoed — ready, but not cleared to post</span></div>';
+      html += '<div class="post-grid">';
+      embargoedReady.forEach(function(p){ html += postCardHTML(p); });
+      html += '</div>';
+    }
   }
   html += '</div>';
   return html;
@@ -882,12 +914,21 @@ function surpriseMe() {
 }
 
 // ── CALENDAR ─────────────────────────────────────────────────────
-// Shows only status=ready posts, placed on suggested_date. Unscheduled ready
-// posts sit in a tray above the grid and can be dragged onto a day — dragging
-// ONLY ever updates suggested_date, never status or any other field. No
-// status-change controls exist anywhere in this view by design.
-function getCalendarReadyPosts() {
-  return state.posts.filter(function(p){ return p.status==="ready" && !isGrowthRow(p); });
+// Shows status=ready posts (placed on suggested_date, draggable to
+// reschedule) AND status=published posts that have a suggested_date, so the
+// grid also shows actual posting cadence, not just what's upcoming. Dragging
+// ONLY ever updates suggested_date, never status or any other field — that
+// only ever applies to Ready cards; published cards are read-only history.
+function getCalendarGridPosts() {
+  return state.posts.filter(function(p){
+    if(isGrowthRow(p)) return false;
+    if(p.status==="ready") return true;
+    if(p.status==="published" && p.suggested_date) return true;
+    return false;
+  });
+}
+function getUnscheduledReadyPosts() {
+  return state.posts.filter(function(p){ return p.status==="ready" && !isGrowthRow(p) && !p.suggested_date; });
 }
 // Rolling 4-week window anchored to "this week's Monday", shifted by
 // state.calWeekOffset weeks. Replaces the old month grid specifically so a
@@ -911,18 +952,31 @@ function calShiftWeek(delta) {
   state.calWeekOffset += delta;
   renderMain();
 }
-function calCardHTML(post) {
+// Colour state per card: past-dated + published = confirms cadence (green).
+// Past-dated + still Ready = missed, needs a new date (dark red, deliberately
+// louder than the normal platform colour so it reads as needing action).
+// Anything not yet in the past keeps the normal platform colour regardless
+// of status, since "overdue" only makes sense in hindsight.
+function calCardColor(post) {
+  const isPast = post.suggested_date && new Date(post.suggested_date).getTime() < new Date().setHours(0,0,0,0);
+  if(isPast && post.status==="published") return {bg:"#10B98122",fg:"#0D7A57",border:"#10B98155"};
+  if(isPast && post.status==="ready") return {bg:"#7F1D1D22",fg:"#7F1D1D",border:"#7F1D1D66"};
   const trackKey=getCadenceTrack(post);
-  const color=TRACK_COLORS[trackKey];
-  return '<div class="cal-card" draggable="true" style="background:'+color+'18;color:'+color+'" '
-    + 'ondragstart="draggedPostId=\''+post.id+'\';event.dataTransfer.effectAllowed=\'move\'" '
+  const c=TRACK_COLORS[trackKey];
+  return {bg:c+"18",fg:c,border:null};
+}
+function calCardHTML(post) {
+  const c=calCardColor(post);
+  const draggable = post.status==="ready";
+  const style = "background:"+c.bg+";color:"+c.fg+(c.border?";border:1px solid "+c.border:"")+(draggable?"":";cursor:pointer");
+  return '<div class="cal-card" '+(draggable?'draggable="true"':'')+' style="'+style+'" '
+    + (draggable?'ondragstart="draggedPostId=\''+post.id+'\';event.dataTransfer.effectAllowed=\'move\'" ':'')
     + 'onclick="event.stopPropagation();navigate(\'editor\',\''+post.id+'\')" title="'+safe(post.title)+'">'
     + platformBadge(post.platform,10)+'<span style="overflow:hidden;text-overflow:ellipsis">'+safe(post.title||"Untitled")+'</span></div>';
 }
 function renderCalendar() {
-  const readyPosts=getCalendarReadyPosts();
-  const scheduled=readyPosts.filter(function(p){return p.suggested_date;});
-  const unscheduled=readyPosts.filter(function(p){return !p.suggested_date;});
+  const scheduled=getCalendarGridPosts();
+  const unscheduled=getUnscheduledReadyPosts();
 
   let html='<div class="content">';
 
@@ -1239,6 +1293,19 @@ function render() {
     +(state.showMobileMenu?renderMobileMenu():"");
   renderMain();
 }
+// ── KEYBOARD SHORTCUTS ──────────────────────────────────────────────
+// 1/2/3 jump to Overview/Library/Calendar. Ignored while typing in any
+// field, or while a modal is open, so it never fires mid-sentence in the
+// editor or steals a "1"/"2"/"3" you're actually typing into a post.
+document.addEventListener("keydown", function(e) {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const tag = (e.target.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable) return;
+  if (state.showNewPost || state.showUrlModal || state.showMobileMenu) return;
+  if (e.key === "1") { navigate("overview"); }
+  else if (e.key === "2") { navigate("library"); }
+  else if (e.key === "3") { navigate("calendar"); }
+});
 render();
 loadFromSheet();
 </script>
