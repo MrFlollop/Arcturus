@@ -252,6 +252,7 @@ function getTrackTarget(trackKey) { return TRACK_TARGET_DAYS[trackKey] || 7; }
 const FEEDBACK_TITLE = "Arcturus Feedback & Ideas";
 const FEEDBACK_POST_ID = "arcturus-feedback-post";
 const GROWTH_ID_PREFIX = "growth_";
+const IG_GROWTH_ID_PREFIX = "ig_growth_";
 const PILLARS = [
   {id:"p1",label:"Running a Creative Agency",short:"Agency",color:"#C25B3F"},
   {id:"p2",label:"Industry Perspective",short:"Industry",color:"#4A7C6F"},
@@ -438,11 +439,17 @@ function verdictBadge(v) {
   const c=colors[v]||"var(--text3)";
   return '<span class="tag" style="background:'+c+'18;color:'+c+'">'+v+'</span>';
 }
-function isGrowthRow(post) { return post.id && post.id.indexOf(GROWTH_ID_PREFIX)===0; }
+function isGrowthRow(post) { return post.id && (post.id.indexOf(GROWTH_ID_PREFIX)===0 || post.id.indexOf(IG_GROWTH_ID_PREFIX)===0); }
 function getGrowthEntries() {
-  return state.posts.filter(isGrowthRow)
+  return state.posts.filter(function(p){ return p.id && p.id.indexOf(GROWTH_ID_PREFIX)===0; })
     .map(function(p){ return {date:p.updated_at, connections:parseFloat(p.connections)}; })
     .filter(function(g){ return g.date && !isNaN(g.connections); })
+    .sort(function(a,b){ return new Date(a.date)-new Date(b.date); });
+}
+function getIgGrowthEntries() {
+  return state.posts.filter(function(p){ return p.id && p.id.indexOf(IG_GROWTH_ID_PREFIX)===0; })
+    .map(function(p){ return {date:p.updated_at, followers:parseFloat(p.followers)}; })
+    .filter(function(g){ return g.date && !isNaN(g.followers); })
     .sort(function(a,b){ return new Date(a.date)-new Date(b.date); });
 }
 // NOTE: verdicts are computed SEPARATELY per platform — each platform's baseline
@@ -472,7 +479,7 @@ async function loadFromSheet() {
   try {
     const posts=await sheetRead();
     state.posts=posts.map(function(p){
-      if (p.id && p.id.indexOf(GROWTH_ID_PREFIX)===0) return p;
+      if (p.id && (p.id.indexOf(GROWTH_ID_PREFIX)===0 || p.id.indexOf(IG_GROWTH_ID_PREFIX)===0)) return p;
       const legacyPlatforms=parsePlatformsLegacy(p.platforms);
       const platform = p.platform || (legacyPlatforms.indexOf("linkedin")!==-1?"linkedin":(legacyPlatforms.indexOf("instagram")!==-1?"instagram":"instagram"));
       const body = p.body || p.body_linkedin || p.body_instagram || p.body_threads || p.notes || "";
@@ -690,46 +697,46 @@ function sortPosts(list) {
   return arr;
 }
 
-// ── LINKEDIN GROWTH CHART ───────────────────────────────────────────
-function renderGrowthChart(compact) {
-  const entries=getGrowthEntries();
+// ── GROWTH CHART (shared renderer for LinkedIn connections + Instagram followers) ──
+function renderGrowthChartGeneric(entries, opts) {
+  const valueKey=opts.valueKey, color=opts.color, unitLabel=opts.unitLabel, gradId=opts.gradId, compact=opts.compact;
   if(entries.length===0){
-    return '<div class="empty growth-empty" style="padding:'+(compact?"8px 0":"20px 0")+'"><div class="empty-title">No growth data yet</div><div class="empty-sub">Once the weekly LinkedIn connections check starts logging, your growth line appears here.</div></div>';
+    return '<div class="empty growth-empty" style="padding:'+(compact?"8px 0":"20px 0")+'"><div class="empty-title">No growth data yet</div><div class="empty-sub">Once the weekly '+opts.sourceLabel+' check starts logging, your growth line appears here.</div></div>';
   }
   const numSize = compact ? 22 : 32;
   if(entries.length===1){
-    return '<div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--font-display);font-size:'+numSize+'px">'+entries[0].connections+'</span><span style="font-size:12px;color:var(--text3)">connections as of '+formatDate(entries[0].date)+'</span></div>';
+    return '<div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--font-display);font-size:'+numSize+'px">'+entries[0][valueKey]+'</span><span style="font-size:12px;color:var(--text3)">'+unitLabel+' as of '+formatDate(entries[0].date)+'</span></div>';
   }
   const W=600, H=compact?70:160, padL=36,padR=12,padT=8,padB=compact?8:24;
-  const vals=entries.map(function(e){return e.connections;});
+  const vals=entries.map(function(e){return e[valueKey];});
   const minV=Math.min.apply(null,vals), maxV=Math.max.apply(null,vals);
   const range=(maxV-minV)||1;
   const chartW=W-padL-padR, chartH=H-padT-padB;
   function xAt(i){ return padL + (i/(entries.length-1))*chartW; }
   function yAt(v){ return padT + chartH - ((v-minV)/range)*chartH; }
   let pathD="";
-  entries.forEach(function(e,i){ pathD += (i===0?"M":"L") + xAt(i).toFixed(1) + " " + yAt(e.connections).toFixed(1) + " "; });
+  entries.forEach(function(e,i){ pathD += (i===0?"M":"L") + xAt(i).toFixed(1) + " " + yAt(e[valueKey]).toFixed(1) + " "; });
   const areaD = pathD + "L"+xAt(entries.length-1).toFixed(1)+" "+(padT+chartH)+" L"+xAt(0).toFixed(1)+" "+(padT+chartH)+" Z";
-  const first=entries[0].connections, last=entries[entries.length-1].connections;
+  const first=entries[0][valueKey], last=entries[entries.length-1][valueKey];
   const change=last-first;
   const changeStr=(change>=0?"+":"")+change;
   const changeColor=change>0?"#10B981":change<0?"#DC2626":"var(--text3)";
   let dots="";
   entries.forEach(function(e,i){
     if(i===0||i===entries.length-1||i%Math.ceil(entries.length/6)===0){
-      dots += '<circle cx="'+xAt(i).toFixed(1)+'" cy="'+yAt(e.connections).toFixed(1)+'" r="'+(compact?2:3)+'" fill="#0A66C2" stroke="#fff" stroke-width="1.5"/>';
+      dots += '<circle cx="'+xAt(i).toFixed(1)+'" cy="'+yAt(e[valueKey]).toFixed(1)+'" r="'+(compact?2:3)+'" fill="'+color+'" stroke="#fff" stroke-width="1.5"/>';
     }
   });
   let html='<div class="growth-chart-wrap">';
   html += '<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:'+(compact?"4px":"10px")+'">';
   html += '<span style="font-family:var(--font-display);font-size:'+numSize+'px">'+last+'</span>';
-  html += '<span style="font-size:12px;color:var(--text3)">connections</span>';
+  html += '<span style="font-size:12px;color:var(--text3)">'+unitLabel+'</span>';
   html += '<span style="font-size:12px;color:'+changeColor+';font-family:var(--font-mono);margin-left:auto">'+changeStr+' since '+formatDateShort(entries[0].date)+'</span>';
   html += '</div>';
   html += '<svg class="growth-svg" style="height:'+H+'px" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">';
-  html += '<defs><linearGradient id="growthFade" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0A66C2" stop-opacity="0.18"/><stop offset="100%" stop-color="#0A66C2" stop-opacity="0"/></linearGradient></defs>';
-  html += '<path d="'+areaD+'" fill="url(#growthFade)"/>';
-  html += '<path d="'+pathD+'" fill="none" stroke="#0A66C2" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+  html += '<defs><linearGradient id="'+gradId+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+color+'" stop-opacity="0.18"/><stop offset="100%" stop-color="'+color+'" stop-opacity="0"/></linearGradient></defs>';
+  html += '<path d="'+areaD+'" fill="url(#'+gradId+')"/>';
+  html += '<path d="'+pathD+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
   html += dots;
   html += '</svg>';
   if(!compact){
@@ -739,6 +746,12 @@ function renderGrowthChart(compact) {
   }
   html += '</div>';
   return html;
+}
+function renderGrowthChart(compact) {
+  return renderGrowthChartGeneric(getGrowthEntries(), {valueKey:"connections",color:"#0A66C2",unitLabel:"connections",gradId:"growthFadeLI",sourceLabel:"LinkedIn connections",compact:compact});
+}
+function renderIgGrowthChart(compact) {
+  return renderGrowthChartGeneric(getIgGrowthEntries(), {valueKey:"followers",color:"#E1306C",unitLabel:"followers",gradId:"growthFadeIG",sourceLabel:"Instagram followers",compact:compact});
 }
 
 // ── OVERVIEW (merged Dashboard + Metrics) ──────────────────────────
@@ -755,11 +768,13 @@ function computeEngagementSnapshot(platformId) {
 function renderEngagementCard(platformId,color,label) {
   const snap=computeEngagementSnapshot(platformId);
   let html='<div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title" style="color:'+color+'">'+label+' Engagement</span></div><div class="card-body">';
-  // LinkedIn only: Connections Growth now lives here, compact, above the
-  // engagement figures — merged in per Oli's request rather than sitting as
-  // its own oversized card.
+  // LinkedIn: connections growth, Instagram: follower growth — both compact,
+  // above the engagement figures, same merged-card pattern for both platforms.
   if(platformId==="linkedin"){
     html += '<div style="margin-bottom:14px">'+renderGrowthChart(true)+'</div>';
+    html += '<hr class="section-divider" style="margin:14px 0">';
+  } else if(platformId==="instagram"){
+    html += '<div style="margin-bottom:14px">'+renderIgGrowthChart(true)+'</div>';
     html += '<hr class="section-divider" style="margin:14px 0">';
   }
   if(!snap){
@@ -1226,7 +1241,7 @@ function renderEditor(post) {
 }
 function renderSidebar() {
   const counts=PILLARS.reduce(function(acc,p){acc[p.id]=state.posts.filter(function(x){return x.pillar===p.id&&!isGrowthRow(x);}).length;return acc;},{});
-  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v6.4</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
+  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v6.5</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
   [{id:"overview",label:"Overview"},{id:"library",label:"Post Library"},{id:"calendar",label:"Calendar"}].forEach(function(item){
     html += '<button class="nav-item '+(state.view===item.id?"active":"")+'" onclick="navigate(\''+item.id+'\')">'+item.label+'</button>';
   });
