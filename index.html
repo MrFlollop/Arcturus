@@ -285,7 +285,7 @@ function platformBadge(platformId, size) {
 
 let state = {
   posts:[],view:"overview",editingId:null,showNewPost:false,showMobileMenu:false,showUrlModal:false,
-  filterPillar:null,filterPlatform:null,filterStatuses:[],search:"",sortBy:"updated_desc",
+  filterPillar:null,filterPlatform:null,filterStatuses:[],search:"",
   loading:true,sheetStatus:"loading",sheetMessage:"Connecting…",pendingSync:[],
   calWeekOffset:0,
 };
@@ -349,6 +349,16 @@ function photoBriefTag(post) {
 function embargoTag(post) {
   if(!parseBool(post.embargoed)) return "";
   return '<span class="tag" style="background:#DC262618;color:#DC2626">🔒 Embargo</span>';
+}
+// A post is "overdue" only when it's still Ready (never went out) and its
+// scheduled date has already passed. Published posts are never overdue —
+// they're done. Used identically in Library and Calendar so the meaning of
+// the badge doesn't have to be relearned per view.
+function isOverdue(post) {
+  return post.status==="ready" && post.suggested_date && new Date(post.suggested_date).getTime() < new Date().setHours(0,0,0,0);
+}
+function overdueBadge() {
+  return '<span class="tag" style="background:#7F1D1D18;color:#7F1D1D" title="Scheduled date has passed — reschedule or publish">⚠️ Overdue</span>';
 }
 function toggleEmbargo(postId) {
   editorState.embargoed=!editorState.embargoed;
@@ -661,19 +671,22 @@ function dismissBackupNudge() {
   const el=document.getElementById("backup-nudge");
   if(el)el.remove();
 }
+// Sort options were removed (Pillar/Status already handled by filter chips,
+// Title A-Z and Last Edited/Oldest had no real use case once search exists).
+// Fixed order now: scheduled date ascending — soonest-to-post first, since
+// that's the one thing actually worth scanning the Library in order of.
+// Anything without a suggested_date (Idea/Draft/unscheduled Ready) has no
+// meaningful position in that order, so those sink to the end, sorted by
+// most-recently-edited among themselves so newer work still surfaces first.
 function sortPosts(list) {
   const arr=list.slice();
-  if(state.sortBy==="updated_desc"){
-    arr.sort(function(a,b){return new Date(b.updated_at||b.created_at||0)-new Date(a.updated_at||a.created_at||0);});
-  } else if(state.sortBy==="updated_asc"){
-    arr.sort(function(a,b){return new Date(a.updated_at||a.created_at||0)-new Date(b.updated_at||b.created_at||0);});
-  } else if(state.sortBy==="title_asc"){
-    arr.sort(function(a,b){return (a.title||"").localeCompare(b.title||"");});
-  } else if(state.sortBy==="status"){
-    arr.sort(function(a,b){return STATUSES.findIndex(function(s){return s.id===a.status;})-STATUSES.findIndex(function(s){return s.id===b.status;});});
-  } else if(state.sortBy==="pillar"){
-    arr.sort(function(a,b){return PILLARS.findIndex(function(p){return p.id===a.pillar;})-PILLARS.findIndex(function(p){return p.id===b.pillar;});});
-  }
+  arr.sort(function(a,b){
+    const aHas=!!a.suggested_date, bHas=!!b.suggested_date;
+    if(aHas && bHas) return new Date(a.suggested_date)-new Date(b.suggested_date);
+    if(aHas && !bHas) return -1;
+    if(!aHas && bHas) return 1;
+    return new Date(b.updated_at||b.created_at||0)-new Date(a.updated_at||a.created_at||0);
+  });
   return arr;
 }
 
@@ -817,8 +830,13 @@ function cardDisplayDate(p) {
   // to go — that's the date that actually matters at this stage. Published
   // posts keep showing when they went out. Everything else (Idea/Draft) has
   // no scheduled date yet, so last-edited remains the only honest option.
+  // An overdue Ready post gets the same dark-red treatment as its badge,
+  // rather than the ordinary green "on schedule" tag.
   if(p.status==="published"&&p.published_at) return {date:p.published_at,style:"background:#6B728018;color:#6B7280;margin-left:auto"};
-  if(p.status==="ready"&&p.suggested_date) return {date:p.suggested_date,style:"background:#10B98118;color:#10B981;margin-left:auto"};
+  if(p.status==="ready"&&p.suggested_date){
+    if(isOverdue(p)) return {date:p.suggested_date,style:"background:#7F1D1D18;color:#7F1D1D;margin-left:auto"};
+    return {date:p.suggested_date,style:"background:#10B98118;color:#10B981;margin-left:auto"};
+  }
   return {date:p.updated_at,style:null};
 }
 function renderLibrary() {
@@ -852,12 +870,7 @@ function renderLibrary() {
     const active=state.filterPlatform===p.id;
     html += '<button class="platform-toggle-btn '+(active?"active":"")+'" onclick="state.filterPlatform=state.filterPlatform===\''+p.id+'\'?null:\''+p.id+'\';renderMain()">'+platformBadge(p.id,14)+'</button>';
   });
-  html += '</div>';
-  html += '<select class="sort-select" onchange="state.sortBy=this.value;renderMain()">';
-  [["updated_desc","Last edited"],["updated_asc","Oldest first"],["title_asc","Title A–Z"],["status","Status"],["pillar","Pillar"]].forEach(function(opt){
-    html += '<option value="'+opt[0]+'" '+(state.sortBy===opt[0]?"selected":"")+'>'+opt[1]+'</option>';
-  });
-  html += '</select>'
+  html += '</div>'
     + '<span style="margin-left:auto;font-size:12px;color:var(--text3);font-family:var(--font-mono)">'+filtered.length+' post'+(filtered.length!==1?"s":"")+'</span></div>';
   // Multi-select status filter — clicking toggles a status in/out of state.filterStatuses.
   // Empty array means "show all statuses" (equivalent to the old null default).
@@ -879,7 +892,7 @@ function renderLibrary() {
       const embargoed=parseBool(p.embargoed);
       return '<div class="post-card'+(embargoed?" post-card-embargoed":"")+'" onclick="navigate(\'editor\',\''+p.id+'\')"><div class="post-card-pillar-bar" style="background:'+(pl?pl.color:"var(--border)")+'"></div><div class="post-card-title">'+(safe(p.title)||'<em style="color:var(--text3);font-weight:400">Untitled post</em>')+'</div>'
         + (p.body?'<div class="post-card-body">'+safe(p.body)+'</div>':"")
-        + '<div class="post-card-meta">'+pillarTag(p.pillar)+statusTag(p.status)+platformBadge(p.platform,16)+photoBriefTag(p)+embargoTag(p)
+        + '<div class="post-card-meta">'+pillarTag(p.pillar)+statusTag(p.status)+platformBadge(p.platform,16)+photoBriefTag(p)+embargoTag(p)+(isOverdue(p)?overdueBadge():"")
         + (dd.style?'<span class="tag" style="'+dd.style+'">'+formatDate(dd.date)+'</span>':'<span class="post-card-date">'+formatDate(dd.date)+'</span>')
         + '</div></div>';
     }
@@ -944,7 +957,7 @@ function calWindowStart() {
   return start;
 }
 function calRangeLabel(start) {
-  const end=new Date(start); end.setDate(start.getDate()+27);
+  const end=new Date(start); end.setDate(start.getDate()+55);
   const fmt=function(d){ return d.toLocaleDateString("en-GB",{day:"numeric",month:"short"}); };
   return fmt(start)+' – '+fmt(end)+', '+end.getFullYear();
 }
@@ -968,11 +981,13 @@ function calCardColor(post) {
 function calCardHTML(post) {
   const c=calCardColor(post);
   const draggable = post.status==="ready";
+  const overdue = isOverdue(post);
   const style = "background:"+c.bg+";color:"+c.fg+(c.border?";border:1px solid "+c.border:"")+(draggable?"":";cursor:pointer");
   return '<div class="cal-card" '+(draggable?'draggable="true"':'')+' style="'+style+'" '
     + (draggable?'ondragstart="draggedPostId=\''+post.id+'\';event.dataTransfer.effectAllowed=\'move\'" ':'')
-    + 'onclick="event.stopPropagation();navigate(\'editor\',\''+post.id+'\')" title="'+safe(post.title)+'">'
-    + platformBadge(post.platform,10)+'<span style="overflow:hidden;text-overflow:ellipsis">'+safe(post.title||"Untitled")+'</span></div>';
+    + 'onclick="event.stopPropagation();navigate(\'editor\',\''+post.id+'\')" title="'+(overdue?"Overdue — ":"")+safe(post.title)+'">'
+    + (overdue?'<span style="flex-shrink:0">⚠️</span>':platformBadge(post.platform,10))
+    + '<span style="overflow:hidden;text-overflow:ellipsis">'+safe(post.title||"Untitled")+'</span></div>';
 }
 function renderCalendar() {
   const scheduled=getCalendarGridPosts();
@@ -1005,10 +1020,10 @@ function renderCalendar() {
     + '<button class="btn btn-ghost btn-sm" onclick="state.calWeekOffset=0;renderMain()">Today</button>'
     + '</div>';
 
-  // Grid — 28 contiguous days (4 weeks) starting from the window start, no month breaks
+  // Grid — 56 contiguous days (8 weeks) starting from the window start, no month breaks
   const todayKey=new Date().toDateString();
   const cells=[];
-  for(let i=0;i<28;i++){
+  for(let i=0;i<56;i++){
     const d=new Date(start); d.setDate(start.getDate()+i);
     cells.push(d);
   }
@@ -1211,7 +1226,7 @@ function renderEditor(post) {
 }
 function renderSidebar() {
   const counts=PILLARS.reduce(function(acc,p){acc[p.id]=state.posts.filter(function(x){return x.pillar===p.id&&!isGrowthRow(x);}).length;return acc;},{});
-  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v6.2</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
+  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v6.4</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
   [{id:"overview",label:"Overview"},{id:"library",label:"Post Library"},{id:"calendar",label:"Calendar"}].forEach(function(item){
     html += '<button class="nav-item '+(state.view===item.id?"active":"")+'" onclick="navigate(\''+item.id+'\')">'+item.label+'</button>';
   });
