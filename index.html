@@ -197,12 +197,15 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 .cal-tray-card:active{cursor:grabbing}
 .cal-tray-card img{width:13px;height:13px}
 .cal-tray.drag-over{border-color:var(--accent);background:#C25B3F08}
+.cal-agenda-day{margin-bottom:18px}
+.cal-agenda-day-label{font-size:11px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);margin-bottom:6px;padding:0 2px}
+.cal-agenda-day-label.today{color:var(--accent);font-weight:600}
+.cal-agenda-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;box-shadow:var(--shadow)}
 @media (max-width: 860px){
   .sidebar{display:none}
-  .app{padding-bottom:calc(var(--bottom-nav-h) + env(safe-area-inset-bottom) + 8px)}
+  .app{padding-bottom:0}
   .main{width:100%}
   .topbar{padding:0 16px;height:calc(var(--header-h) + max(24px,env(safe-area-inset-top)));padding-top:max(24px,env(safe-area-inset-top))}
-  .mobile-menu-btn{display:inline-flex}
   .topbar-brand{display:inline-flex;align-items:center;gap:4px;font-family:var(--font-logo);font-size:15px;letter-spacing:0.04em;color:var(--accent);margin-right:8px;flex-shrink:0}
   .autosave-indicator span{display:none}
   .content{padding:16px}
@@ -213,30 +216,23 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
   .form-row{grid-template-columns:1fr}
   .perf-grid{grid-template-columns:repeat(2,1fr)}
   .editor-form{padding:16px}
-  .cal-grid{grid-template-columns:repeat(7,1fr);gap:3px}
-  .cal-cell{height:60px;padding:4px}
-  .cal-card{font-size:9px}
-  .bottom-nav{
-    display:flex;position:fixed;bottom:0;left:0;right:0;
-    height:calc(var(--bottom-nav-h) + env(safe-area-inset-bottom) + 8px);
-    background:var(--text);border-top:1px solid rgba(255,255,255,0.08);
-    align-items:center;justify-content:space-between;z-index:50;
-    padding:0 20px;padding-bottom:env(safe-area-inset-bottom);
-  }
-  .bottom-nav-item{
-    display:flex;align-items:center;justify-content:center;
-    background:none;border:none;color:rgba(247,244,239,0.55);
-    font-size:14px;font-weight:600;font-family:var(--font-body);cursor:pointer;
-    padding:11px 20px;border-radius:16px;min-width:76px;transition:all 0.15s var(--ease);
-  }
-  .bottom-nav-item.active{color:#F7F4EF;background:rgba(194,91,63,0.28)}
-  .bottom-nav-fab{
-    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:52px;height:52px;border-radius:50%;background:var(--accent);color:white;
-    display:flex;align-items:center;justify-content:center;font-size:24px;
-    border:none;cursor:pointer;box-shadow:0 4px 14px rgba(194,91,63,0.45);transition:transform 0.1s var(--ease);
-  }
-  .bottom-nav-fab:active{transform:translate(-50%,-50%) scale(0.94)}
+  /* Mobile Calendar becomes a vertical agenda list — see .cal-agenda-* below —
+     so the old 7-col grid rules no longer apply at this breakpoint. */
+  .speed-dial{position:fixed;right:20px;bottom:calc(56px + env(safe-area-inset-bottom));z-index:60;display:flex;flex-direction:column;align-items:flex-end;gap:12px}
+  .speed-dial-item{display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(8px) scale(0.9);pointer-events:none;transition:opacity 0.15s var(--ease),transform 0.15s var(--ease)}
+  .speed-dial.open .speed-dial-item{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+  .speed-dial-item:nth-child(1){transition-delay:0.02s}
+  .speed-dial-item:nth-child(2){transition-delay:0.06s}
+  .speed-dial-item:nth-child(3){transition-delay:0.1s}
+  .speed-dial-item:nth-child(4){transition-delay:0.14s}
+  .speed-dial-label{background:var(--text);color:#F7F4EF;font-size:13px;font-family:var(--font-body);padding:7px 14px;border-radius:20px;white-space:nowrap;box-shadow:var(--shadow-md)}
+  .speed-dial-btn{width:44px;height:44px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:var(--shadow-md);cursor:pointer}
+  .speed-dial-btn.secondary{background:var(--surface);color:var(--text)}
+  .speed-dial-main{width:56px;height:56px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-size:26px;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(194,91,63,0.45);transition:transform 0.2s var(--ease),background 0.15s var(--ease);flex-shrink:0}
+  .speed-dial-main:active{transform:scale(0.94)}
+  .speed-dial.open .speed-dial-main{transform:rotate(45deg)}
+  .speed-dial-scrim{position:fixed;inset:0;background:rgba(0,0,0,0.15);z-index:55;opacity:0;pointer-events:none;transition:opacity 0.15s var(--ease)}
+  .speed-dial-scrim.open{opacity:1;pointer-events:auto}
 }
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 </style>
@@ -285,7 +281,7 @@ function platformBadge(platformId, size) {
 }
 
 let state = {
-  posts:[],view:"overview",editingId:null,showNewPost:false,showMobileMenu:false,showUrlModal:false,
+  posts:[],view:"overview",editingId:null,showNewPost:false,speedDialOpen:false,showUrlModal:false,
   filterPillar:null,filterPlatform:null,filterStatuses:[],search:"",
   loading:true,sheetStatus:"loading",sheetMessage:"Connecting…",pendingSync:[],
   calWeekOffset:0,
@@ -380,7 +376,7 @@ function showToast(msg,isError) {
 }
 function navigate(view,id) {
   state.view=view;if(id)state.editingId=id;
-  state.showMobileMenu=false;
+  state.speedDialOpen=false;
   render();
 }
 function celebrate() {
@@ -1004,7 +1000,81 @@ function calCardHTML(post) {
     + (overdue?'<span style="flex-shrink:0">⚠️</span>':platformBadge(post.platform,10))
     + '<span style="overflow:hidden;text-overflow:ellipsis">'+safe(post.title||"Untitled")+'</span></div>';
 }
+// Mobile gets a genuinely different layout, not a squeezed version of the
+// desktop grid — a 7-col grid was unreadable at phone width (titles reduced
+// to 2-3 characters). Agenda list instead: one row per day that actually has
+// something, full titles visible, tap-to-reschedule instead of drag (touch
+// drag-and-drop across a scrolling list is unreliable, so this isn't a
+// downgrade, it's the more reliable interaction for the device).
+function isMobileViewport() {
+  return window.innerWidth <= 860;
+}
 function renderCalendar() {
+  return isMobileViewport() ? renderCalendarAgenda() : renderCalendarDesktop();
+}
+function renderCalendarAgenda() {
+  const scheduled=getCalendarGridPosts();
+  const unscheduled=getUnscheduledReadyPosts();
+  const start=calWindowStart();
+
+  let html='<div class="content">';
+
+  html += '<div class="cal-tray">';
+  html += '<div class="section-heading" style="margin-bottom:0">Unscheduled</div>';
+  if(unscheduled.length===0){
+    html += '<div style="font-size:12px;color:var(--text3);margin-top:8px">Nothing waiting — every Ready post has a date.</div>';
+  } else {
+    unscheduled.forEach(function(p){
+      html += '<div class="cal-agenda-row" style="border-bottom:1px solid var(--border)">'
+        + platformBadge(p.platform,16)
+        + '<span style="flex:1;font-size:13px;cursor:pointer" onclick="navigate(\'editor\',\''+p.id+'\')">'+safe(p.title||"Untitled")+'</span>'
+        + '<input type="date" class="form-input" style="width:132px;padding:6px 8px;font-size:12px" onchange="updateSuggestedDate(\''+p.id+'\',this.value)">'
+        + '</div>';
+    });
+  }
+  html += '</div>';
+
+  html += '<div class="cal-header">'
+    + '<button class="cal-nav-btn" onclick="calShiftWeek(-1)">‹</button>'
+    + '<span class="cal-month-label" style="font-size:16px">'+calRangeLabel(start)+'</span>'
+    + '<button class="cal-nav-btn" onclick="calShiftWeek(1)">›</button>'
+    + '</div>'
+    + '<button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;margin-bottom:14px" onclick="state.calWeekOffset=0;renderMain()">Today</button>';
+
+  const days=[];
+  for(let i=0;i<56;i++){
+    const d=new Date(start); d.setDate(start.getDate()+i);
+    days.push(d);
+  }
+  const todayKey=new Date().toDateString();
+  let anyShown=false;
+  days.forEach(function(d){
+    const dateStr=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    const postsOnDay=scheduled.filter(function(p){ return p.suggested_date && p.suggested_date.slice(0,10)===dateStr; });
+    if(postsOnDay.length===0) return; // agenda view: only show days with something on them
+    anyShown=true;
+    const isToday=d.toDateString()===todayKey;
+    html += '<div class="cal-agenda-day">'
+      + '<div class="cal-agenda-day-label'+(isToday?" today":"")+'">'+d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})+(isToday?' <span style="color:var(--accent)">· Today</span>':'')+'</div>';
+    postsOnDay.forEach(function(p){
+      const overdue=isOverdue(p);
+      const c=calCardColor(p);
+      html += '<div class="cal-agenda-row" onclick="navigate(\'editor\',\''+p.id+'\')" style="cursor:pointer;border-left:3px solid '+c.fg+'">'
+        + (overdue?'<span>⚠️</span>':platformBadge(p.platform,16))
+        + '<span style="flex:1;font-size:13px">'+safe(p.title||"Untitled")+'</span>'
+        + (p.status==="ready"?'<input type="date" class="form-input" style="width:132px;padding:6px 8px;font-size:12px" value="'+dateStr+'" onclick="event.stopPropagation()" onchange="event.stopPropagation();updateSuggestedDate(\''+p.id+'\',this.value)">':'<span class="tag" style="background:#10B98118;color:#10B981">Published</span>')
+        + '</div>';
+    });
+    html += '</div>';
+  });
+  if(!anyShown){
+    html += '<div class="empty" style="padding:30px 0"><div class="empty-title">Nothing scheduled in this window</div><div class="empty-sub">Try paging forward, or check the Unscheduled tray above.</div></div>';
+  }
+
+  html += '</div>';
+  return html;
+}
+function renderCalendarDesktop() {
   const scheduled=getCalendarGridPosts();
   const unscheduled=getUnscheduledReadyPosts();
 
@@ -1241,7 +1311,7 @@ function renderEditor(post) {
 }
 function renderSidebar() {
   const counts=PILLARS.reduce(function(acc,p){acc[p.id]=state.posts.filter(function(x){return x.pillar===p.id&&!isGrowthRow(x);}).length;return acc;},{});
-  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v6.5</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
+  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v6.6</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
   [{id:"overview",label:"Overview"},{id:"library",label:"Post Library"},{id:"calendar",label:"Calendar"}].forEach(function(item){
     html += '<button class="nav-item '+(state.view===item.id?"active":"")+'" onclick="navigate(\''+item.id+'\')">'+item.label+'</button>';
   });
@@ -1254,23 +1324,37 @@ function renderSidebar() {
     + '<button class="btn btn-primary" style="width:100%;justify-content:center" onclick="state.showNewPost=true;render()">+ New Post</button></div></div>';
   return html;
 }
-function renderBottomNav() {
-  return '<div class="bottom-nav">'
-    + '<button class="bottom-nav-item '+(state.view==='overview'?'active':'')+'" onclick="navigate(\'overview\')">Overview</button>'
-    + '<button class="bottom-nav-item '+(state.view==='calendar'?'active':'')+'" onclick="navigate(\'calendar\')">Calendar</button>'
-    + '<button class="bottom-nav-fab" onclick="state.showNewPost=true;render()">+</button>'
-    + '<button class="bottom-nav-item '+(state.view==='library'?'active':'')+'" onclick="navigate(\'library\')">Library</button>'
-    + '</div>';
+// Mobile-only. Replaces the old fixed 3-item bar + separate hamburger menu —
+// both were fighting for the same strip of screen (see v6.5's overlapping
+// Calendar label). One floating button, tap to fan out every destination as
+// labelled bubbles, tap again (or the scrim, or any bubble) to close.
+function toggleSpeedDial() {
+  state.speedDialOpen = !state.speedDialOpen;
+  render();
 }
-function renderMobileMenu() {
-  return '<div class="mobile-menu-overlay" onclick="state.showMobileMenu=false;render()"><div class="mobile-menu-panel" onclick="event.stopPropagation()">'
-    + '<button class="mobile-menu-item" onclick="navigate(\'overview\')">Overview</button>'
-    + '<button class="mobile-menu-item" onclick="navigate(\'library\')">Post Library</button>'
-    + '<button class="mobile-menu-item" onclick="navigate(\'calendar\')">Calendar</button>'
-    + '<button class="mobile-menu-item" onclick="goToFeedbackPost()">Feedback</button>'
-    + '<div style="flex:1"></div>'
-    + '<button class="mobile-menu-item" onclick="state.showMobileMenu=false;render()">✕ Close</button>'
-    + '</div></div>';
+function speedDialGo(action) {
+  state.speedDialOpen = false;
+  if(action==="new"){ state.showNewPost=true; render(); }
+  else if(action==="feedback"){ goToFeedbackPost(); }
+  else { navigate(action); }
+}
+function renderSpeedDial() {
+  const open = state.speedDialOpen;
+  const items = [
+    {action:"feedback", label:"Feedback", icon:"💬"},
+    {action:"calendar", label:"Calendar", icon:"📅"},
+    {action:"library", label:"Post Library", icon:"📋"},
+    {action:"overview", label:"Overview", icon:"🏠"},
+    {action:"new", label:"New Post", icon:"➕"},
+  ];
+  let html = '<div class="speed-dial-scrim'+(open?" open":"")+'" onclick="toggleSpeedDial()"></div>';
+  html += '<div class="speed-dial'+(open?" open":"")+'">';
+  items.forEach(function(it){
+    html += '<div class="speed-dial-item"><span class="speed-dial-label">'+it.label+'</span><button class="speed-dial-btn secondary" onclick="speedDialGo(\''+it.action+'\')">'+it.icon+'</button></div>';
+  });
+  html += '<button class="speed-dial-main" onclick="toggleSpeedDial()">+</button>';
+  html += '</div>';
+  return html;
 }
 function renderSheetBar() {
   const dotClass=state.sheetStatus==="connected"?"connected":state.sheetStatus==="loading"?"loading":"error";
@@ -1307,20 +1391,19 @@ function renderMain() {
       html='<div class="empty"><div class="empty-title">Post not found</div></div>';
     }
   }else if(state.view==="library"){
-    html='<div class="topbar"><span class="topbar-title"><span class="topbar-brand">🟠 ARCTURUS</span>Post Library</span><button class="btn btn-ghost btn-sm mobile-menu-btn" onclick="state.showMobileMenu=true;render()">☰</button></div><div class="view-enter">'+renderLibrary()+'</div>';
+    html='<div class="topbar"><span class="topbar-title"><span class="topbar-brand">🟠 ARCTURUS</span>Post Library</span></div><div class="view-enter">'+renderLibrary()+'</div>';
   }else if(state.view==="calendar"){
-    html='<div class="topbar"><span class="topbar-title"><span class="topbar-brand">🟠 ARCTURUS</span>Calendar</span><button class="btn btn-ghost btn-sm mobile-menu-btn" onclick="state.showMobileMenu=true;render()">☰</button></div><div class="view-enter">'+renderCalendar()+'</div>';
+    html='<div class="topbar"><span class="topbar-title"><span class="topbar-brand">🟠 ARCTURUS</span>Calendar</span></div><div class="view-enter">'+renderCalendar()+'</div>';
   }else{
-    html='<div class="topbar"><span class="topbar-title"><span class="topbar-brand">🟠 ARCTURUS</span>Overview</span><button class="btn btn-ghost btn-sm mobile-menu-btn" onclick="state.showMobileMenu=true;render()">☰</button></div><div class="view-enter">'+renderOverview()+'</div>';
+    html='<div class="topbar"><span class="topbar-title"><span class="topbar-brand">🟠 ARCTURUS</span>Overview</span></div><div class="view-enter">'+renderOverview()+'</div>';
   }
   main.innerHTML=html+renderSheetBar();
 }
 function render() {
   const app=document.getElementById("app");
-  app.innerHTML=renderSidebar()+'<div id="main-area" class="main"></div>'+renderBottomNav()
+  app.innerHTML=renderSidebar()+'<div id="main-area" class="main"></div>'+renderSpeedDial()
     +(state.showNewPost?renderNewPostModal():"")
-    +(state.showUrlModal?renderUrlModal():"")
-    +(state.showMobileMenu?renderMobileMenu():"");
+    +(state.showUrlModal?renderUrlModal():"");
   renderMain();
 }
 // ── KEYBOARD SHORTCUTS ──────────────────────────────────────────────
@@ -1331,10 +1414,22 @@ document.addEventListener("keydown", function(e) {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const tag = (e.target.tagName || "").toLowerCase();
   if (tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable) return;
-  if (state.showNewPost || state.showUrlModal || state.showMobileMenu) return;
+  if (state.showNewPost || state.showUrlModal || state.speedDialOpen) return;
   if (e.key === "1") { navigate("overview"); }
   else if (e.key === "2") { navigate("library"); }
   else if (e.key === "3") { navigate("calendar"); }
+});
+// Calendar has two genuinely different layouts (mobile agenda vs desktop
+// grid) picked by viewport width — re-render it on resize so rotating a
+// phone or resizing a browser window switches layout without a manual
+// refresh. Only re-renders when Calendar is the active view, to avoid
+// pointless work on every resize elsewhere in the app.
+let resizeTimer=null;
+window.addEventListener("resize", function(){
+  clearTimeout(resizeTimer);
+  resizeTimer=setTimeout(function(){
+    if(state.view==="calendar") renderMain();
+  },150);
 });
 render();
 loadFromSheet();
