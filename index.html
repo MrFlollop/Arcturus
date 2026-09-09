@@ -169,6 +169,8 @@ html,body{font-family:var(--font-body);background:var(--bg);color:var(--text);fo
 .mobile-menu-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:8px;background:none;border:none;color:rgba(247,244,239,0.75);font-size:14px;font-family:var(--font-body);cursor:pointer;text-align:left}
 .mobile-menu-item:active{background:rgba(255,255,255,0.08)}
 .bottom-nav{display:none}
+.speed-dial{display:none}
+.speed-dial-scrim{display:none}
 .growth-chart-wrap{padding:4px 0 8px}
 .growth-svg{width:100%;height:auto;display:block}
 .growth-empty{padding:20px 0}
@@ -281,7 +283,7 @@ function platformBadge(platformId, size) {
 }
 
 let state = {
-  posts:[],view:"overview",editingId:null,showNewPost:false,speedDialOpen:false,showUrlModal:false,
+  posts:[],view:"overview",editingId:null,speedDialOpen:false,showUrlModal:false,
   filterPillar:null,filterPlatform:null,filterStatuses:[],search:"",
   loading:true,sheetStatus:"loading",sheetMessage:"Connecting…",pendingSync:[],
   calWeekOffset:0,
@@ -537,33 +539,20 @@ function blankPost(overrides) {
     created_at:new Date().toISOString(),updated_at:new Date().toISOString(),
   }, overrides||{});
 }
-async function createNewPost() {
+// Goes straight to the editor rather than the old New Post modal — the modal
+// only ever captured Title/Pillar/Platform/Status/Idea, and the editor has
+// since grown Embargo, Scheduled Date, Photo Brief and Duplicate, none of
+// which the modal touched. A blank post is saved immediately so there's
+// something real to edit; title/pillar/platform default and get set in the
+// editor itself, same as editing any existing post.
+function createNewPost() {
   if(isCreatingPost) return;
   isCreatingPost=true;
-  const btn=document.getElementById("np-submit-btn");
-  if(btn){btn.disabled=true;btn.textContent="Adding…";}
-  try {
-    const pillar=document.getElementById("np-pillar").value;
-    const platform=document.getElementById("np-platform").value;
-    const status=document.getElementById("np-status").value;
-    const idea=document.getElementById("np-idea").value.trim();
-    const titleInput=document.getElementById("np-title").value.trim();
-    if(!idea){
-      showToast("Add your idea first",true);
-      if(btn){btn.disabled=false;btn.textContent="Add Post →";}
-      isCreatingPost=false;
-      return;
-    }
-    const title=titleInput || idea.slice(0,60).split("\n")[0];
-    const post=blankPost({title:title,pillar:pillar,platform:platform,status:status,body:idea});
-    state.posts.push(post);
-    state.showNewPost=false;
-    await savePost(post);
-    showToast("Post added ✓");
-    render();
-  } finally {
-    isCreatingPost=false;
-  }
+  const post=blankPost();
+  state.posts.push(post);
+  savePost(post);
+  navigate("editor",post.id);
+  isCreatingPost=false;
 }
 function duplicatePost(postId) {
   const orig=state.posts.find(function(p){return p.id===postId;});
@@ -895,7 +884,7 @@ function renderLibrary() {
   });
   html += '</div>';
   if(filtered.length===0){
-    html += '<div class="empty"><div class="empty-title">'+(state.posts.length===0?"Library is empty":"No posts match")+'</div><div class="empty-sub">'+(state.posts.length===0?"Add your first post idea.":"Try adjusting your filters.")+'</div>'+(state.posts.length===0?'<button class="btn btn-primary" style="margin-top:8px" onclick="state.showNewPost=true;render()">+ New Post</button>':"")+'</div>';
+    html += '<div class="empty"><div class="empty-title">'+(state.posts.length===0?"Library is empty":"No posts match")+'</div><div class="empty-sub">'+(state.posts.length===0?"Add your first post idea.":"Try adjusting your filters.")+'</div>'+(state.posts.length===0?'<button class="btn btn-primary" style="margin-top:8px" onclick="createNewPost()">+ New Post</button>':"")+'</div>';
   } else {
     function postCardHTML(p) {
       const pl=getPillar(p.pillar);
@@ -1279,7 +1268,7 @@ function renderEditor(post) {
     + '<div class="autosave-indicator" style="flex-shrink:0"><div class="autosave-dot saved" id="autosave-dot"></div><span id="autosave-txt">Saved</span></div></div>'
     + '<button class="btn btn-danger btn-sm" onclick="deletePost(\''+post.id+'\')">Delete</button></div>'
     + '<div class="editor-form">'
-    + '<div class="form-group"><label class="form-label">Title</label><input class="form-input" value="'+safe(e.title)+'" oninput="editorState.title=this.value;scheduleAutosave(\''+post.id+'\');const d=document.getElementById(\'editor-title-display\');if(d)d.innerHTML=this.value||\'<em style=color:var(--text3);font-style:italic>Untitled post</em>\'" placeholder="What\'s the core idea in a line?"></div>'
+    + '<div class="form-group"><label class="form-label">Title</label><input class="form-input" value="'+safe(e.title)+'" autofocus oninput="editorState.title=this.value;scheduleAutosave(\''+post.id+'\');const d=document.getElementById(\'editor-title-display\');if(d)d.innerHTML=this.value||\'<em style=color:var(--text3);font-style:italic>Untitled post</em>\'" placeholder="What\'s the core idea in a line?"></div>'
     + '<div class="form-row">'
     + '<div class="form-group"><label class="form-label">Pillar</label><select class="form-input form-select" onchange="editorState.pillar=this.value;scheduleAutosave(\''+post.id+'\')">';
   PILLARS.forEach(function(p){ html += '<option value="'+p.id+'" '+(e.pillar===p.id?"selected":"")+'>'+p.label+'</option>'; });
@@ -1311,7 +1300,7 @@ function renderEditor(post) {
 }
 function renderSidebar() {
   const counts=PILLARS.reduce(function(acc,p){acc[p.id]=state.posts.filter(function(x){return x.pillar===p.id&&!isGrowthRow(x);}).length;return acc;},{});
-  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v6.6</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
+  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v6.7</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
   [{id:"overview",label:"Overview"},{id:"library",label:"Post Library"},{id:"calendar",label:"Calendar"}].forEach(function(item){
     html += '<button class="nav-item '+(state.view===item.id?"active":"")+'" onclick="navigate(\''+item.id+'\')">'+item.label+'</button>';
   });
@@ -1321,7 +1310,7 @@ function renderSidebar() {
   });
   html += '</nav><div style="padding:12px 10px;border-top:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:8px">'
     + '<button class="btn btn-ghost" style="width:100%;justify-content:center;color:#F7F4EF;border-color:rgba(255,255,255,0.15)" onclick="goToFeedbackPost()">💬 Feedback</button>'
-    + '<button class="btn btn-primary" style="width:100%;justify-content:center" onclick="state.showNewPost=true;render()">+ New Post</button></div></div>';
+    + '<button class="btn btn-primary" style="width:100%;justify-content:center" onclick="createNewPost()">+ New Post</button></div></div>';
   return html;
 }
 // Mobile-only. Replaces the old fixed 3-item bar + separate hamburger menu —
@@ -1334,7 +1323,7 @@ function toggleSpeedDial() {
 }
 function speedDialGo(action) {
   state.speedDialOpen = false;
-  if(action==="new"){ state.showNewPost=true; render(); }
+  if(action==="new"){ createNewPost(); }
   else if(action==="feedback"){ goToFeedbackPost(); }
   else { navigate(action); }
 }
@@ -1362,21 +1351,6 @@ function renderSheetBar() {
   const msg=n>0?(n+" change"+(n>1?"s":"")+" saving…"):state.sheetMessage;
   return '<div class="sheet-bar"><div class="sheet-dot '+dotClass+'"></div><span>Google Sheet</span><span style="color:var(--border2)">·</span><span id="sheet-bar-msg" style="color:var(--text2)">'+msg+'</span><button class="btn btn-ghost btn-sm" style="margin-left:auto;font-size:10px;padding:3px 8px" onclick="loadFromSheet()">↻ Refresh</button></div>';
 }
-function renderNewPostModal() {
-  let html = '<div class="modal-overlay" onclick="state.showNewPost=false;render()"><div class="modal" onclick="event.stopPropagation()"><div class="modal-title">New Post</div><div class="modal-sub">Get the idea down now — refine everything else later from the Library.</div>'
-    + '<div class="form-row"><div class="form-group"><label class="form-label">Platform</label><select class="form-input form-select" id="np-platform">';
-  PLATFORMS_DEF.forEach(function(p){ html += '<option value="'+p.id+'">'+p.label+'</option>'; });
-  html += '</select></div><div class="form-group"><label class="form-label">Pillar</label><select class="form-input form-select" id="np-pillar">';
-  PILLARS.forEach(function(p){ html += '<option value="'+p.id+'">'+p.label+'</option>'; });
-  html += '</select></div></div>'
-    + '<div class="form-group"><label class="form-label">Status</label><select class="form-input form-select" id="np-status">';
-  STATUSES.forEach(function(s){ html += '<option value="'+s.id+'">'+s.label+'</option>'; });
-  html += '</select></div>'
-    + '<div class="form-group"><label class="form-label">Title (optional)</label><input class="form-input" id="np-title" placeholder="Leave blank to auto-generate from your idea"></div>'
-    + '<div class="form-group"><label class="form-label">Your idea</label><textarea class="form-input form-textarea tall" id="np-idea" placeholder="Just get it down. Voice-to-text is fine — tidy it up later." autofocus></textarea></div>'
-    + '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px"><button class="btn btn-ghost" onclick="state.showNewPost=false;render()">Cancel</button><button class="btn btn-primary" id="np-submit-btn" onclick="createNewPost()">Add Post →</button></div></div></div>';
-  return html;
-}
 function renderMain() {
   const main=document.getElementById("main-area");if(!main)return;
   let html="";
@@ -1402,7 +1376,6 @@ function renderMain() {
 function render() {
   const app=document.getElementById("app");
   app.innerHTML=renderSidebar()+'<div id="main-area" class="main"></div>'+renderSpeedDial()
-    +(state.showNewPost?renderNewPostModal():"")
     +(state.showUrlModal?renderUrlModal():"");
   renderMain();
 }
@@ -1414,7 +1387,7 @@ document.addEventListener("keydown", function(e) {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const tag = (e.target.tagName || "").toLowerCase();
   if (tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable) return;
-  if (state.showNewPost || state.showUrlModal || state.speedDialOpen) return;
+  if (state.showUrlModal || state.speedDialOpen) return;
   if (e.key === "1") { navigate("overview"); }
   else if (e.key === "2") { navigate("library"); }
   else if (e.key === "3") { navigate("calendar"); }
