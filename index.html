@@ -453,13 +453,14 @@ function getIgGrowthEntries() {
 // NOTE: verdicts are computed SEPARATELY per platform — each platform's baseline
 // only ever looks at that platform's own prior scored posts, never mixed together,
 // since LinkedIn and Instagram engagement ranges aren't comparable.
-// Verdicts recompute every load while a post is still inside its active
-// metrics window (<=METRICS_LOCK_DAYS since publish), so the badge stays
-// current as the Support task refreshes views/likes/comments/shares week by
-// week. Once a post ages past the lock point AND already has a verdict,
-// there's nothing left to recompute (the Support task has stopped touching
-// its numbers by then too) so it's skipped for cost, not correctness. A
-// recompute only triggers a sheet write when the verdict actually changed.
+// v7.0: the old 14-day "not started" buffer is gone — the Support task starts
+// scraping views/likes/comments/shares from day one and keeps refreshing them
+// through day 42. A verdict is deliberately NOT computed during that window,
+// even though the raw numbers are visible and moving, because it's not final
+// yet. Only once a post is older than METRICS_LOCK_DAYS does ensureVerdicts
+// compute a verdict — once, using whatever metrics have settled by then — and
+// write it. After that it never recomputes: post.verdict being present at all
+// now means "locked", full stop.
 const METRICS_LOCK_DAYS = 42;
 function daysSincePublished(post) {
   if(!post.published_at) return null;
@@ -474,33 +475,38 @@ function ensureVerdicts() {
     const platformPosts=state.posts.filter(function(p){return p.platform===platformId&&p.status==="published"&&p.published_at;})
       .sort(function(a,b){return new Date(a.published_at)-new Date(b.published_at);});
     platformPosts.forEach(function(post,idx){
-      if(isMetricsLocked(post) && post.verdict) return;
+      if(post.verdict) return; // already locked in — never touch again
+      if(!isMetricsLocked(post)) return; // still tracking, too early to lock in
       const m=getPostMetrics(post);
-      if(!m) return;
+      if(!m) return; // locked window reached but still no view data — stays unverdicted until data appears
       const priorScored=platformPosts.slice(0,idx).map(function(p2){return {post:p2,m:getPostMetrics(p2)};}).filter(function(x){return x.m;});
       const last5=priorScored.slice(-5);
       let baselineAvg=null;
       if(last5.length>=3){
         baselineAvg=last5.reduce(function(sum,x){return sum+x.m.er;},0)/last5.length;
       }
-      const newVerdict=verdictLabel(m.er,baselineAvg);
-      if(newVerdict!==post.verdict){
-        post.verdict=newVerdict;
-        savePost(Object.assign({},post));
-      }
+      post.verdict=verdictLabel(m.er,baselineAvg);
+      savePost(Object.assign({},post));
     });
   });
 }
-// Three-state tag showing where a post sits in the metrics lifecycle:
-// under 14 days old (Support task hasn't touched it yet), 14-42 days
-// (actively re-scraped weekly, numbers still moving), or past 42 days
-// (Support task has stopped, numbers and verdict are final).
+// Two-state tag showing where a post sits in the metrics lifecycle: Tracking
+// (day 0-42, Support task actively scraping, numbers still moving, no verdict
+// yet) or Locked (day 42+, numbers and verdict are final). A verdict badge is
+// only ever shown alongside "Locked" — see lockedVerdictBadge() — so the two
+// tags can never contradict each other the way "Not started" + a verdict
+// used to.
 function metricsStatusTag(post) {
   const d=daysSincePublished(post);
   if(d===null) return "";
-  if(d<14) return '<span class="tag" style="background:#94A3B818;color:#64748B">⏳ Not started</span>';
   if(d<=METRICS_LOCK_DAYS) return '<span class="tag" style="background:#3B82F618;color:#3B82F6">♻️ Tracking</span>';
   return '<span class="tag" style="background:#6B728018;color:#6B7280">🔒 Locked</span>';
+}
+// Gates verdict display on lock status rather than trusting post.verdict
+// alone — belt-and-braces so a stray/legacy verdict value on a still-tracking
+// post can never resurface the old contradictory display.
+function lockedVerdictBadge(post) {
+  return isMetricsLocked(post) ? verdictBadge(post.verdict) : "";
 }
 async function loadFromSheet() {
   state.loading=true;state.sheetStatus="loading";state.sheetMessage="Loading from sheet…";render();
@@ -845,7 +851,7 @@ function renderOverview() {
         + '<span style="font-size:10px;color:var(--text3);font-family:var(--font-mono);flex-shrink:0">'+formatDate(p.published_at)+'</span>'
         + '<span class="tag" style="background:'+TRACK_COLORS[trackKey]+'18;color:'+TRACK_COLORS[trackKey]+'">'+TRACK_LABELS[trackKey]+'</span>'
         + '<span style="flex:1;font-size:13px;cursor:pointer;min-width:120px" onclick="navigate(\'editor\',\''+p.id+'\')">'+safe(p.title)+'</span>'
-        + verdictBadge(p.verdict)
+        + lockedVerdictBadge(p)
         + metricsStatusTag(p)
         + '</div>';
     });
@@ -1303,12 +1309,20 @@ function renderPostUrlSection() {
 }
 function renderPerformanceSection() {
   if(editorState.status!=="published")return"";
-  const vb=verdictBadge(editorState.verdict);
+  const locked=isMetricsLocked(editorState);
+  const vb=locked?verdictBadge(editorState.verdict):"";
+  let verdictLine;
+  if(locked){
+    verdictLine=vb||'<span style="color:var(--text3)">Not enough data yet</span>';
+  } else {
+    const lockDate=new Date(new Date(editorState.published_at).getTime()+METRICS_LOCK_DAYS*24*60*60*1000);
+    verdictLine='<span style="color:var(--text3)">Locks in on '+formatDate(lockDate.toISOString())+'</span>';
+  }
   let html = '<hr class="section-divider"><div class="section-heading">Post Performance <span style="font-weight:400;text-transform:none;letter-spacing:normal">— filled in automatically from your metrics tracking</span></div><div class="perf-grid">';
   ["views","likes","comments","shares"].forEach(function(f){
     html += '<div class="perf-stat"><div class="perf-stat-label">'+(f.charAt(0).toUpperCase()+f.slice(1))+'</div><div class="perf-stat-value">'+(editorState[f]!==""&&editorState[f]!==undefined&&editorState[f]!==null?editorState[f]:"—")+'</div></div>';
   });
-  html += '</div><div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text3)">Verdict: '+(vb||'<span style="color:var(--text3)">Not enough data yet</span>')+'</div>';
+  html += '</div><div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text3)">Verdict: '+verdictLine+'</div>';
   return html;
 }
 function renderEditor(post) {
@@ -1355,7 +1369,7 @@ function renderEditor(post) {
 }
 function renderSidebar() {
   const counts=PILLARS.reduce(function(acc,p){acc[p.id]=state.posts.filter(function(x){return x.pillar===p.id&&!isGrowthRow(x);}).length;return acc;},{});
-  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v6.9</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
+  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">v7.0</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
   [{id:"overview",label:"Overview"},{id:"library",label:"Post Library"},{id:"calendar",label:"Calendar"}].forEach(function(item){
     html += '<button class="nav-item '+(state.view===item.id?"active":"")+'" onclick="navigate(\''+item.id+'\')">'+item.label+'</button>';
   });
