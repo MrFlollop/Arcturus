@@ -289,17 +289,81 @@ input[type="date"].form-input::-webkit-date-and-time-value,input[type="datetime-
   .speed-dial-scrim{position:fixed;inset:0;background:rgba(0,0,0,0.15);z-index:55;opacity:0;pointer-events:none;transition:opacity 0.15s var(--ease)}
   .speed-dial-scrim.open{opacity:1;pointer-events:auto}
 }
+/* LOGIN, WELCOME, SETTINGS (v7.5) */
+a.btn{text-decoration:none}
+.link-btn{background:none;border:none;padding:0;font:inherit;font-size:12px;color:var(--accent2);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.login-wrap{position:absolute;inset:0;display:flex;background:var(--bg);overflow:hidden}
+.login-aside{flex:1 1 46%;background:var(--text);color:#F7F4EF;padding:48px;padding-top:max(48px,env(safe-area-inset-top));display:flex;flex-direction:column;justify-content:space-between;min-width:0}
+.login-mark{font-family:var(--font-logo);font-size:34px;letter-spacing:0.06em;line-height:1}
+.login-tag{font-family:var(--font-display);font-size:clamp(30px,4vw,46px);line-height:1.1;max-width:14ch}
+.login-tag em{font-style:italic;color:#E8896B}
+.login-foot{font-size:10px;font-family:var(--font-mono);letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,244,239,0.5)}
+.login-main{flex:1 1 54%;overflow-y:auto;overscroll-behavior:contain;display:flex;justify-content:center;align-items:center;padding:32px 24px;min-width:0}
+.login-card{width:100%;max-width:360px}
+.login-title{font-family:var(--font-display);font-size:30px;line-height:1.1;margin-bottom:8px}
+.login-lede{color:var(--text2);margin-bottom:22px;line-height:1.55;font-size:13px}
+.login-row{display:flex;align-items:center;gap:8px;margin:2px 0 18px;font-size:12px;color:var(--text2)}
+.login-row input{width:16px;height:16px;accent-color:var(--accent)}
+.login-msg{min-height:20px;font-size:12px;margin-bottom:12px;color:var(--text2);line-height:1.5}
+.login-msg.error{color:#B91C1C}
+.login-links{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:18px}
+.modal.welcome{width:640px;padding:28px 28px 0}
+.welcome-eyebrow{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent2);font-family:var(--font-mono);margin-bottom:6px}
+.welcome-title{font-family:var(--font-display);font-size:28px;line-height:1.1;margin-bottom:10px;font-weight:400}
+.welcome-lede{color:var(--text2);line-height:1.6;margin-bottom:18px;max-width:56ch}
+.flow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:stretch;margin-bottom:22px}
+.flow-node{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.flow-node b{font-size:13px}
+.flow-node span{font-size:11px;color:var(--text3);line-height:1.35}
+.flow-node.sheet{border-color:var(--accent)}
+.flow-arrow{align-self:center;color:var(--text3);font-family:var(--font-mono)}
+.welcome-steps{list-style:none;display:flex;flex-direction:column;gap:14px;margin-bottom:12px}
+.welcome-step{display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px}
+.welcome-num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:white;font-family:var(--font-mono);font-size:12px;display:flex;align-items:center;justify-content:center}
+.welcome-step b{display:block;font-size:13px;margin-bottom:2px}
+.welcome-step p{color:var(--text2);line-height:1.55;font-size:13px}
+.welcome-actions{display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border);padding:14px 0 20px}
+.settings-wrap{max-width:720px;display:flex;flex-direction:column;gap:16px}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.set-text{font-size:13px;color:var(--text2);line-height:1.55;min-width:0;flex:1 1 260px}
+.set-text b{color:var(--text)}
+.set-actions{display:flex;gap:8px;flex-wrap:wrap}
+.pe-row{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:6px 12px;align-items:start;padding:12px 0;border-bottom:1px solid var(--border)}
+.pe-colour{width:40px;height:40px;padding:2px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);cursor:pointer}
+.pe-fields{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:8px;min-width:0}
+.pe-toggle{min-height:40px;padding:0 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:12px;font-family:var(--font-body);font-weight:500;cursor:pointer}
+.pe-toggle.on{background:var(--accent);border-color:var(--accent);color:white}
+.pe-note{grid-column:2 / -1;font-size:11px;color:var(--text3);font-family:var(--font-mono);line-height:1.5}
+.pe-row.off .pe-fields,.pe-row.off .pe-colour{opacity:0.55}
+.pe-foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px}
+.pe-msg{font-size:12px;color:var(--text2)}
+.pe-msg.error{color:#B91C1C}
+@media (max-width:860px){
+  .login-wrap{flex-direction:column}
+  .login-aside{flex:0 0 auto;padding:16px;padding-top:max(24px,env(safe-area-inset-top))}
+  .login-mark{font-size:26px}
+  .login-tag,.login-foot{display:none}
+  .login-main{align-items:flex-start;padding:24px 16px}
+  .flow{grid-template-columns:minmax(0,1fr)}
+  .flow-arrow{justify-self:center;transform:rotate(90deg)}
+  .modal.welcome{padding:20px 20px 0}
+  .pe-fields{grid-template-columns:minmax(0,1fr)}
+  .speed-dial-item:nth-child(5){transition-delay:0.18s}
+  .speed-dial-item:nth-child(6){transition-delay:0.22s}
+}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 </style>
 </head>
 <body>
 <div id="app" class="app"></div>
+<div id="welcome-root"></div>
 <div id="toast" class="toast"></div>
 <script>
-const APP_VERSION = "v7.1";
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtuMyKcwbM7dzJM4LBl6sWBRqRYoMcP4BcQOH7NJb_WHqEi0MV-6E0V_VIKDkRrl4/exec";
-const SHEET_TOKEN = "PaR5WgzcM6QeuojXFPeKnX0q9ePyCyDt";
-// Feedback now opens an email to this address (change per instance if needed)
+const APP_VERSION = "v7.5";
+// Paste the hub web app address here after deploying Code.gs (Deploy > New deployment > Web app).
+// The address on its own opens nothing: every request needs a signed-in session.
+const HUB_URL = "PASTE_HUB_WEB_APP_URL_HERE";
+// Used when a person's profile has no feedback address of its own
 const FEEDBACK_EMAIL = "oliver.clubb@sundaytreat.com";
 const TRACK_TARGET_DAYS = {linkedin:3, instagram:7};
 function getTrackTarget(trackKey) { return TRACK_TARGET_DAYS[trackKey] || 7; }
@@ -308,13 +372,17 @@ const FEEDBACK_TITLE = "Arcturus Feedback & Ideas";
 const FEEDBACK_POST_ID = "arcturus-feedback-post";
 const GROWTH_ID_PREFIX = "growth_";
 const IG_GROWTH_ID_PREFIX = "ig_growth_";
-const PILLARS = [
-  {id:"p1",label:"Running a Creative Agency",short:"Agency",color:"#C25B3F"},
-  {id:"p2",label:"Industry Perspective",short:"Industry",color:"#4A7C6F"},
-  {id:"p3",label:"Creative Leadership",short:"Leadership",color:"#5B5EA6"},
-  {id:"p4",label:"Craft & Camera",short:"Craft",color:"#B8860B"},
-  {id:"p5",label:"Personal",short:"Personal",color:"#7B4F8E"},
+// v7.5: pillars come from each person's profile at sign-in (see applyProfile). These are the fallback.
+const DEFAULT_COLOURS = ["#C25B3F","#4A7C6F","#5B5EA6","#B8860B","#7B4F8E"];
+const DEFAULT_PILLARS = [
+  {id:"p1",label:"Running a Creative Agency",short:"Agency",color:"#C25B3F",hidden:false},
+  {id:"p2",label:"Industry Perspective",short:"Industry",color:"#4A7C6F",hidden:false},
+  {id:"p3",label:"Creative Leadership",short:"Leadership",color:"#5B5EA6",hidden:false},
+  {id:"p4",label:"Craft & Camera",short:"Craft",color:"#B8860B",hidden:false},
+  {id:"p5",label:"Personal",short:"Personal",color:"#7B4F8E",hidden:false},
 ];
+let ALL_PILLARS = DEFAULT_PILLARS.slice();   // every pillar, including hidden ones (old posts keep their tag)
+let PILLARS = ALL_PILLARS.filter(function(p){return !p.hidden;});   // the ones shown in menus and filters
 const STATUSES = [
   {id:"idea",label:"Idea",color:"#94A3B8"},
   {id:"draft",label:"Drafting",color:"#F59E0B"},
@@ -345,6 +413,7 @@ let state = {
   resultsFilter:"all",resultsPlatform:null,resultsSort:"newest",
   loading:true,sheetStatus:"loading",sheetMessage:"Connecting…",pendingSync:[],
   calWeekOffset:0,
+  loginMessage:"",loginError:false,showWelcome:false,
 };
 let editorState = {};
 let autosaveTimer = null;
@@ -352,24 +421,88 @@ let autosavePending = false;
 let autosaveStatus = "saved";
 let isCreatingPost = false;
 let draggedPostId = null;
+// ── v7.5 HUB, SESSION AND PROFILE ────────────────────────────────────
+const SESSION_KEY = "arcturus_session_v75";
+const LAST_USER_KEY = "arcturus_last_user";
+let auth = {session:"", username:"", profile:null};
+function lsGet(k) { try { return localStorage.getItem(k) || ""; } catch(e) { return ""; } }
+function lsSet(k,v) { try { localStorage.setItem(k,v); } catch(e) {} }
+function saveSession(token, remember) {
+  clearSession();
+  try { (remember ? localStorage : sessionStorage).setItem(SESSION_KEY, token); } catch(e) {}
+}
+function loadSession() {
+  try { return localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY) || ""; } catch(e) { return ""; }
+}
+function clearSession() {
+  try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
+  try { sessionStorage.removeItem(SESSION_KEY); } catch(e) {}
+}
+function hubConfigured() { return typeof HUB_URL === "string" && HUB_URL.indexOf("https://") === 0; }
+async function hubCall(action, payload, noSession) {
+  if (!hubConfigured()) throw new Error("Arcturus is not connected to its hub yet.");
+  const body = Object.assign({action:action}, payload || {});
+  if (!noSession) body.session = auth.session;
+  let res;
+  try { res = await fetch(HUB_URL, {method:"POST", body:JSON.stringify(body)}); }
+  catch(e) { throw new Error("Could not reach Arcturus. Check your connection."); }
+  let data;
+  try { data = await res.json(); } catch(e) { throw new Error("Unexpected reply from the hub."); }
+  if (!data.ok) {
+    const err = new Error(data.error || "Request failed");
+    if (data.code === "auth" && !noSession) { err.auth = true; handleSessionEnded("Your session has ended. Please sign in again.", true); }
+    throw err;
+  }
+  return data;
+}
 async function sheetRead() {
-  const res = await fetch(SCRIPT_URL + "?token=" + encodeURIComponent(SHEET_TOKEN));
-  const data = await res.json();
-  if (!data.ok) throw new Error(data.error || "Read failed");
+  const data = await hubCall("read");
+  if (data.profile) applyProfile(data.profile);
   return data.posts;
 }
-async function sheetWrite(post) {
-  const res = await fetch(SCRIPT_URL, {method:"POST",body:JSON.stringify({action:"write",post,token:SHEET_TOKEN})});
-  const data = await res.json();
-  if (!data.ok) throw new Error(data.error || "Write failed");
+async function sheetWrite(post) { await hubCall("write", {post:post}); }
+async function sheetDelete(id) { await hubCall("delete", {id:id}); }
+
+function normalisePillar(p) {
+  const hidden = !!p.hidden;
+  const label = String(p.label || "").trim();
+  const short = (String(p.short || "").trim() || label.split(/\s+/)[0] || String(p.id)).slice(0, 20);
+  return {id:String(p.id), label:label || (hidden ? "" : short), short:short, color:/^#[0-9a-fA-F]{6}$/.test(p.color || "") ? p.color : "#8C877F", hidden:hidden};
 }
-async function sheetDelete(id) {
-  const res = await fetch(SCRIPT_URL, {method:"POST",body:JSON.stringify({action:"delete",id,token:SHEET_TOKEN})});
-  const data = await res.json();
-  if (!data.ok) throw new Error(data.error || "Delete failed");
+function applyProfile(profile) {
+  auth.profile = profile;
+  let list = DEFAULT_PILLARS;
+  if (Array.isArray(profile.pillars)) {
+    const clean = profile.pillars.filter(function(p){ return p && /^p[1-5]$/.test(String(p.id)); }).map(normalisePillar);
+    if (clean.length) list = clean;
+  }
+  ALL_PILLARS = list;
+  PILLARS = ALL_PILLARS.filter(function(p){ return !p.hidden; });
+  if (!PILLARS.length) PILLARS = ALL_PILLARS.slice(0, 1);
+  if (state.filterPillar && !PILLARS.some(function(p){ return p.id === state.filterPillar; })) state.filterPillar = null;
+}
+function resetProfile() {
+  auth.profile = null;
+  ALL_PILLARS = DEFAULT_PILLARS.slice();
+  PILLARS = ALL_PILLARS.filter(function(p){ return !p.hidden; });
+}
+function handleSessionEnded(message, isError) {
+  clearTimeout(autosaveTimer); autosavePending = false; editorState = {};
+  clearSession();
+  auth.session = ""; auth.profile = null;
+  state.posts = []; state.loading = false; state.view = "overview"; state.editingId = null;
+  state.speedDialOpen = false; state.showUrlModal = false;
+  state.loginMessage = message || ""; state.loginError = !!isError;
+  resetProfile();
+  render();
+}
+async function signOut() {
+  clearTimeout(autosaveTimer);
+  if (autosavePending && editorState._postId) { try { await doSaveNow(editorState._postId); } catch(e) {} }
+  handleSessionEnded("You have signed out.", false);
 }
 function genId() { return "post_"+Date.now()+"_"+Math.random().toString(36).slice(2,6); }
-function getPillar(id) { return PILLARS.find(p=>p.id===id); }
+function getPillar(id) { return ALL_PILLARS.find(p=>p.id===id); }
 function getStatus(id) { return STATUSES.find(s=>s.id===id); }
 function getPlatformDef(id) { return PLATFORMS_DEF.find(p=>p.id===id) || PLATFORMS_DEF[1]; }
 function safe(s) { return (s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
@@ -460,6 +593,7 @@ function navigate(view,id) {
     editorState={};
   }
   if(view==="editor" && state.view!=="editor") state.editorReturn=state.view;
+  if(view==="settings" && state.view!=="settings") initSettings();
   state.view=view;if(id)state.editingId=id;
   state.speedDialOpen=false;
   render();
@@ -611,6 +745,7 @@ async function loadFromSheet() {
     ensureVerdicts();
     state.loading=false;state.sheetStatus="connected";state.sheetMessage="Sheet connected";render();
   } catch(err) {
+    if(err.auth) return;   // session ended: the sign-in screen is already showing
     state.loading=false;state.sheetStatus="error";state.sheetMessage="Error: "+err.message;render();
     showToast("Could not load from sheet",true);
   }
@@ -659,7 +794,7 @@ async function deletePost(id) {
 }
 function blankPost(overrides) {
   return Object.assign({
-    id:genId(),title:"",pillar:"p1",status:"idea",platform:"linkedin",body:"",
+    id:genId(),title:"",pillar:(PILLARS[0]||ALL_PILLARS[0]||{id:"p1"}).id,status:"idea",platform:"linkedin",body:"",
     published_at:"",post_url:"",views:"",likes:"",comments:"",shares:"",verdict:"",
     photo_brief:"",suggested_date:"",embargoed:false,
     created_at:new Date().toISOString(),updated_at:new Date().toISOString(),
@@ -700,12 +835,13 @@ function duplicatePost(postId) {
   showToast("Duplicate created ✓");
   navigate("editor",newPost.id);
 }
-// v7.1: feedback is now an email to Oli rather than a post in the sheet
+// v7.1: feedback is an email to Oli rather than a post in the sheet (v7.5: or the address in the person's profile)
 function sendFeedback() {
   const subject="Arcturus feedback ("+APP_VERSION+")";
   const body="\n\n---\nArcturus "+APP_VERSION;
   showToast("Opening your mail app…");
-  window.location.href="mailto:"+FEEDBACK_EMAIL+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+  const to=(auth.profile&&auth.profile.feedback_email)||FEEDBACK_EMAIL;
+  window.location.href="mailto:"+to+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
 }
 function scheduleAutosave(postId) {
   clearTimeout(autosaveTimer);
@@ -902,7 +1038,7 @@ function renderAllTimeCard() {
   if(total===0){
     html += '<div style="font-size:12px;color:var(--text3)">Nothing published yet.</div>';
   } else {
-    PILLARS.forEach(function(pl){
+    ALL_PILLARS.filter(function(pl){return !pl.hidden||pubs.some(function(p){return p.pillar===pl.id;});}).forEach(function(pl){
       const n=pubs.filter(function(p){return p.pillar===pl.id;}).length;
       const pct=(n/total)*100;
       html += '<div class="pillar-bar-row">'
@@ -1546,7 +1682,9 @@ function renderEditor(post) {
     + '<div class="form-group"><label class="form-label">Title</label><input class="form-input" value="'+safe(e.title)+'" '+(e.title?"":"autofocus ")+'oninput="editorState.title=this.value;scheduleAutosave(\''+post.id+'\');const d=document.getElementById(\'editor-title-display\');if(d)d.innerHTML=this.value||\'<em style=color:var(--text3);font-style:italic>Untitled post</em>\'" placeholder="What\'s the core idea in a line?"></div>'
     + '<div class="form-row">'
     + '<div class="form-group"><label class="form-label">Pillar</label><select class="form-input form-select" onchange="editorState.pillar=this.value;scheduleAutosave(\''+post.id+'\')">';
-  PILLARS.forEach(function(p){ html += '<option value="'+p.id+'" '+(e.pillar===p.id?"selected":"")+'>'+p.label+'</option>'; });
+  const pillarOpts=PILLARS.slice();
+  if(pl&&pillarOpts.indexOf(pl)===-1) pillarOpts.push(pl);
+  pillarOpts.forEach(function(p){ html += '<option value="'+p.id+'" '+(e.pillar===p.id?"selected":"")+'>'+safe(p.label||p.short)+(p.hidden?" (hidden)":"")+'</option>'; });
   html += '</select></div>'
     + '<div class="form-group"><label class="form-label">Platform</label><select class="form-input form-select" onchange="handlePlatformChange(this.value)">';
   PLATFORMS_DEF.forEach(function(p){ html += '<option value="'+p.id+'" '+(e.platform===p.id?"selected":"")+'>'+p.label+'</option>'; });
@@ -1575,8 +1713,8 @@ function renderEditor(post) {
 }
 function renderSidebar() {
   const counts=PILLARS.reduce(function(acc,p){acc[p.id]=state.posts.filter(function(x){return x.pillar===p.id&&!isSystemRow(x);}).length;return acc;},{});
-  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">'+APP_VERSION+'</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
-  [{id:"overview",label:"Overview",key:"1"},{id:"library",label:"Post Library",key:"2"},{id:"calendar",label:"Calendar",key:"3"}].forEach(function(item){
+  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">'+APP_VERSION+(auth.profile&&auth.profile.display_name?' · '+safe(auth.profile.display_name):'')+'</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
+  [{id:"overview",label:"Overview",key:"1"},{id:"library",label:"Post Library",key:"2"},{id:"calendar",label:"Calendar",key:"3"},{id:"settings",label:"Settings",key:"4"}].forEach(function(item){
     const active=state.view===item.id||(item.id==="overview"&&state.view==="results");
     html += '<button class="nav-item '+(active?"active":"")+'" onclick="navigate(\''+item.id+'\')">'+item.label+'<span class="nav-key">'+item.key+'</span></button>';
   });
@@ -1607,6 +1745,7 @@ function renderSpeedDial() {
   const open = state.speedDialOpen;
   const items = [
     {action:"feedback", label:"Feedback", icon:"💬"},
+    {action:"settings", label:"Settings", icon:"⚙️"},
     {action:"calendar", label:"Calendar", icon:"📅"},
     {action:"library", label:"Post Library", icon:"📋"},
     {action:"overview", label:"Overview", icon:"🏠"},
@@ -1615,7 +1754,7 @@ function renderSpeedDial() {
   let html = '<div class="speed-dial-scrim'+(open?" open":"")+'" onclick="toggleSpeedDial()"></div>';
   html += '<div class="speed-dial'+(open?" open":"")+'">';
   items.forEach(function(it){
-    html += '<div class="speed-dial-item"><span class="speed-dial-label">'+it.label+'</span><button class="speed-dial-btn secondary" onclick="speedDialGo(\''+it.action+'\')">'+it.icon+'</button></div>';
+    html += '<div class="speed-dial-item"><span class="speed-dial-label" onclick="speedDialGo(\''+it.action+'\')">'+it.label+'</span><button class="speed-dial-btn secondary" onclick="speedDialGo(\''+it.action+'\')">'+it.icon+'</button></div>';
   });
   // v7.1: burger menu icon (was a + that users read as "add"); becomes a cross while the menu is open
   const burgerSVG='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>';
@@ -1652,6 +1791,8 @@ function renderMain() {
     html=topbarHTML("Post Library")+'<div class="view-enter">'+renderLibrary()+'</div>';
   }else if(state.view==="calendar"){
     html=topbarHTML("Calendar")+'<div class="view-enter">'+renderCalendar()+'</div>';
+  }else if(state.view==="settings"){
+    html=topbarHTML("Settings")+'<div class="view-enter">'+renderSettings()+'</div>';
   }else if(state.view==="results"){
     html=topbarHTML("All Results",'<button class="btn btn-ghost btn-sm" onclick="navigate(\'overview\')">← Overview</button>')+'<div class="view-enter">'+renderResults()+'</div>';
   }else{
@@ -1661,15 +1802,222 @@ function renderMain() {
 }
 function render() {
   const app=document.getElementById("app");
+  if(!auth.session){ renderLogin(); renderWelcomeRoot(); return; }
   app.innerHTML=renderSidebar()+'<div id="main-area" class="main"></div>'+renderSpeedDial()
     +(state.showUrlModal?renderUrlModal():"");
   renderMain();
+  renderWelcomeRoot();
 }
+// ── v7.5 SIGN-IN SCREEN ───────────────────────────────────────────────
+function renderLogin() {
+  const app = document.getElementById("app");
+  const setup = !hubConfigured();
+  const msg = setup
+    ? "Arcturus is not connected to its hub yet. Oli needs to add the hub address to index.html."
+    : (state.loginMessage || "");
+  const isErr = setup || state.loginError;
+  const last = lsGet(LAST_USER_KEY);
+  app.innerHTML = '<div class="login-wrap">'
+    + '<aside class="login-aside"><div class="login-mark">🟠 ARCTURUS</div>'
+    + '<p class="login-tag">Plan it. Write it. <em>Track what lands.</em></p>'
+    + '<div class="login-foot">Social Content Database · '+APP_VERSION+'</div></aside>'
+    + '<main class="login-main"><div class="login-card">'
+    + '<h1 class="login-title">Sign in</h1>'
+    + '<p class="login-lede">Use the username and passcode Oli gave you. Your username decides which Google Sheet opens, so there is nothing else to choose.</p>'
+    + '<form onsubmit="return doLogin(event)">'
+    + '<div class="form-group"><label class="form-label" for="login-user">Username</label><input class="form-input" id="login-user" name="username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" value="'+safe(last)+'"></div>'
+    + '<div class="form-group"><label class="form-label" for="login-pass">Passcode</label><input class="form-input" id="login-pass" name="password" type="password" autocomplete="current-password"></div>'
+    + '<label class="login-row"><input type="checkbox" id="login-remember" checked> Remember me on this device</label>'
+    + '<div class="login-msg'+(isErr?' error':'')+'" id="login-msg" role="status">'+safe(msg)+'</div>'
+    + '<button class="btn btn-primary" id="login-btn" type="submit" style="width:100%;justify-content:center;padding:11px 14px">Sign in</button>'
+    + '</form>'
+    + '<div class="login-links"><button class="link-btn" type="button" onclick="openWelcome()">How does Arcturus work?</button></div>'
+    + '</div></main></div>';
+  setTimeout(function(){
+    const el = document.getElementById(last ? "login-pass" : "login-user");
+    if (el && el.focus) el.focus();
+  }, 30);
+}
+function setLoginMessage(text, isErr) {
+  const el = document.getElementById("login-msg");
+  if (!el) return;
+  el.textContent = text;
+  el.className = "login-msg" + (isErr ? " error" : "");
+}
+async function doLogin(ev) {
+  if (ev && ev.preventDefault) ev.preventDefault();
+  const u = document.getElementById("login-user").value.trim().toLowerCase();
+  const pw = document.getElementById("login-pass").value;
+  const remember = document.getElementById("login-remember").checked;
+  if (!hubConfigured()) { setLoginMessage("Arcturus is not connected to its hub yet. Oli needs to add the hub address to index.html.", true); return false; }
+  if (!u || !pw) { setLoginMessage("Enter your username and passcode.", true); return false; }
+  const btn = document.getElementById("login-btn");
+  btn.disabled = true; btn.textContent = "Signing in…";
+  setLoginMessage("", false);
+  try {
+    const data = await hubCall("login", {username:u, passcode:pw, remember:remember}, true);
+    auth.session = data.session;
+    auth.username = (data.profile && data.profile.username) || u;
+    saveSession(data.session, remember);
+    lsSet(LAST_USER_KEY, auth.username);
+    applyProfile(data.profile || {});
+    state.posts = []; state.view = "overview"; state.loading = true;
+    state.loginMessage = ""; state.loginError = false;
+    state.showWelcome = lsGet("arcturus_welcome_" + auth.username) !== "1";
+    render();
+    loadFromSheet();
+  } catch(err) {
+    btn.disabled = false; btn.textContent = "Sign in";
+    setLoginMessage(err.message, true);
+    const pass = document.getElementById("login-pass");
+    if (pass) { pass.value = ""; pass.focus(); }
+  }
+  return false;
+}
+
+// ── v7.5 WELCOME SCREEN ───────────────────────────────────────────────
+let welcomeShown = false;
+function openWelcome() { state.showWelcome = true; renderWelcomeRoot(); }
+function closeWelcome() {
+  state.showWelcome = false;
+  if (auth.username) lsSet("arcturus_welcome_" + auth.username, "1");
+  renderWelcomeRoot();
+}
+function renderWelcomeRoot() {
+  if (state.showWelcome === welcomeShown) return;
+  welcomeShown = state.showWelcome;
+  const root = document.getElementById("welcome-root");
+  if (root) root.innerHTML = state.showWelcome ? welcomeHTML() : "";
+}
+function welcomeHTML() {
+  const name = auth.profile && auth.profile.display_name ? auth.profile.display_name : "";
+  const steps = [
+    ["Sign in once","Oli gives you a username and a passcode. Tick Remember me and this device stays signed in for 30 days. Sign out from Settings if the device is shared."],
+    ["Your Google Sheet is the database","Every post is one row in your own Google Sheet. Your username decides which sheet opens, so you never have to pick one. Arcturus is the screen, the sheet is where everything lives. Oli looks after the set-up and can open every sheet."],
+    ["It saves as you type","There is no save button. The dot beside the ARCTURUS wordmark shows Saving, Saved or Unsaved."],
+    ["Open the sheet whenever you like","Settings has an Open my sheet button. You can read, filter and export it. If you change something in the sheet by hand, press Refresh in Arcturus. Please leave the headings in row 1 alone, because Arcturus finds your data by them."],
+    ["Results fill themselves in","A Support task on your computer copies views, likes and comments from LinkedIn and Instagram into the sheet. A post is Tracking for 42 days, then it is rated Strong, Average or Weak."],
+    ["Make it yours","In Settings you can rename your pillars, change their colours and hide the ones you do not use."],
+  ];
+  let html = '<div class="modal-overlay" onclick="if(event.target===this)closeWelcome()"><div class="modal welcome" role="dialog" aria-modal="true" aria-labelledby="welcome-h">'
+    + '<div class="welcome-eyebrow">'+(name?'Welcome, '+safe(name):'Welcome')+'</div>'
+    + '<h2 class="welcome-title" id="welcome-h">How Arcturus works</h2>'
+    + '<p class="welcome-lede">Arcturus is where you plan, write and track your social posts. It runs in your browser and keeps everything in a Google Sheet that belongs to you.</p>'
+    + '<div class="flow" aria-hidden="true">'
+    + '<div class="flow-node"><b>Arcturus</b><span>On your phone or laptop</span></div><div class="flow-arrow">⇄</div>'
+    + '<div class="flow-node"><b>Sign-in</b><span>Checks your passcode</span></div><div class="flow-arrow">⇄</div>'
+    + '<div class="flow-node sheet"><b>Your sheet</b><span>Where your posts are kept</span></div></div>'
+    + '<ol class="welcome-steps">';
+  steps.forEach(function(st,i){
+    html += '<li class="welcome-step"><span class="welcome-num">'+(i+1)+'</span><div><b>'+st[0]+'</b><p>'+st[1]+'</p></div></li>';
+  });
+  html += '</ol><div class="welcome-actions"><button class="btn btn-primary" onclick="closeWelcome()">'+(auth.session?'Get started':'Close')+'</button></div></div></div>';
+  return html;
+}
+
+// ── v7.5 SETTINGS ─────────────────────────────────────────────────────
+let settingsState = {pillars:[], dirty:false, saving:false};
+function pillarCount(id) { return state.posts.filter(function(x){ return x.pillar===id && !isSystemRow(x); }).length; }
+function initSettings() {
+  const list = [];
+  for (let i = 1; i <= 5; i++) {
+    const id = "p" + i;
+    const f = ALL_PILLARS.find(function(p){ return p.id === id; });
+    if (f) { const c = Object.assign({}, f); if (!c.label) c.short = ""; list.push(c); }
+    else list.push({id:id, label:"", short:"", color:DEFAULT_COLOURS[i-1], hidden:true});
+  }
+  settingsState = {pillars:list, dirty:false, saving:false};
+}
+function pillarRowHTML(p) {
+  const off = !!p.hidden, n = pillarCount(p.id);
+  const posts = n + " post" + (n !== 1 ? "s" : "");
+  const note = off
+    ? (n > 0 ? posts + " still use this pillar. They keep it, but it is hidden from menus and filters." : (p.label ? "Hidden. No posts use it." : "Not in use. Add a name and switch it on to use it."))
+    : posts;
+  return '<div class="pe-row'+(off?' off':'')+'" id="pe-'+p.id+'">'
+    + '<input type="color" class="pe-colour" value="'+safe(p.color)+'" aria-label="Colour for pillar '+p.id.slice(1)+'" oninput="peSet(\''+p.id+'\',\'color\',this.value)">'
+    + '<div class="pe-fields"><input class="form-input" maxlength="60" placeholder="Pillar name" aria-label="Pillar name" value="'+safe(p.label)+'" oninput="peSet(\''+p.id+'\',\'label\',this.value)">'
+    + '<input class="form-input" maxlength="14" placeholder="Short name" aria-label="Short name" value="'+safe(p.short)+'" oninput="peSet(\''+p.id+'\',\'short\',this.value)"></div>'
+    + '<button type="button" class="pe-toggle'+(off?'':' on')+'" aria-pressed="'+(!off)+'" onclick="peToggle(\''+p.id+'\')">'+(off?'Hidden':'Shown')+'</button>'
+    + '<div class="pe-note">'+note+'</div></div>';
+}
+function peMarkDirty() {
+  settingsState.dirty = true;
+  const b = document.getElementById("pe-save"); if (b) b.disabled = false;
+  const r = document.getElementById("pe-reset"); if (r) r.disabled = false;
+  const m = document.getElementById("pe-msg"); if (m) { m.textContent = ""; m.className = "pe-msg"; }
+}
+function peSet(id, key, val) {
+  const p = settingsState.pillars.find(function(x){ return x.id === id; });
+  if (p) { p[key] = val; peMarkDirty(); }
+}
+function peToggle(id) {
+  const p = settingsState.pillars.find(function(x){ return x.id === id; });
+  if (!p) return;
+  p.hidden = !p.hidden;
+  const row = document.getElementById("pe-" + id);
+  if (row) row.outerHTML = pillarRowHTML(p);
+  peMarkDirty();
+}
+function peReset() { initSettings(); renderMain(); }
+async function peSave() {
+  if (settingsState.saving) return;
+  const list = settingsState.pillars.map(function(p){
+    const label = String(p.label || "").trim();
+    const short = (String(p.short || "").trim() || label.split(/\s+/)[0] || "").slice(0, 14);
+    return {id:p.id, label:label, short:short, color:p.color, hidden:!!p.hidden};
+  });
+  const shown = list.filter(function(p){ return !p.hidden; });
+  const msg = document.getElementById("pe-msg");
+  function fail(t) { if (msg) { msg.textContent = t; msg.className = "pe-msg error"; } }
+  if (!shown.length) { fail("Keep at least one pillar shown."); return; }
+  if (shown.some(function(p){ return !p.label; })) { fail("Give every shown pillar a name."); return; }
+  settingsState.saving = true;
+  const b = document.getElementById("pe-save"); if (b) { b.disabled = true; b.textContent = "Saving…"; }
+  try {
+    const data = await hubCall("saveProfile", {pillars:list});
+    applyProfile(data.profile || {pillars:list});
+    initSettings();
+    render();
+    showToast("Pillars saved ✓");
+  } catch(err) {
+    settingsState.saving = false;
+    if (!err.auth) { if (b) { b.disabled = false; b.textContent = "Save pillars"; } fail("Could not save: " + err.message); }
+  }
+}
+function renderSettings() {
+  const pr = auth.profile || {};
+  const who = safe(pr.display_name || auth.username || "");
+  let html = '<div class="content"><div class="settings-wrap">';
+  html += '<div class="card"><div class="card-header"><span class="card-title">Account</span></div><div class="card-body"><div class="set-row">'
+    + '<div class="set-text">Signed in as <b>'+who+'</b>'+(pr.username?' ('+safe(pr.username)+')':'')+'. Sign out here if you are on a shared device.</div>'
+    + '<div class="set-actions"><button class="btn btn-ghost" onclick="signOut()">Sign out</button></div></div></div></div>';
+  html += '<div class="card"><div class="card-header"><span class="card-title">Your Google Sheet</span></div><div class="card-body"><div class="set-row">'
+    + '<div class="set-text">Arcturus saves every post to your own Google Sheet, and your login decides which one opens. If you edit the sheet by hand, press Refresh to bring the changes in. Please keep the headings in row 1 as they are.</div>'
+    + '<div class="set-actions">'
+    + (pr.sheet_url?'<a class="btn btn-ghost" href="'+safe(pr.sheet_url)+'" target="_blank" rel="noopener">Open my sheet ↗</a>':'')
+    + '<button class="btn btn-ghost" onclick="loadFromSheet()">↻ Refresh</button>'
+    + '<button class="btn btn-ghost" onclick="openWelcome()">How Arcturus works</button></div></div></div></div>';
+  html += '<div class="card"><div class="card-header"><span class="card-title">Pillars</span></div><div class="card-body">'
+    + '<div class="set-text" style="margin-bottom:6px">Name your pillars, pick a colour for each and hide the ones you do not use. Renaming changes the label on every post that uses the pillar. Hiding one keeps its posts and only removes it from menus and filters.</div>';
+  settingsState.pillars.forEach(function(p){ html += pillarRowHTML(p); });
+  html += '<div class="pe-foot"><button class="btn btn-primary" id="pe-save" onclick="peSave()" '+(settingsState.dirty?'':'disabled')+'>Save pillars</button>'
+    + '<button class="btn btn-ghost" id="pe-reset" onclick="peReset()" '+(settingsState.dirty?'':'disabled')+'>Undo changes</button>'
+    + '<span class="pe-msg" id="pe-msg" role="status"></span></div></div></div>';
+  html += '<div class="card"><div class="card-header"><span class="card-title">About</span></div><div class="card-body"><div class="set-row">'
+    + '<div class="set-text"><b>Arcturus '+APP_VERSION+'</b><br>Shortcuts: 1 Overview, 2 Library, 3 Calendar, 4 Settings, N new post.</div>'
+    + '<div class="set-actions"><button class="btn btn-ghost" onclick="sendFeedback()">💬 Send feedback</button></div></div></div></div>';
+  html += '</div></div>';
+  return html;
+}
+
 // ── KEYBOARD SHORTCUTS ──────────────────────────────────────────────
 // 1/2/3 jump to Overview/Library/Calendar, N starts a new post. Ignored while
 // typing in any field, or while a modal is open, so it never fires mid-sentence
 // in the editor or steals a letter or number you're actually typing into a post.
 document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape" && state.showWelcome) { closeWelcome(); return; }
+  if (!auth.session || state.showWelcome) return;
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const tag = (e.target.tagName || "").toLowerCase();
   if (tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable) return;
@@ -1677,6 +2025,7 @@ document.addEventListener("keydown", function(e) {
   if (e.key === "1") { navigate("overview"); }
   else if (e.key === "2") { navigate("library"); }
   else if (e.key === "3") { navigate("calendar"); }
+  else if (e.key === "4") { navigate("settings"); }
   else if (e.key === "n" || e.key === "N") {
     if (state.loading) return;
     e.preventDefault();
@@ -1695,8 +2044,18 @@ window.addEventListener("resize", function(){
     if(state.view==="calendar") renderMain();
   },150);
 });
-render();
-loadFromSheet();
+// Boot: restore a saved session if there is one, otherwise show the sign-in screen
+(function boot() {
+  const saved = loadSession();
+  if (saved && hubConfigured()) {
+    auth.session = saved;
+    auth.username = saved.split(".")[0];
+    render();
+    loadFromSheet();
+  } else {
+    render();
+  }
+})();
 </script>
 </body>
 </html>
