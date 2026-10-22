@@ -362,7 +362,7 @@ a.btn{text-decoration:none}
 const APP_VERSION = "v7.5";
 // Paste the hub web app address here after deploying Code.gs (Deploy > New deployment > Web app).
 // The address on its own opens nothing: every request needs a signed-in session.
-const HUB_URL = https://script.google.com/macros/s/AKfycbwiBCSC8B__t1hA7K856AI032z5rB13itowZwks9KtWBft4IDgQlnH0RUa9YODsANDE8w/exec;
+const HUB_URL = "https://script.google.com/macros/s/AKfycbwiBCSC8B__t1hA7K856AI032z5rB13itowZwks9KtWBft4IDgQlnH0RUa9YODsANDE8w/exec";
 // Used when a person's profile has no feedback address of its own
 const FEEDBACK_EMAIL = "oliver.clubb@sundaytreat.com";
 const TRACK_TARGET_DAYS = {linkedin:3, instagram:7};
@@ -444,10 +444,23 @@ async function hubCall(action, payload, noSession) {
   const body = Object.assign({action:action}, payload || {});
   if (!noSession) body.session = auth.session;
   let res;
-  try { res = await fetch(HUB_URL, {method:"POST", body:JSON.stringify(body)}); }
-  catch(e) { throw new Error("Could not reach Arcturus. Check your connection."); }
+  const ctl = (typeof AbortController !== "undefined") ? new AbortController() : null;
+  const timer = ctl ? setTimeout(function(){ ctl.abort(); }, 25000) : null;
+  try { res = await fetch(HUB_URL, {method:"POST", body:JSON.stringify(body), signal:ctl ? ctl.signal : undefined}); }
+  catch(e) {
+    if (timer) clearTimeout(timer);
+    console.error("Arcturus: hub request failed", e);
+    throw new Error(e && e.name === "AbortError"
+      ? "The hub is taking too long to reply. Please try again in a moment."
+      : "Could not reach the hub. Check that the address in index.html ends in /exec and that the deployment's access is set to Anyone.");
+  }
+  if (timer) clearTimeout(timer);
   let data;
-  try { data = await res.json(); } catch(e) { throw new Error("Unexpected reply from the hub."); }
+  try { data = await res.json(); }
+  catch(e) {
+    console.error("Arcturus: hub did not return data", e);
+    throw new Error("The hub sent back a web page instead of data. In Apps Script choose Deploy, then Manage deployments, and check Who has access is set to Anyone.");
+  }
   if (!data.ok) {
     const err = new Error(data.error || "Request failed");
     if (data.code === "auth" && !noSession) { err.auth = true; handleSessionEnded("Your session has ended. Please sign in again.", true); }
@@ -1824,7 +1837,7 @@ function renderLogin() {
     + '<main class="login-main"><div class="login-card">'
     + '<h1 class="login-title">Sign in</h1>'
     + '<p class="login-lede">Use the username and passcode Oli gave you. Your username decides which Google Sheet opens, so there is nothing else to choose.</p>'
-    + '<form onsubmit="return doLogin(event)">'
+    + '<form onsubmit="event.preventDefault();doLogin(event);return false">'
     + '<div class="form-group"><label class="form-label" for="login-user">Username</label><input class="form-input" id="login-user" name="username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" value="'+safe(last)+'"></div>'
     + '<div class="form-group"><label class="form-label" for="login-pass">Passcode</label><input class="form-input" id="login-pass" name="password" type="password" autocomplete="current-password"></div>'
     + '<label class="login-row"><input type="checkbox" id="login-remember" checked> Remember me on this device</label>'
@@ -1845,6 +1858,16 @@ function setLoginMessage(text, isErr) {
   el.className = "login-msg" + (isErr ? " error" : "");
 }
 async function doLogin(ev) {
+  try { return await doLoginInner(ev); }
+  catch(e) {
+    console.error("Arcturus: sign-in failed", e);
+    setLoginMessage("Something went wrong: " + ((e && e.message) || e), true);
+    const b = document.getElementById("login-btn");
+    if (b) { b.disabled = false; b.textContent = "Sign in"; }
+    return false;
+  }
+}
+async function doLoginInner(ev) {
   if (ev && ev.preventDefault) ev.preventDefault();
   const u = document.getElementById("login-user").value.trim().toLowerCase();
   const pw = document.getElementById("login-pass").value;
@@ -1853,7 +1876,7 @@ async function doLogin(ev) {
   if (!u || !pw) { setLoginMessage("Enter your username and passcode.", true); return false; }
   const btn = document.getElementById("login-btn");
   btn.disabled = true; btn.textContent = "Signing in…";
-  setLoginMessage("", false);
+  setLoginMessage("Signing in. The first time can take a few seconds.", false);
   try {
     const data = await hubCall("login", {username:u, passcode:pw, remember:remember}, true);
     auth.session = data.session;
