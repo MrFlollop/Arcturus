@@ -328,6 +328,21 @@ a.btn{text-decoration:none}
 .set-text{font-size:13px;color:var(--text2);line-height:1.55;min-width:0;flex:1 1 260px}
 .set-text b{color:var(--text)}
 .set-actions{display:flex;gap:8px;flex-wrap:wrap}
+.trk-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px}
+.trk-facts div{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;min-width:0}
+.trk-facts span{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
+.trk-facts b{display:block;font-size:12px;word-break:break-all;color:var(--text)}
+.trk-steps{list-style:none;counter-reset:t;display:flex;flex-direction:column;gap:10px;margin:0 0 14px;padding:0}
+.trk-steps li{counter-increment:t;position:relative;padding-left:32px;font-size:13px;color:var(--text2);line-height:1.5}
+.trk-steps li::before{content:counter(t);position:absolute;left:0;top:0;width:22px;height:22px;border-radius:50%;background:var(--text);color:var(--bg);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.trk-steps b{color:var(--text)}
+.trk-steps p{margin:2px 0 0}
+.trk-inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:12px}
+.trk-inputs .form-label{display:block}
+.trk-inputs .form-input{margin-top:6px;text-transform:none;letter-spacing:0;font-family:var(--font-body)}
+.trk-prompt{width:100%;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:16px;line-height:1.45;resize:vertical;min-height:220px}
+@media(min-width:900px){.trk-prompt{font-size:12px}}
+
 .pe-row{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:6px 12px;align-items:start;padding:12px 0;border-bottom:1px solid var(--border)}
 .pe-colour{width:40px;height:40px;padding:2px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);cursor:pointer}
 .pe-fields{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:8px;min-width:0}
@@ -359,7 +374,9 @@ a.btn{text-decoration:none}
 <div id="welcome-root"></div>
 <div id="toast" class="toast"></div>
 <script>
-const APP_VERSION = "v7.5";
+const APP_VERSION = "v7.6";
+// Rolling release notes page. Same address every release: the page is republished with the newest version on top.
+const RELEASE_NOTES_URL = "https://claude.ai/artifact/6L9DVhoazfY4qLW5QUfG5H";
 // Paste the hub web app address here after deploying Code.gs (Deploy > New deployment > Web app).
 // The address on its own opens nothing: every request needs a signed-in session.
 const HUB_URL = "https://script.google.com/macros/s/AKfycbwiBCSC8B__t1hA7K856AI032z5rB13itowZwks9KtWBft4IDgQlnH0RUa9YODsANDE8w/exec";
@@ -518,7 +535,7 @@ function genId() { return "post_"+Date.now()+"_"+Math.random().toString(36).slic
 function getPillar(id) { return ALL_PILLARS.find(p=>p.id===id); }
 function getStatus(id) { return STATUSES.find(s=>s.id===id); }
 function getPlatformDef(id) { return PLATFORMS_DEF.find(p=>p.id===id) || PLATFORMS_DEF[1]; }
-function safe(s) { return (s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function safe(s) { return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 function formatDate(iso) { if(!iso)return""; try{return new Date(iso).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});}catch(e){return iso;} }
 function formatDateShort(iso) { if(!iso)return""; try{return new Date(iso).toLocaleDateString("en-GB",{day:"numeric",month:"short"});}catch(e){return iso;} }
 function formatDateTime(iso) { if(!iso)return""; try{return new Date(iso).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});}catch(e){return iso;} }
@@ -743,11 +760,23 @@ function metricsStatusTag(post) {
 function lockedVerdictBadge(post) {
   return isMetricsLocked(post) ? verdictBadge(post.verdict) : "";
 }
+// Google Sheets hands back numbers for cells that look like numbers (a title of 2026, a body of 12345).
+// The app expects text, so everything is turned into text here. Booleans are left alone.
+function plainPost(p) {
+  const o = {};
+  Object.keys(p || {}).forEach(function(k){
+    let v = p[k];
+    if (v === null || v === undefined) v = "";
+    else if (typeof v === "number") v = String(v);
+    o[k] = v;
+  });
+  return o;
+}
 async function loadFromSheet() {
   state.loading=true;state.sheetStatus="loading";state.sheetMessage="Loading from sheet…";render();
   try {
     const posts=await sheetRead();
-    state.posts=posts.map(function(p){
+    state.posts=posts.map(plainPost).map(function(p){
       if (p.id && (p.id.indexOf(GROWTH_ID_PREFIX)===0 || p.id.indexOf(IG_GROWTH_ID_PREFIX)===0)) return p;
       const legacyPlatforms=parsePlatformsLegacy(p.platforms);
       const platform = p.platform || (legacyPlatforms.indexOf("linkedin")!==-1?"linkedin":(legacyPlatforms.indexOf("instagram")!==-1?"instagram":"instagram"));
@@ -1736,6 +1765,7 @@ function renderSidebar() {
     html += '<button class="nav-item" onclick="state.filterPillar=\''+p.id+'\';navigate(\'library\')"><div class="nav-dot" style="background:'+p.color+'"></div>'+p.short+'<span class="nav-count">'+(counts[p.id]||0)+'</span></button>';
   });
   html += '</nav><div style="padding:12px 10px;border-top:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:8px">'
+    + '<button class="btn btn-ghost" style="width:100%;justify-content:center;color:#F7F4EF;border-color:rgba(255,255,255,0.15)" onclick="openReleaseNotes()">📝 Release notes</button>'
     + '<button class="btn btn-ghost" style="width:100%;justify-content:center;color:#F7F4EF;border-color:rgba(255,255,255,0.15)" onclick="sendFeedback()">💬 Feedback</button>'
     + '<button class="btn btn-primary" style="width:100%;justify-content:center" onclick="createNewPost()">+ New Post<span class="btn-key">N</span></button></div></div>';
   return html;
@@ -1748,16 +1778,22 @@ function toggleSpeedDial() {
   state.speedDialOpen = !state.speedDialOpen;
   render();
 }
+function openReleaseNotes() {
+  const w = window.open(RELEASE_NOTES_URL, "_blank", "noopener");
+  if (!w) showToast("Could not open release notes. Check your pop-up settings.", true);
+}
 function speedDialGo(action) {
   state.speedDialOpen = false;
   if(action==="new"){ createNewPost(); }
   else if(action==="feedback"){ render(); sendFeedback(); }
+  else if(action==="notes"){ render(); openReleaseNotes(); }
   else { navigate(action); }
 }
 function renderSpeedDial() {
   const open = state.speedDialOpen;
   const items = [
     {action:"feedback", label:"Feedback", icon:"💬"},
+    {action:"notes", label:"Release notes", icon:"📝"},
     {action:"settings", label:"Settings", icon:"⚙️"},
     {action:"calendar", label:"Calendar", icon:"📅"},
     {action:"library", label:"Post Library", icon:"📋"},
@@ -1788,6 +1824,9 @@ function topbarHTML(title,right) {
   return '<div class="topbar"><span class="topbar-title"><span class="topbar-brand">🟠 ARCTURUS</span>'+indicatorHTML("ai-mobile ai-dot-only")+title+'</span>'+(right||"")+'</div>';
 }
 function renderMain() {
+  try { renderMainInner(); } catch(e) { showCrash(e); }
+}
+function renderMainInner() {
   const main=document.getElementById("main-area");if(!main)return;
   let html="";
   if(state.loading){
@@ -1813,7 +1852,22 @@ function renderMain() {
   }
   main.innerHTML=html+renderSheetBar();
 }
+function showCrash(err) {
+  console.error("Arcturus: could not draw the screen", err);
+  const app=document.getElementById("app"); if(!app) return;
+  const detail=String((err&&(err.stack||err.message))||err).slice(0,700).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  app.innerHTML='<div class="login-wrap"><main class="login-main"><div class="login-card">'
+    +'<h1 class="login-title">Something went wrong</h1>'
+    +'<p class="login-lede">Arcturus could not draw this screen. Your posts are safe in your sheet. Please send Oli the text below.</p>'
+    +'<pre style="white-space:pre-wrap;word-break:break-word;font-size:11px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px;margin-bottom:16px;max-height:200px;overflow:auto">'+detail+'</pre>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" onclick="location.reload()">Reload</button>'
+    +'<button class="btn btn-ghost" onclick="handleSessionEnded(\'You have signed out.\',false)">Sign out</button></div>'
+    +'</div></main></div>';
+}
 function render() {
+  try { renderInner(); } catch(e) { showCrash(e); }
+}
+function renderInner() {
   const app=document.getElementById("app");
   if(!auth.session){ renderLogin(); renderWelcomeRoot(); return; }
   app.innerHTML=renderSidebar()+'<div id="main-area" class="main"></div>'+renderSpeedDial()
@@ -1832,7 +1886,7 @@ function renderLogin() {
   const last = lsGet(LAST_USER_KEY);
   app.innerHTML = '<div class="login-wrap">'
     + '<aside class="login-aside"><div class="login-mark">🟠 ARCTURUS</div>'
-    + '<p class="login-tag">Plan it. Write it. <em>Track what lands.</em></p>'
+    + '<p class="login-tag">Make socials <em>easier to track.</em></p>'
     + '<div class="login-foot">Social Content Database · '+APP_VERSION+'</div></aside>'
     + '<main class="login-main"><div class="login-card">'
     + '<h1 class="login-title">Sign in</h1>'
@@ -2008,6 +2062,98 @@ async function peSave() {
     if (!err.auth) { if (b) { b.disabled = false; b.textContent = "Save pillars"; } fail("Could not save: " + err.message); }
   }
 }
+// ── v7.6 TRACKING SET-UP ──────────────────────────────────────────────
+// Builds a personalised prompt for a Claude Cowork scheduled task that copies results from
+// LinkedIn and Instagram into this person's own sheet. Everything it needs comes from the signed-in profile.
+const trackMem = {};
+function trackPrefGet(k) { if (k in trackMem) return trackMem[k]; try { return localStorage.getItem("arc_track_"+k) || ""; } catch(e) { return ""; } }
+function trackPrefSet(k,v) { trackMem[k] = v; try { localStorage.setItem("arc_track_"+k, v); } catch(e) {} }
+function sheetIdFromUrl(u) { const m = String(u||"").match(/\/d\/([a-zA-Z0-9_-]+)/); return m ? m[1] : ""; }
+function trackingPrompt() {
+  const pr = auth.profile || {};
+  const name = pr.display_name || pr.username || auth.username || "me";
+  const user = pr.username || auth.username || "";
+  const sid = sheetIdFromUrl(pr.sheet_url);
+  const tab = pr.tab || "";
+  const li = (trackPrefGet("li") || "").trim();
+  const ig = (trackPrefGet("ig") || "").trim().replace(/^@/, "");
+  const L = [];
+  L.push("You are my daily social tracking assistant for Arcturus. Your job is to copy results from my LinkedIn and Instagram into my Google Sheet, so my content dashboard stays up to date. Work carefully and change only what is listed below.");
+  L.push("");
+  L.push("MY DETAILS");
+  L.push("- Name: " + name);
+  L.push("- Arcturus username: " + (user || "[your username]"));
+  L.push("- Google Sheet ID: " + (sid || "[your sheet ID]"));
+  L.push("- Sheet link: " + (pr.sheet_url || "[your sheet link]"));
+  L.push("- Tab: " + (tab ? tab : "the first tab in the sheet"));
+  L.push("- LinkedIn profile: " + (li || "[paste your LinkedIn profile address]"));
+  L.push("- Instagram: " + (ig ? "@" + ig + " (https://www.instagram.com/" + ig + "/)" : "[your Instagram username]"));
+  L.push("");
+  L.push("TOOLS");
+  L.push("- Use the Google Sheets connector to read and write ONLY the sheet above.");
+  L.push("- Use Claude in Chrome to open my LinkedIn and Instagram. I am already signed in to both in Chrome. If either asks me to sign in or shows a security check, stop that platform, do not try to get round it, and say so in your report.");
+  L.push("");
+  L.push("HOW THE SHEET WORKS");
+  L.push("- Row 1 holds the column headings. Find every column by its heading name, never by its position, and never change row 1.");
+  L.push("- Each post is one row. Relevant columns: id, title, platform (linkedin or instagram), status, post_url, published_at, views, likes, comments, shares, followers, connections, updated_at.");
+  L.push("- Never touch the columns verdict, body, photo_brief, pillar, title, status or embargoed.");
+  L.push("");
+  L.push("STEP 1: POST RESULTS");
+  L.push("1. Read the sheet. Select rows where status is Published, post_url is not empty, and published_at is within the last 42 days. Ignore every other row, including any row whose id starts with growth_ or ig_growth_.");
+  L.push("2. For each selected row, open its post_url in Chrome and read the current numbers: views (impressions or plays), likes (reactions), comments and shares (reposts). If a number is not shown for that post, leave that cell as it is rather than guessing.");
+  L.push("3. Write the numbers into views, likes, comments and shares on that same row, as plain numbers with no commas or text. Set updated_at to the current date and time in ISO format (for example 2026-10-22T09:00:00Z).");
+  L.push("4. Refresh every day for the full 42 days. Numbers only go up, so if a figure you read is lower than the one already in the sheet, keep the higher one.");
+  L.push("");
+  L.push("STEP 2: AUDIENCE GROWTH");
+  L.push("1. Read my current LinkedIn connections count from my LinkedIn profile.");
+  L.push("2. Add ONE new row at the bottom of the sheet with id growth_ followed by today's date as YYYY-MM-DD (for example growth_2026-10-22), connections set to the number, and updated_at set to now. If a row with that id already exists, update it instead of adding another.");
+  L.push("3. Read my current Instagram followers count from my Instagram profile.");
+  L.push("4. Add ONE new row with id ig_growth_ followed by today's date (for example ig_growth_2026-10-22), followers set to the number, and updated_at set to now. Update it if that id already exists.");
+  L.push("5. Leave every other cell on those two rows empty.");
+  L.push("");
+  L.push("RULES");
+  L.push("- Do not create, delete or reorder any other rows. Do not edit any post text.");
+  L.push("- If something looks wrong (a post cannot be opened, a column is missing, the sheet will not open), do not improvise. Skip it and tell me in the report.");
+  L.push("");
+  L.push("REPORT");
+  L.push("When you finish, reply with a short summary: how many posts you updated, today's connections and followers counts, and anything you skipped and why.");
+  return L.join("\n");
+}
+function trackInput(k,v) {
+  trackPrefSet(k,v);
+  const t = document.getElementById("track-prompt"); if (t) t.value = trackingPrompt();
+}
+function copyTrackingPrompt(btn) { copyToClipboard(trackingPrompt(), btn, "Prompt copied"); }
+function trackingCardHTML() {
+  const pr = auth.profile || {};
+  const sid = sheetIdFromUrl(pr.sheet_url);
+  const tab = pr.tab || "";
+  const steps = [
+    ["Check you have the tools","You need the Claude desktop app, the Claude in Chrome extension, and the Google Sheets connector switched on in Claude. Sign in to LinkedIn and Instagram in Chrome on that same computer."],
+    ["Check Claude can edit your sheet","Open your sheet with the button above. The Google account connected to Claude must be able to edit it. If you cannot edit it, ask Oli to share it with you."],
+    ["Add your LinkedIn and Instagram","Fill in the two boxes below. They are saved on this device only, and they update the prompt as you type."],
+    ["Copy the prompt","Press Copy prompt. It already contains your username and sheet details."],
+    ["Create a scheduled task in Claude","In the Claude desktop app, start a new scheduled task, paste the prompt in, and set it to run once a day at a time your computer is switched on and awake. Early morning or lunchtime works well."],
+    ["Run it once to test","Run the task once by hand, watch it work through a post or two, then press Refresh in Arcturus. Posts should show their numbers, and the Overview should show today's connections and followers."],
+  ];
+  let h = '<div class="card"><div class="card-header"><span class="card-title">Set up your own tracking</span></div><div class="card-body">'
+    + '<div class="set-text" style="margin-bottom:10px">Arcturus does not read LinkedIn or Instagram itself. A scheduled task in Claude on your computer collects the numbers and writes them into your sheet, then Arcturus shows them. The prompt below is written for you, using your own username and sheet.</div>'
+    + '<div class="trk-facts"><div><span>Username</span><b>'+safe(pr.username||auth.username||"")+'</b></div>'
+    + '<div><span>Sheet ID</span><b>'+(sid?safe(sid):"Not available")+'</b></div>'
+    + '<div><span>Tab</span><b>'+(tab?safe(tab):"First tab")+'</b></div></div>'
+    + '<ol class="trk-steps">';
+  steps.forEach(function(st){ h += '<li><b>'+st[0]+'</b><p>'+st[1]+'</p></li>'; });
+  h += '</ol>'
+    + '<div class="trk-inputs"><label class="form-label">Your LinkedIn profile address<input class="form-input" id="track-li" inputmode="url" autocapitalize="off" autocomplete="off" placeholder="https://www.linkedin.com/in/your-name" value="'+safe(trackPrefGet("li"))+'" oninput="trackInput(\'li\',this.value)"></label>'
+    + '<label class="form-label">Your Instagram username<input class="form-input" id="track-ig" autocapitalize="off" autocomplete="off" placeholder="@yourname" value="'+safe(trackPrefGet("ig"))+'" oninput="trackInput(\'ig\',this.value)"></label></div>'
+    + '<label class="form-label" for="track-prompt">Your Claude Cowork prompt</label>'
+    + '<textarea class="form-input trk-prompt" id="track-prompt" readonly rows="14" onfocus="this.select()">'+safe(trackingPrompt())+'</textarea>'
+    + '<div class="pe-foot"><button class="btn btn-primary" onclick="copyTrackingPrompt(this)">Copy prompt</button>'
+    + '<span class="pe-msg">Text in square brackets means a detail is missing. Fill the boxes above first.</span></div>'
+    + '<div class="set-text" style="margin-top:12px"><b>Good to know.</b> The task only works while your computer is on and Claude is open. A missed day is fine, because the next run catches up on every post from the last 42 days. If LinkedIn or Instagram asks you to sign in again, do that in Chrome and run the task once more.</div>'
+    + '</div></div>';
+  return h;
+}
 function renderSettings() {
   const pr = auth.profile || {};
   const who = safe(pr.display_name || auth.username || "");
@@ -2027,9 +2173,10 @@ function renderSettings() {
   html += '<div class="pe-foot"><button class="btn btn-primary" id="pe-save" onclick="peSave()" '+(settingsState.dirty?'':'disabled')+'>Save pillars</button>'
     + '<button class="btn btn-ghost" id="pe-reset" onclick="peReset()" '+(settingsState.dirty?'':'disabled')+'>Undo changes</button>'
     + '<span class="pe-msg" id="pe-msg" role="status"></span></div></div></div>';
+  html += trackingCardHTML();
   html += '<div class="card"><div class="card-header"><span class="card-title">About</span></div><div class="card-body"><div class="set-row">'
     + '<div class="set-text"><b>Arcturus '+APP_VERSION+'</b><br>Shortcuts: 1 Overview, 2 Library, 3 Calendar, 4 Settings, N new post.</div>'
-    + '<div class="set-actions"><button class="btn btn-ghost" onclick="sendFeedback()">💬 Send feedback</button></div></div></div></div>';
+    + '<div class="set-actions"><button class="btn btn-ghost" onclick="openReleaseNotes()">📝 Release notes</button><button class="btn btn-ghost" onclick="sendFeedback()">💬 Send feedback</button></div></div></div></div>';
   html += '</div></div>';
   return html;
 }
