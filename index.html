@@ -362,19 +362,84 @@ a.btn{text-decoration:none}
   .flow{grid-template-columns:minmax(0,1fr)}
   .flow-arrow{justify-self:center;transform:rotate(90deg)}
   .modal.welcome{padding:20px 20px 0}
+  .modal.whatsnew{width:100%}
   .pe-fields{grid-template-columns:minmax(0,1fr)}
   .speed-dial-item:nth-child(5){transition-delay:0.18s}
   .speed-dial-item:nth-child(6){transition-delay:0.22s}
 }
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+/* v7.7.1 SIDEBAR (BOARD layout), USER BLOCK, FEEDBACK, WHAT'S NEW */
+.sidebar-new{padding:14px 10px 4px}
+.sidebar-new .btn{width:100%;justify-content:center}
+.nav-icon{width:16px;height:16px;flex-shrink:0;opacity:0.85}
+.nav-dot-wrap{width:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sidebar-footer{padding:10px 10px 14px;border-top:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:2px}
+.user-block{display:flex;align-items:center;gap:10px;width:100%;margin-top:8px;padding:8px 10px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;background:rgba(255,255,255,0.04);color:#F7F4EF;cursor:pointer;text-align:left;font-family:var(--font-body);transition:background 0.15s var(--ease),border-color 0.15s var(--ease)}
+.user-block:hover{background:rgba(255,255,255,0.09);border-color:rgba(255,255,255,0.2)}
+.user-block .nav-icon{opacity:0.5}
+.user-block:hover .nav-icon{opacity:0.9}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:0.02em;flex-shrink:0}
+.user-text{display:flex;flex-direction:column;min-width:0;flex:1}
+.user-name{font-size:13px;font-weight:500;line-height:1.25;overflow-wrap:anywhere}
+.user-sub{font-size:9px;font-family:var(--font-mono);letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,244,239,0.4);margin-top:2px}
+.sidebar-meta{padding:12px 10px 0}
+.sidebar-version{font-size:9px;color:rgba(247,244,239,0.3);letter-spacing:0.08em;font-family:var(--font-mono)}
+.sidebar-love{font-size:11px;font-style:italic;color:rgba(247,244,239,0.45);line-height:1.4;margin-top:4px}
+.fb-type-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.whatsnew{width:460px}
+.whatsnew-eyebrow{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent2);font-family:var(--font-mono);margin-bottom:10px}
+.whatsnew-release{margin-bottom:18px}
+.whatsnew-release + .whatsnew-release{border-top:1px solid var(--border);padding-top:16px}
+.whatsnew-version{font-family:var(--font-display);font-size:32px;line-height:1.1;color:var(--text)}
+.whatsnew-release.older .whatsnew-version{font-size:20px}
+.whatsnew-date{font-size:11px;color:var(--text3);font-family:var(--font-mono);margin:4px 0 14px}
+.whatsnew-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+.whatsnew-list li{font-size:13px;line-height:1.5;color:var(--text2);padding-left:16px;position:relative}
+.whatsnew-list li::before{content:"";position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:2px;background:var(--accent)}
+.whatsnew-list li strong{color:var(--text);font-weight:600}
 </style>
 </head>
 <body>
 <div id="app" class="app"></div>
 <div id="welcome-root"></div>
+<div id="overlay-root"></div>
 <div id="toast" class="toast"></div>
 <script>
-const APP_VERSION = "v7.6";
+const APP_VERSION = "v7.7.1";
+// v7.7.1 update flow. Every update signs people out once, then shows What's New after they sign back in.
+const SIGNED_IN_BUILD_KEY = "arcturus_signed_in_build";
+const LAST_SEEN_KEY = "arcturus_last_seen_version";
+const FEEDBACK_ID_PREFIX = "feedback_";
+const FEEDBACK_TYPES = [
+  {id:"idea",label:"Idea"},
+  {id:"bug",label:"Bug"},
+  {id:"other",label:"Other"},
+];
+// Release notes shown in the What's New screen. Newest first, customer-facing only.
+// Add an entry for every release. Add signOut:false to an entry for a tiny fix that should not sign everyone out.
+const CHANGELOG = [
+  {version:"v7.7.1", date:"30 Oct 2026", items:[
+    "<strong>Feedback now sends from inside Arcturus.</strong> Tap Feedback, write your note and press Send. No mail app needed.",
+    "<strong>New Post moved to the top of the sidebar</strong>, straight under the logo.",
+    "<strong>Sidebar refresh.</strong> Icons on every item, with Release notes, Feedback and the version number at the bottom.",
+    "<strong>Your name now sits at the bottom of the sidebar.</strong> Tap it to sign out.",
+    "<strong>Clearer updates.</strong> After each update you sign in again and see what changed, like this screen. If Arcturus is already open when an update goes live, it asks you to reload."
+  ]}
+];
+// Sidebar icons (line style, they take the colour of the text around them)
+const NAV_ICONS = {
+  overview:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  library:'<rect x="3" y="3" width="18" height="18" rx="3"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/>',
+  calendar:'<rect x="3" y="4.5" width="18" height="16.5" rx="3"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/>',
+  settings:'<circle cx="12" cy="12" r="3"/><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>',
+  notes:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/>',
+  feedback:'<path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 20.5l1.6-5.1A8.5 8.5 0 1 1 21 11.5z"/>',
+  plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+};
+function navIcon(name) {
+  return '<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(NAV_ICONS[name]||"")+'</svg>';
+}
 // Rolling release notes page. Same address every release: the page is republished with the newest version on top.
 const RELEASE_NOTES_URL = "https://claude.ai/artifact/6L9DVhoazfY4qLW5QUfG5H";
 // Paste the hub web app address here after deploying Code.gs (Deploy > New deployment > Web app).
@@ -431,6 +496,7 @@ let state = {
   loading:true,sheetStatus:"loading",sheetMessage:"Connecting…",pendingSync:[],
   calWeekOffset:0,
   loginMessage:"",loginError:false,showWelcome:false,
+  showFeedbackModal:false,feedbackType:"idea",feedbackDraft:"",feedbackError:"",feedbackSending:false,showWhatsNew:false,updateAvailable:"",
 };
 let editorState = {};
 let autosaveTimer = null;
@@ -522,6 +588,7 @@ function handleSessionEnded(message, isError) {
   auth.session = ""; auth.profile = null;
   state.posts = []; state.loading = false; state.view = "overview"; state.editingId = null;
   state.speedDialOpen = false; state.showUrlModal = false;
+  state.showFeedbackModal = false; state.showWhatsNew = false;
   state.loginMessage = message || ""; state.loginError = !!isError;
   resetProfile();
   render();
@@ -685,7 +752,7 @@ function verdictBadge(v) {
   return '<span class="tag" style="background:'+c+'18;color:'+c+'">'+v+'</span>';
 }
 function isGrowthRow(post) { return post.id && (post.id.indexOf(GROWTH_ID_PREFIX)===0 || post.id.indexOf(IG_GROWTH_ID_PREFIX)===0); }
-function isFeedbackRow(post) { return post.id===FEEDBACK_POST_ID || post.title===FEEDBACK_TITLE; }
+function isFeedbackRow(post) { return post.id===FEEDBACK_POST_ID || post.title===FEEDBACK_TITLE || (post.id && String(post.id).indexOf(FEEDBACK_ID_PREFIX)===0); }
 // Rows that live in the sheet but are never shown as posts anywhere in the app
 function isSystemRow(post) { return isGrowthRow(post) || isFeedbackRow(post); }
 function getGrowthEntries() {
@@ -877,13 +944,56 @@ function duplicatePost(postId) {
   showToast("Duplicate created ✓");
   navigate("editor",newPost.id);
 }
-// v7.1: feedback is an email to Oli rather than a post in the sheet (v7.5: or the address in the person's profile)
-function sendFeedback() {
+// v7.7.1: feedback is written from inside the app. It is saved as a hidden row in the person's own
+// sheet (id starts feedback_, never shown as a post). If that fails, the person can email it instead.
+function openFeedback() {
+  state.speedDialOpen=false;
+  state.showFeedbackModal=true;
+  state.feedbackError="";
+  render();
+}
+function closeFeedback() {
+  state.showFeedbackModal=false;
+  state.feedbackError="";
+  renderOverlays();
+}
+function setFeedbackType(id) {
+  state.feedbackType=id;
+  renderOverlays();
+}
+function emailFeedback() {
   const subject="Arcturus feedback ("+APP_VERSION+")";
-  const body="\n\n---\nArcturus "+APP_VERSION;
-  showToast("Opening your mail app…");
+  const body=(state.feedbackDraft||"")+"\n\n---\nArcturus "+APP_VERSION;
   const to=(auth.profile&&auth.profile.feedback_email)||FEEDBACK_EMAIL;
   window.location.href="mailto:"+to+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+}
+async function sendFeedback() {
+  if(state.feedbackSending) return;
+  const msg=(state.feedbackDraft||"").trim();
+  if(!msg){ state.feedbackError="Write a message first."; renderOverlays(); return; }
+  const typeDef=FEEDBACK_TYPES.find(function(t){return t.id===state.feedbackType;})||FEEDBACK_TYPES[0];
+  const who=(auth.profile&&auth.profile.display_name)||auth.username;
+  const context="Sent from Arcturus "+APP_VERSION+" by "+who+" ("+auth.username+"), "+state.view+" screen, "+window.innerWidth+"px wide";
+  const post=blankPost({
+    id:FEEDBACK_ID_PREFIX+Date.now()+"_"+Math.random().toString(36).slice(2,6),
+    title:"["+typeDef.label+"] "+msg.split("\n")[0].slice(0,70),
+    platform:"feedback",
+    status:"idea",
+    body:msg+"\n\n"+context,
+  });
+  state.feedbackSending=true; state.feedbackError="";
+  renderOverlays();
+  try {
+    await sheetWrite(post);
+    state.feedbackDraft=""; state.feedbackType="idea"; state.feedbackSending=false; state.showFeedbackModal=false;
+    renderOverlays();
+    showToast("Feedback sent ✓");
+  } catch(err) {
+    state.feedbackSending=false;
+    if(err.auth) return;   // session ended: the sign-in screen is already showing
+    state.feedbackError="Could not send: "+err.message;
+    renderOverlays();
+  }
 }
 function scheduleAutosave(postId) {
   clearTimeout(autosaveTimer);
@@ -1753,21 +1863,42 @@ function renderEditor(post) {
     + '</div></div>';
   return html;
 }
+function userInitials(name) {
+  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "?";
+  const first = parts[0].charAt(0), last = parts.length > 1 ? parts[parts.length - 1].charAt(0) : "";
+  return (first + last).toUpperCase();
+}
+// v7.7.1 layout, following BOARD: brand block, split line, New Post, grouped nav with section labels,
+// then Release notes, Feedback, the signed-in person (tap to sign out), version and credit at the bottom.
+// Colours, fonts and the active state are unchanged.
 function renderSidebar() {
   const counts=PILLARS.reduce(function(acc,p){acc[p.id]=state.posts.filter(function(x){return x.pillar===p.id&&!isSystemRow(x);}).length;return acc;},{});
-  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div><div class="sidebar-logo-version">'+APP_VERSION+(auth.profile&&auth.profile.display_name?' · '+safe(auth.profile.display_name):'')+'</div></div><nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
-  [{id:"overview",label:"Overview",key:"1"},{id:"library",label:"Post Library",key:"2"},{id:"calendar",label:"Calendar",key:"3"},{id:"settings",label:"Settings",key:"4"}].forEach(function(item){
+  const pr=auth.profile||{};
+  const fullName=pr.display_name||auth.username||"Signed in";
+  let html = '<div class="sidebar"><div class="sidebar-logo"><div class="sidebar-logo-name">🟠 ARCTURUS</div><div class="sidebar-logo-sub">Social Content Database</div></div>'
+    + '<div class="sidebar-new"><button class="btn btn-primary" onclick="createNewPost()">'+navIcon("plus")+'New Post<span class="btn-key">N</span></button></div>'
+    + '<nav class="sidebar-nav"><div class="sidebar-section-label">Views</div>';
+  function navItem(item) {
     const active=state.view===item.id||(item.id==="overview"&&state.view==="results");
-    html += '<button class="nav-item '+(active?"active":"")+'" onclick="navigate(\''+item.id+'\')">'+item.label+'<span class="nav-key">'+item.key+'</span></button>';
-  });
+    return '<button class="nav-item '+(active?"active":"")+'" onclick="navigate(\''+item.id+'\')">'+navIcon(item.id)+item.label+'<span class="nav-key">'+item.key+'</span></button>';
+  }
+  [{id:"overview",label:"Overview",key:"1"},{id:"library",label:"Post Library",key:"2"},{id:"calendar",label:"Calendar",key:"3"}].forEach(function(item){ html += navItem(item); });
   html += '<div class="sidebar-section-label" style="margin-top:8px">Pillars</div>';
   PILLARS.forEach(function(p){
-    html += '<button class="nav-item" onclick="state.filterPillar=\''+p.id+'\';navigate(\'library\')"><div class="nav-dot" style="background:'+p.color+'"></div>'+p.short+'<span class="nav-count">'+(counts[p.id]||0)+'</span></button>';
+    html += '<button class="nav-item" onclick="state.filterPillar=\''+p.id+'\';navigate(\'library\')"><span class="nav-dot-wrap"><span class="nav-dot" style="background:'+p.color+'"></span></span>'+safe(p.short)+'<span class="nav-count">'+(counts[p.id]||0)+'</span></button>';
   });
-  html += '</nav><div style="padding:12px 10px;border-top:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:8px">'
-    + '<button class="btn btn-ghost" style="width:100%;justify-content:center;color:#F7F4EF;border-color:rgba(255,255,255,0.15)" onclick="openReleaseNotes()">📝 Release notes</button>'
-    + '<button class="btn btn-ghost" style="width:100%;justify-content:center;color:#F7F4EF;border-color:rgba(255,255,255,0.15)" onclick="sendFeedback()">💬 Feedback</button>'
-    + '<button class="btn btn-primary" style="width:100%;justify-content:center" onclick="createNewPost()">+ New Post<span class="btn-key">N</span></button></div></div>';
+  html += '<div class="sidebar-section-label" style="margin-top:8px">Admin</div>';
+  html += navItem({id:"settings",label:"Settings",key:"4"});
+  html += '</nav><div class="sidebar-footer">'
+    + '<button class="nav-item" onclick="openReleaseNotes()">'+navIcon("notes")+'Release notes</button>'
+    + '<button class="nav-item" onclick="openFeedback()">'+navIcon("feedback")+'Feedback</button>'
+    + '<button class="user-block" onclick="signOut()" title="Sign out" aria-label="Sign out '+safe(fullName)+'">'
+    + '<span class="user-avatar">'+safe(userInitials(fullName))+'</span>'
+    + '<span class="user-text"><span class="user-name">'+safe(fullName)+'</span><span class="user-sub">Sign out</span></span>'
+    + navIcon("logout")+'</button>'
+    + '<div class="sidebar-meta"><div class="sidebar-version">'+safe(APP_VERSION)+'</div><div class="sidebar-love">Built with love by Mr Flollop 🧡</div></div>'
+    + '</div></div>';
   return html;
 }
 // Mobile-only. Replaces the old fixed 3-item bar + separate hamburger menu —
@@ -1785,7 +1916,7 @@ function openReleaseNotes() {
 function speedDialGo(action) {
   state.speedDialOpen = false;
   if(action==="new"){ createNewPost(); }
-  else if(action==="feedback"){ render(); sendFeedback(); }
+  else if(action==="feedback"){ openFeedback(); }
   else if(action==="notes"){ render(); openReleaseNotes(); }
   else { navigate(action); }
 }
@@ -1869,11 +2000,12 @@ function render() {
 }
 function renderInner() {
   const app=document.getElementById("app");
-  if(!auth.session){ renderLogin(); renderWelcomeRoot(); return; }
+  if(!auth.session){ renderLogin(); renderWelcomeRoot(); renderOverlays(); return; }
   app.innerHTML=renderSidebar()+'<div id="main-area" class="main"></div>'+renderSpeedDial()
     +(state.showUrlModal?renderUrlModal():"");
   renderMain();
   renderWelcomeRoot();
+  renderOverlays();
 }
 // ── v7.5 SIGN-IN SCREEN ───────────────────────────────────────────────
 function renderLogin() {
@@ -1941,6 +2073,8 @@ async function doLoginInner(ev) {
     state.posts = []; state.view = "overview"; state.loading = true;
     state.loginMessage = ""; state.loginError = false;
     state.showWelcome = lsGet("arcturus_welcome_" + auth.username) !== "1";
+    lsSet(SIGNED_IN_BUILD_KEY, APP_VERSION);
+    afterSignIn();
     render();
     loadFromSheet();
   } catch(err) {
@@ -1950,6 +2084,133 @@ async function doLoginInner(ev) {
     if (pass) { pass.value = ""; pass.focus(); }
   }
   return false;
+}
+
+// ── v7.7.1 OVERLAYS, WHAT'S NEW, FORCED SIGN-OUT AND UPDATE CHECK ─────────
+// Feedback, What's New and the update prompt live in #overlay-root. They are only redrawn when
+// one of the things that shapes them changes, so typing in the feedback box is never interrupted.
+function parseVersion(v) {
+  return String(v||"0").replace(/^v/i,"").split(".").map(function(n){ return parseInt(n,10)||0; });
+}
+function cmpVersion(a,b) {
+  const x=parseVersion(a), y=parseVersion(b);
+  const len=Math.max(x.length,y.length);
+  for(let i=0;i<len;i++){
+    const d=(x[i]||0)-(y[i]||0);
+    if(d!==0) return d;
+  }
+  return 0;
+}
+// True when a release the person has not signed in under yet asks for a fresh sign-in (the default)
+function needsForcedSignOut() {
+  const built=lsGet(SIGNED_IN_BUILD_KEY)||"0";
+  return CHANGELOG.some(function(r){ return r.signOut!==false && cmpVersion(r.version,built)>0 && cmpVersion(r.version,APP_VERSION)<=0; });
+}
+// Releases this device has not shown yet. A device that has never shown one gets just the newest.
+function getPendingReleaseNotes() {
+  const last=lsGet(LAST_SEEN_KEY);
+  const sorted=CHANGELOG.slice().sort(function(a,b){ return cmpVersion(b.version,a.version); });
+  if(!last) return sorted.slice(0,1);
+  return sorted.filter(function(r){ return cmpVersion(r.version,last)>0 && cmpVersion(r.version,APP_VERSION)<=0; });
+}
+// Called once a person is signed in. Brand new people get the Welcome screen instead of What's New.
+function afterSignIn() {
+  if(state.showWelcome){ lsSet(LAST_SEEN_KEY,APP_VERSION); state.showWhatsNew=false; }
+  else if(getPendingReleaseNotes().length>0){ state.showWhatsNew=true; }
+  else { lsSet(LAST_SEEN_KEY,APP_VERSION); }
+}
+function dismissWhatsNew() {
+  lsSet(LAST_SEEN_KEY,APP_VERSION);
+  state.showWhatsNew=false;
+  renderOverlays();
+}
+function feedbackModalHTML() {
+  const sending=state.feedbackSending;
+  let h='<div class="modal-overlay" onclick="if(event.target===this)closeFeedback()"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="fb-h" style="width:440px">'
+    + '<div class="modal-title" id="fb-h">Feedback and ideas</div>'
+    + '<div class="modal-sub">Sent from here, no email needed. Bugs, ideas, anything that got in your way.</div>'
+    + '<div class="fb-type-row">';
+  FEEDBACK_TYPES.forEach(function(t){
+    const active=state.feedbackType===t.id;
+    h += '<button class="status-filter-chip" style="'+(active?"border-color:var(--accent);background:var(--accent);color:white":"")+'" onclick="setFeedbackType(\''+t.id+'\')">'+t.label+'</button>';
+  });
+  h += '</div>'
+    + '<div class="form-group"><textarea class="form-input form-textarea" id="feedback-input" style="min-height:140px" placeholder="What would make this better?" oninput="state.feedbackDraft=this.value">'+safe(state.feedbackDraft)+'</textarea></div>'
+    + '<div class="login-msg'+(state.feedbackError?' error':'')+'" role="status">'+safe(state.feedbackError)
+    + (state.feedbackError&&state.feedbackError.indexOf("Could not send")===0?' <button class="link-btn" type="button" onclick="emailFeedback()">Email it instead</button>':'')
+    + '</div>'
+    + '<div style="display:flex;gap:8px;justify-content:flex-end">'
+    + '<button class="btn btn-ghost" onclick="closeFeedback()">Cancel</button>'
+    + '<button class="btn btn-primary" onclick="sendFeedback()" '+(sending?"disabled":"")+'>'+(sending?"Sending…":"Send")+'</button>'
+    + '</div></div></div>';
+  return h;
+}
+function whatsNewHTML() {
+  const releases=getPendingReleaseNotes();
+  let h='<div class="modal-overlay" style="z-index:300"><div class="modal whatsnew" role="dialog" aria-modal="true" aria-labelledby="wn-h">'
+    + '<div class="whatsnew-eyebrow" id="wn-h">New in version</div>';
+  releases.forEach(function(r,i){
+    h += '<div class="whatsnew-release'+(i>0?" older":"")+'">'
+      + '<div class="whatsnew-version">'+safe(r.version)+'</div>'
+      + '<div class="whatsnew-date">'+safe(r.date)+'</div>'
+      + '<ul class="whatsnew-list">';
+    r.items.forEach(function(item){ h += '<li>'+item+'</li>'; });
+    h += '</ul></div>';
+  });
+  h += '<div style="display:flex;justify-content:flex-end;margin-top:6px"><button class="btn btn-primary" onclick="dismissWhatsNew()">Let\'s go</button></div>'
+    + '</div></div>';
+  return h;
+}
+function updateModalHTML() {
+  return '<div class="modal-overlay" style="z-index:310"><div class="modal" role="dialog" aria-modal="true" style="width:380px">'
+    + '<div class="modal-title">Update available</div>'
+    + '<div class="modal-sub">Version '+safe(String(state.updateAvailable).replace(/^v/i,""))+' is live. Reload to pick it up. Anything you are editing is saved first, and you may be asked to sign in again.</div>'
+    + '<div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn btn-primary" id="update-reload-btn" onclick="reloadForUpdate()">Reload now</button></div>'
+    + '</div></div>';
+}
+let overlaySig="";
+function renderOverlays() {
+  const root=document.getElementById("overlay-root");
+  if(!root) return;
+  const showFb=!!(state.showFeedbackModal && auth.session);
+  const showWn=!!(state.showWhatsNew && auth.session);
+  const sig=[showFb?1:0,state.feedbackType,state.feedbackSending?1:0,state.feedbackError,showWn?1:0,state.updateAvailable||""].join("|");
+  if(sig===overlaySig) return;
+  overlaySig=sig;
+  let html="";
+  if(showFb) html+=feedbackModalHTML();
+  if(showWn) html+=whatsNewHTML();
+  if(state.updateAvailable) html+=updateModalHTML();
+  root.innerHTML=html;
+  if(showFb && !state.feedbackSending){
+    setTimeout(function(){ const el=document.getElementById("feedback-input"); if(el) el.focus(); },30);
+  }
+}
+// Open tabs and home-screen copies never see a new deploy on their own, so this re-fetches the page
+// itself, reads its APP_VERSION and, if that is newer than the running one, asks for a reload.
+// It does nothing wherever the fetch fails (offline, opened from a file, and so on).
+let lastUpdateCheck=0;
+async function checkForUpdate(force) {
+  if(state.updateAvailable) return;
+  const now=Date.now();
+  if(!force && now-lastUpdateCheck<60000) return;
+  lastUpdateCheck=now;
+  try {
+    const url=location.href.split("#")[0].split("?")[0]+"?v="+now;
+    const res=await fetch(url,{cache:"no-store"});
+    if(!res.ok) return;
+    const m=(await res.text()).match(/const APP_VERSION\s*=\s*"([^"]+)"/);
+    if(m && cmpVersion(m[1],APP_VERSION)>0){
+      state.updateAvailable=m[1];
+      renderOverlays();
+    }
+  } catch(e) {}
+}
+async function reloadForUpdate() {
+  const btn=document.getElementById("update-reload-btn");
+  if(btn){ btn.disabled=true; btn.textContent="Saving…"; }
+  try { if(autosavePending && editorState._postId) await doSaveNow(editorState._postId); } catch(e) {}
+  location.href=location.href.split("#")[0].split("?")[0]+"?r="+Date.now();
 }
 
 // ── v7.5 WELCOME SCREEN ───────────────────────────────────────────────
@@ -2176,7 +2437,7 @@ function renderSettings() {
   html += trackingCardHTML();
   html += '<div class="card"><div class="card-header"><span class="card-title">About</span></div><div class="card-body"><div class="set-row">'
     + '<div class="set-text"><b>Arcturus '+APP_VERSION+'</b><br>Shortcuts: 1 Overview, 2 Library, 3 Calendar, 4 Settings, N new post.</div>'
-    + '<div class="set-actions"><button class="btn btn-ghost" onclick="openReleaseNotes()">📝 Release notes</button><button class="btn btn-ghost" onclick="sendFeedback()">💬 Send feedback</button></div></div></div></div>';
+    + '<div class="set-actions"><button class="btn btn-ghost" onclick="openReleaseNotes()">📝 Release notes</button><button class="btn btn-ghost" onclick="openFeedback()">💬 Send feedback</button></div></div></div></div>';
   html += '</div></div>';
   return html;
 }
@@ -2187,7 +2448,8 @@ function renderSettings() {
 // in the editor or steals a letter or number you're actually typing into a post.
 document.addEventListener("keydown", function(e) {
   if (e.key === "Escape" && state.showWelcome) { closeWelcome(); return; }
-  if (!auth.session || state.showWelcome) return;
+  if (e.key === "Escape" && state.showFeedbackModal) { closeFeedback(); return; }
+  if (!auth.session || state.showWelcome || state.showFeedbackModal || state.showWhatsNew || state.updateAvailable) return;
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const tag = (e.target.tagName || "").toLowerCase();
   if (tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable) return;
@@ -2216,15 +2478,28 @@ window.addEventListener("resize", function(){
 });
 // Boot: restore a saved session if there is one, otherwise show the sign-in screen
 (function boot() {
-  const saved = loadSession();
+  let saved = loadSession();
+  // v7.7.1: a new build signs everyone out once, so the update notes appear straight after they sign back in
+  if (saved && needsForcedSignOut()) {
+    clearSession();
+    saved = "";
+    state.loginMessage = "Arcturus has been updated to " + APP_VERSION + ". Please sign in again to see what is new.";
+    state.loginError = false;
+  }
   if (saved && hubConfigured()) {
     auth.session = saved;
     auth.username = saved.split(".")[0];
+    afterSignIn();
     render();
     loadFromSheet();
   } else {
     render();
   }
+  // Catch deploys that land while Arcturus is already open
+  document.addEventListener("visibilitychange", function(){ if (!document.hidden) checkForUpdate(false); });
+  window.addEventListener("focus", function(){ checkForUpdate(false); });
+  setInterval(function(){ checkForUpdate(false); }, 10 * 60 * 1000);
+  setTimeout(function(){ checkForUpdate(true); }, 4000);
 })();
 </script>
 </body>
