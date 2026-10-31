@@ -269,13 +269,20 @@ a.btn{text-decoration:none}
 .login-foot{font-size:10px;font-family:var(--font-mono);letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,244,239,0.5)}
 .login-main{flex:1 1 54%;overflow-y:auto;overscroll-behavior:contain;display:flex;justify-content:center;align-items:center;padding:32px 24px;min-width:0}
 .login-card{width:100%;max-width:360px}
-.login-title{font-family:var(--font-display);font-size:30px;line-height:1.1;margin-bottom:8px}
+.login-title{font-family:var(--font-display);font-size:30px;line-height:1.1;margin-bottom:22px}
 .login-lede{color:var(--text2);margin-bottom:22px;line-height:1.55;font-size:13px}
 .login-row{display:flex;align-items:center;gap:8px;margin:2px 0 18px;font-size:12px;color:var(--text2)}
 .login-row input{width:16px;height:16px;accent-color:var(--accent)}
 .login-msg{min-height:20px;font-size:12px;margin-bottom:12px;color:var(--text2);line-height:1.5}
 .login-msg.error{color:#B91C1C}
-.login-links{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:18px}
+.login-love{margin-top:22px;text-align:center;font-size:12px;color:var(--text3);line-height:1.5}
+.trk-callout{background:#C25B3F12;border:1px solid #C25B3F40;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.55;color:var(--text2);margin-bottom:14px}
+.trk-callout b{color:var(--text)}
+.trk-sub{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);font-family:var(--font-mono);margin:4px 0 8px}
+.trk-needs{list-style:none;display:flex;flex-direction:column;gap:6px;margin:0 0 14px;padding:0;font-size:13px;color:var(--text2);line-height:1.5}
+.trk-needs li{padding-left:16px;position:relative}
+.trk-needs li::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:2px;background:var(--accent)}
+.trk-needs b{color:var(--text)}
 .modal.welcome{width:640px;padding:28px 28px 0}
 .welcome-eyebrow{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent2);font-family:var(--font-mono);margin-bottom:6px}
 .welcome-title{font-family:var(--font-display);font-size:28px;line-height:1.1;margin-bottom:10px;font-weight:400}
@@ -385,9 +392,11 @@ a.btn{text-decoration:none}
 .whatsnew-version{font-family:var(--font-display);font-size:32px;line-height:1.1;color:var(--text)}
 .whatsnew-release.older .whatsnew-version{font-size:20px}
 .whatsnew-date{font-size:11px;color:var(--text3);font-family:var(--font-mono);margin:4px 0 14px}
-.whatsnew-list{list-style:none;display:flex;flex-direction:column;gap:10px}
-.whatsnew-list li{font-size:13px;line-height:1.5;color:var(--text2);padding-left:16px;position:relative}
-.whatsnew-list li::before{content:"";position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:2px;background:var(--accent)}
+.whatsnew-list{list-style:none;display:flex;flex-direction:column;gap:12px;margin:0;padding:0}
+.whatsnew-list li{display:flex;gap:12px;align-items:flex-start;font-size:13px;line-height:1.5;color:var(--text2)}
+.wn-ico{flex:0 0 30px;width:30px;height:30px;border-radius:8px;background:#C25B3F18;color:var(--accent);display:flex;align-items:center;justify-content:center}
+.wn-ico .nav-icon{width:16px;height:16px;margin:0}
+.wn-txt{min-width:0;padding-top:4px}
 .whatsnew-list li strong{color:var(--text);font-weight:600}
 </style>
 </head>
@@ -397,7 +406,7 @@ a.btn{text-decoration:none}
 <div id="overlay-root"></div>
 <div id="toast" class="toast"></div>
 <script>
-const APP_VERSION = "v8.0";
+const APP_VERSION = "v8.1";
 // Update flow. Every update signs people out once, then shows What's New after they sign back in.
 const SIGNED_IN_BUILD_KEY = "arcturus_signed_in_build";
 const LAST_SEEN_KEY = "arcturus_last_seen_version";
@@ -406,24 +415,30 @@ const FEEDBACK_TYPES = [
   {id:"bug",label:"Bug"},
   {id:"other",label:"Other"},
 ];
-// Release notes shown in the What's New screen. Newest first, customer-facing only.
+// Release notes shown in the What's New pop-up (after an update, and any time from the Release notes button).
+// Newest first, customer-facing only, short. Each item has an icon name (see NAV_ICONS), a bold lead-in and a plain sentence.
 // Add an entry for every release. Add signOut:false to an entry for a tiny fix that should not sign everyone out.
 const CHANGELOG = [
+  {version:"v8.1", date:"31 Oct 2026", items:[
+    {i:"chart", t:"Tracking for everyone.", d:"Settings now has a copy and paste prompt that sets up a Claude task to collect your views, likes and follower counts in the background. The steps are right there."},
+    {i:"notes", t:"Release notes are this pop-up.", d:"Tap Release notes whenever you like to see what is new. There is no separate page any more."},
+    {i:"lock", t:"A tidier sign-in screen.", d:"Just your username and passcode, with a thank-you from Mr Flollop underneath."}
+  ]},
   {version:"v8.0", date:"31 Oct 2026", items:[
-    "<strong>One home for everyone's posts.</strong> Arcturus now keeps everything in a single shared Hub. You still only ever see your own posts. Oli looks after the Hub and can see everyone's.",
-    "<strong>TikTok is here.</strong> Switch it on in Settings to plan TikTok posts and track your TikTok followers alongside LinkedIn and Instagram.",
-    "<strong>Simpler statuses.</strong> Posts are now Drafting, Ready or Published. Every old Idea has become a Drafting post.",
-    "<strong>Log your followers yourself.</strong> Use the Log today's number button on the Overview whenever you want to add a follower or connection count.",
-    "<strong>Choose your platforms.</strong> Settings now has a switch for each platform. Turn off any you do not use and they disappear from menus and filters.",
-    "<strong>Feedback goes straight to Oli by email.</strong> Same Feedback button, now with no part of it stored in your posts.",
-    "<strong>Settings page for Oli.</strong> Adding people, resetting passcodes and signing people out are now done from Settings."
+    {i:"layers", t:"One home for everyone's posts.", d:"Arcturus now keeps everything in a single shared Hub. You still only see your own posts. Oli looks after the Hub and can see everyone's."},
+    {i:"spark", t:"TikTok is here.", d:"Switch it on in Settings to plan TikTok posts and track your TikTok followers alongside LinkedIn and Instagram."},
+    {i:"check", t:"Simpler statuses.", d:"Posts are now Drafting, Ready or Published. Every old Idea has become a Drafting post."},
+    {i:"pencil", t:"Log your followers yourself.", d:"Use the Log today's number button on the Overview whenever you want to add a follower or connection count."},
+    {i:"sliders", t:"Choose your platforms.", d:"Settings has a switch for each platform. Turn off any you do not use and they disappear from menus and filters."},
+    {i:"mail", t:"Feedback goes straight to Oli by email.", d:"Same Feedback button, now with no part of it stored in your posts."},
+    {i:"users", t:"Settings page for Oli.", d:"Adding people, resetting passcodes and signing people out are now done from Settings."}
   ]},
   {version:"v7.7.1", date:"30 Oct 2026", items:[
-    "<strong>Feedback now sends from inside Arcturus.</strong> Tap Feedback, write your note and press Send. No mail app needed.",
-    "<strong>New Post moved to the top of the sidebar</strong>, straight under the logo.",
-    "<strong>Sidebar refresh.</strong> Icons on every item, with Release notes, Feedback and the version number at the bottom.",
-    "<strong>Your name now sits at the bottom of the sidebar.</strong> Tap it to sign out.",
-    "<strong>Clearer updates.</strong> After each update you sign in again and see what changed, like this screen. If Arcturus is already open when an update goes live, it asks you to reload."
+    {i:"mail", t:"Feedback sends from inside Arcturus.", d:"Tap Feedback, write your note and press Send. No mail app needed."},
+    {i:"plus", t:"New Post moved to the top.", d:"It now sits straight under the logo in the sidebar."},
+    {i:"overview", t:"Sidebar refresh.", d:"Icons on every item, with Release notes, Feedback and the version number at the bottom."},
+    {i:"users", t:"Your name sits at the bottom of the sidebar.", d:"Tap it to sign out."},
+    {i:"lock", t:"Clearer updates.", d:"After each update you sign in again and see what changed, like this screen."}
   ]}
 ];
 // Sidebar icons (line style, they take the colour of the text around them)
@@ -436,12 +451,19 @@ const NAV_ICONS = {
   feedback:'<path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 20.5l1.6-5.1A8.5 8.5 0 1 1 21 11.5z"/>',
   plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
   logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+  chart:'<polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/>',
+  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/>',
+  lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  layers:'<polygon points="12 3 21 8 12 13 3 8"/><polyline points="3 13 12 18 21 13"/><polyline points="3 17 12 22 21 17"/>',
+  spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 17l.7 1.8L21.5 19.5l-1.8.7L19 22l-.7-1.8-1.8-.7 1.8-.7z"/>',
+  check:'<circle cx="12" cy="12" r="9"/><polyline points="8 12 11 15 16 9"/>',
+  pencil:'<path d="M4 20h4L19 9l-4-4L4 16z"/><line x1="13" y1="7" x2="17" y2="11"/>',
+  sliders:'<line x1="4" y1="7" x2="20" y2="7"/><circle cx="9" cy="7" r="2"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="15" cy="17" r="2"/>',
+  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/>',
 };
 function navIcon(name) {
   return '<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(NAV_ICONS[name]||"")+'</svg>';
 }
-// Rolling release notes page. Same address every release: the page is republished with the newest version on top.
-const RELEASE_NOTES_URL = "https://claude.ai/artifact/6L9DVhoazfY4qLW5QUfG5H";
 // The hub web app address (Apps Script). The address on its own opens nothing: every request needs a signed-in session.
 const HUB_URL = "https://script.google.com/macros/s/AKfycbwiBCSC8B__t1hA7K856AI032z5rB13itowZwks9KtWBft4IDgQlnH0RUa9YODsANDE8w/exec";
 // Used when a person's profile has no feedback address of its own (only for the "email it instead" fallback)
@@ -497,7 +519,7 @@ let state = {
   loading:true,sheetStatus:"loading",sheetMessage:"Connecting…",pendingSync:[],
   calWeekOffset:0,
   loginMessage:"",loginError:false,showWelcome:false,
-  showFeedbackModal:false,feedbackType:"idea",feedbackDraft:"",feedbackError:"",feedbackSending:false,showWhatsNew:false,updateAvailable:"",
+  showFeedbackModal:false,feedbackType:"idea",feedbackDraft:"",feedbackError:"",feedbackSending:false,showWhatsNew:false,whatsNewManual:false,updateAvailable:"",
   growthModal:null,   // {platform, value, error, saving} while the Log-a-number box is open
 };
 let editorState = {};
@@ -603,7 +625,7 @@ function handleSessionEnded(message, isError) {
   auth.session = ""; auth.profile = null;
   state.posts = []; state.growth = []; state.loading = false; state.view = "overview"; state.editingId = null;
   state.speedDialOpen = false; state.showUrlModal = false;
-  state.showFeedbackModal = false; state.showWhatsNew = false; state.growthModal = null;
+  state.showFeedbackModal = false; state.showWhatsNew = false; state.whatsNewManual = false; state.growthModal = null;
   adminState = {users:[], loaded:false, loading:false, error:"", reveal:null, busy:"", name:"", username:""};
   state.loginMessage = message || ""; state.loginError = !!isError;
   resetProfile();
@@ -1879,9 +1901,11 @@ function toggleSpeedDial() {
   state.speedDialOpen = !state.speedDialOpen;
   render();
 }
+// Release notes are the same pop-up people see after an update, opened on demand with the newest release.
 function openReleaseNotes() {
-  const w = window.open(RELEASE_NOTES_URL, "_blank", "noopener");
-  if (!w) showToast("Could not open release notes. Check your pop-up settings.", true);
+  state.whatsNewManual = true;
+  state.showWhatsNew = true;
+  renderOverlays();
 }
 function speedDialGo(action) {
   state.speedDialOpen = false;
@@ -1990,7 +2014,6 @@ function renderLogin() {
     + '<div class="login-foot">Social Content Database · '+APP_VERSION+'</div></aside>'
     + '<main class="login-main"><div class="login-card">'
     + '<h1 class="login-title">Sign in</h1>'
-    + '<p class="login-lede">Use the username and passcode Oli gave you. You will only ever see your own posts.</p>'
     + '<form onsubmit="event.preventDefault();doLogin(event);return false">'
     + '<div class="form-group"><label class="form-label" for="login-user">Username</label><input class="form-input" id="login-user" name="username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" value="'+safe(last)+'"></div>'
     + '<div class="form-group"><label class="form-label" for="login-pass">Passcode</label><input class="form-input" id="login-pass" name="password" type="password" autocomplete="current-password"></div>'
@@ -1998,7 +2021,7 @@ function renderLogin() {
     + '<div class="login-msg'+(isErr?' error':'')+'" id="login-msg" role="status">'+safe(msg)+'</div>'
     + '<button class="btn btn-primary" id="login-btn" type="submit" style="width:100%;justify-content:center;padding:11px 14px">Sign in</button>'
     + '</form>'
-    + '<div class="login-links"><button class="link-btn" type="button" onclick="openWelcome()">How does Arcturus work?</button></div>'
+    + '<div class="login-love">Built with love by Mr Flollop for the Sunday Treat team 🧡</div>'
     + '</div></main></div>';
   setTimeout(function(){
     const el = document.getElementById(last ? "login-pass" : "login-user");
@@ -2083,6 +2106,7 @@ function getPendingReleaseNotes() {
 }
 // Called once a person is signed in. Brand new people get the Welcome screen instead of What's New.
 function afterSignIn() {
+  state.whatsNewManual=false;
   if(state.showWelcome){ lsSet(LAST_SEEN_KEY,APP_VERSION); state.showWhatsNew=false; }
   else if(getPendingReleaseNotes().length>0){ state.showWhatsNew=true; }
   else { lsSet(LAST_SEEN_KEY,APP_VERSION); }
@@ -2090,6 +2114,7 @@ function afterSignIn() {
 function dismissWhatsNew() {
   lsSet(LAST_SEEN_KEY,APP_VERSION);
   state.showWhatsNew=false;
+  state.whatsNewManual=false;
   renderOverlays();
 }
 function feedbackModalHTML() {
@@ -2114,18 +2139,21 @@ function feedbackModalHTML() {
   return h;
 }
 function whatsNewHTML() {
-  const releases=getPendingReleaseNotes();
-  let h='<div class="modal-overlay" style="z-index:300"><div class="modal whatsnew" role="dialog" aria-modal="true" aria-labelledby="wn-h">'
-    + '<div class="whatsnew-eyebrow" id="wn-h">New in version</div>';
+  const sorted=CHANGELOG.slice().sort(function(a,b){ return cmpVersion(b.version,a.version); });
+  const releases=state.whatsNewManual ? sorted.slice(0,1) : getPendingReleaseNotes();
+  let h='<div class="modal-overlay" style="z-index:300" onclick="if(event.target===this)dismissWhatsNew()"><div class="modal whatsnew" role="dialog" aria-modal="true" aria-labelledby="wn-h">'
+    + '<div class="whatsnew-eyebrow" id="wn-h">'+(state.whatsNewManual?'Latest release':'New in version')+'</div>';
   releases.forEach(function(r,i){
     h += '<div class="whatsnew-release'+(i>0?" older":"")+'">'
       + '<div class="whatsnew-version">'+safe(r.version)+'</div>'
       + '<div class="whatsnew-date">'+safe(r.date)+'</div>'
       + '<ul class="whatsnew-list">';
-    r.items.forEach(function(item){ h += '<li>'+item+'</li>'; });
+    r.items.forEach(function(item){
+      h += '<li><span class="wn-ico">'+navIcon(item.i)+'</span><span class="wn-txt"><strong>'+safe(item.t)+'</strong> '+safe(item.d)+'</span></li>';
+    });
     h += '</ul></div>';
   });
-  h += '<div style="display:flex;justify-content:flex-end;margin-top:6px"><button class="btn btn-primary" onclick="dismissWhatsNew()">Let\'s go</button></div>'
+  h += '<div style="display:flex;justify-content:flex-end;margin-top:6px"><button class="btn btn-primary" onclick="dismissWhatsNew()">'+(state.whatsNewManual?'Close':'Let\'s go')+'</button></div>'
     + '</div></div>';
   return h;
 }
@@ -2145,7 +2173,7 @@ function renderOverlays() {
   const showFb=!!(state.showFeedbackModal && auth.session);
   const showWn=!!(state.showWhatsNew && auth.session);
   const gm=(state.growthModal && auth.session) ? state.growthModal : null;
-  const sig=[showFb?1:0,state.feedbackType,state.feedbackSending?1:0,state.feedbackError,showWn?1:0,state.updateAvailable||"",
+  const sig=[showFb?1:0,state.feedbackType,state.feedbackSending?1:0,state.feedbackError,showWn?(state.whatsNewManual?2:1):0,state.updateAvailable||"",
     gm?(gm.platform+"/"+(gm.saving?1:0)+"/"+gm.error):"-"].join("|");
   if(sig===overlaySig) return;
   overlaySig=sig;
@@ -2434,100 +2462,91 @@ function peopleInnerHTML() {
   h += '</div>';
   return h;
 }
-// ── TRACKING SET-UP (Oli only for now) ──
-// Builds a personalised prompt for a Claude scheduled task that copies results from LinkedIn, Instagram and TikTok into
-// this person's own tabs in the Hub. Everything it needs comes from the signed-in profile.
-const trackMem = {};
-function trackPrefGet(k) { if (k in trackMem) return trackMem[k]; try { return localStorage.getItem("arc_track_"+k) || ""; } catch(e) { return ""; } }
-function trackPrefSet(k,v) { trackMem[k] = v; try { localStorage.setItem("arc_track_"+k, v); } catch(e) {} }
-function sheetIdFromUrl(u) { const m = String(u||"").match(/\/d\/([a-zA-Z0-9_-]+)/); return m ? m[1] : ""; }
+// ── TRACKING SET-UP (everyone) ──
+// Arcturus cannot read LinkedIn, Instagram or TikTok itself. A scheduled task in Claude does that in the background and
+// sends the numbers back through the person's own tracking key. The key can only add numbers to their own posts and
+// follower counts, so the task never needs the Hub sheet. Nobody types in account names: the task finds the signed-in
+// account in Chrome.
+function trackingAddress() {
+  const pr = auth.profile || {};
+  return pr.track_token ? HUB_URL + "?token=" + pr.track_token : "";
+}
 function trackingPrompt() {
   const pr = auth.profile || {};
   const name = pr.display_name || pr.username || auth.username || "me";
-  const user = pr.username || auth.username || "";
-  const sid = sheetIdFromUrl(pr.sheet_url);
-  const tab = pr.tab || "";
-  const gtab = pr.growth_tab || "";
+  const addr = trackingAddress() || "[your tracking address is not ready yet, ask Oli]";
   const on = enabledPlatforms().map(function(p){ return p.id; });
-  const li = (trackPrefGet("li") || "").trim();
-  const ig = (trackPrefGet("ig") || "").trim().replace(/^@/, "");
-  const tt = (trackPrefGet("tt") || "").trim().replace(/^@/, "");
   const L = [];
-  L.push("You are my daily social tracking assistant for Arcturus. Your job is to copy results from my social accounts into my own tabs in the Arcturus Hub Google Sheet, so my content dashboard stays up to date. Work carefully and change only what is listed below.");
+  L.push("You are my daily social tracking assistant for Arcturus, my content dashboard. Each day you collect the latest numbers from my own social accounts and send them to Arcturus, so my dashboard stays up to date. Work carefully and do only what is listed below.");
   L.push("");
   L.push("MY DETAILS");
   L.push("- Name: " + name);
-  L.push("- Arcturus username: " + (user || "[your username]"));
-  L.push("- Hub Google Sheet ID: " + (sid || "[the Hub sheet ID]"));
-  L.push("- My posts tab: " + (tab || "[your posts tab]"));
-  L.push("- My growth tab: " + (gtab || "[your growth tab]"));
-  if (on.indexOf("linkedin") !== -1) L.push("- LinkedIn profile: " + (li || "[paste your LinkedIn profile address]"));
-  if (on.indexOf("instagram") !== -1) L.push("- Instagram: " + (ig ? "@" + ig + " (https://www.instagram.com/" + ig + "/)" : "[your Instagram username]"));
-  if (on.indexOf("tiktok") !== -1) L.push("- TikTok: " + (tt ? "@" + tt + " (https://www.tiktok.com/@" + tt + ")" : "[your TikTok username]"));
+  L.push("- Platforms to track: " + enabledPlatforms().map(function(p){ return p.label; }).join(", "));
+  L.push("- My private tracking address: " + addr);
+  L.push("");
+  L.push("HOW THE TRACKING ADDRESS WORKS");
+  L.push("Open the tracking address in Claude in Chrome and read the page text. It replies with plain text that starts with {\"ok\":true when it worked. If it says \"ok\":false, stop that step and tell me what it said in your report. Add these to the END of the address for each step:");
+  L.push("- &do=due   (lists my published posts whose numbers are still being tracked)");
+  L.push("- &do=metrics&id=POST_ID&views=N&likes=N&comments=N&shares=N   (saves a post's numbers)");
+  L.push("- &do=growth&platform=PLATFORM&value=N   (saves today's audience count, PLATFORM is linkedin, instagram or tiktok)");
   L.push("");
   L.push("TOOLS");
-  L.push("- Use the Google Sheets connector to read and write ONLY the two tabs named above. The Hub also holds other people's tabs: never open, read or change any other tab.");
-  L.push("- Use Claude in Chrome to open my social accounts. I am already signed in in Chrome. If a platform asks me to sign in or shows a security check, stop that platform, do not try to get round it, and say so in your report.");
+  L.push("- Use Claude in Chrome only. I am already signed in to my social accounts in Chrome. If a platform asks me to sign in or shows a security check, stop that platform, do not try to get round it, and say so in your report.");
+  L.push("- Only open my tracking address and the post or profile pages listed below. Never share the tracking address anywhere.");
   L.push("");
-  L.push("HOW THE TABS WORK");
-  L.push("- Row 1 of each tab holds the column headings. Find every column by its heading name, never by its position, and never change row 1.");
-  L.push("- Posts tab: one row per post. Columns you may write: views, likes, comments, shares, updated_at. Columns you read: id, title, platform (linkedin, instagram or tiktok), status, post_url, published_at. Never touch any other column (especially verdict, body, photo_brief, pillar, title, status, embargoed).");
-  L.push("- Growth tab: one row per platform per day, with columns id, recorded_at, platform, connections, followers.");
+  L.push("STEP 0: CHECK CHROME");
+  L.push("Call tabs_context_mcp once. If Chrome is not connected, stop and report that the run did not happen. Do nothing else.");
   L.push("");
   L.push("STEP 1: POST RESULTS");
-  L.push("1. Read my posts tab. Select rows where status is published, post_url is a web address, and published_at is within the last 42 days. Ignore every other row.");
-  L.push("2. For each selected row, open its post_url in Chrome and read the current numbers: views (impressions or plays), likes (reactions), comments and shares (reposts). If a number is not shown for that post, leave that cell as it is rather than guessing.");
-  L.push("3. Write the numbers into views, likes, comments and shares on that same row, as plain numbers with no commas or text. Set updated_at to the current date and time in ISO format (for example 2026-10-31T09:00:00Z).");
-  L.push("4. Refresh every day for the full 42 days. Numbers only go up, so if a figure you read is lower than the one already in the sheet, keep the higher one.");
+  L.push("1. Open the tracking address with &do=due added. It lists each post with its id, platform, post_url and the numbers saved so far.");
+  L.push("2. For each post, open its post_url in Chrome and read the current views (impressions or plays), likes (reactions), comments and shares (reposts). LinkedIn: use the post's View analytics. Instagram: use View Insights. TikTok: use the video's analytics. If a number is not shown for that post, leave it out of the address rather than guessing.");
+  L.push("3. Open the tracking address with &do=metrics and the post's id and the numbers you read. Use plain numbers with no commas. Numbers only ever go up, so a lower reading is simply kept out by the system.");
+  L.push("4. The needs_attention list holds published posts that are missing a platform or a post link. Do not try to fix them, just list them in your report.");
   L.push("");
-  L.push("STEP 2: AUDIENCE GROWTH");
-  L.push("For each platform below, read today's count from my profile and write ONE row in my growth tab. If a row with that id already exists, update it instead of adding another. Set recorded_at to now (ISO format), set platform, and leave the other number column empty.");
-  if (on.indexOf("linkedin") !== -1) L.push("- LinkedIn: id growth_YYYY-MM-DD (today's date), platform linkedin, connections = my connections count.");
-  if (on.indexOf("instagram") !== -1) L.push("- Instagram: id ig_growth_YYYY-MM-DD, platform instagram, followers = my followers count.");
-  if (on.indexOf("tiktok") !== -1) L.push("- TikTok: id tt_growth_YYYY-MM-DD, platform tiktok, followers = my followers count.");
+  L.push("STEP 2: AUDIENCE");
+  L.push("For each platform below, find the signed-in account in Chrome, read the exact count, then open the tracking address with &do=growth, the platform and the number as value. If a count is only shown in short form (for example 12.3K), use it and say so in your report. If a number for today is already saved, the system says so and that is fine.");
+  if (on.indexOf("linkedin") !== -1) L.push("- LinkedIn: open https://www.linkedin.com/mynetwork/invite-connect/connections/ and read the exact connections count shown near the top. Do not use the profile page, which stops at 500+. Platform: linkedin.");
+  if (on.indexOf("instagram") !== -1) L.push("- Instagram: open instagram.com, go to my own profile from the signed-in account, and read the followers count. Page text can be blocked on Instagram, so use a screenshot and zoom if needed. Platform: instagram.");
+  if (on.indexOf("tiktok") !== -1) L.push("- TikTok: open tiktok.com, go to my own profile from the signed-in account, and read the followers count. Platform: tiktok.");
   L.push("");
   L.push("RULES");
-  L.push("- Do not create, delete or reorder any other rows. Do not edit any post text.");
-  L.push("- If something looks wrong (a post cannot be opened, a column is missing, the sheet will not open), do not improvise. Skip it and tell me in the report.");
+  L.push("- Never write a guessed or invented number. If something cannot be read, skip it and say so.");
+  L.push("- If one platform fails, finish the others.");
+  L.push("- Do not change, create or delete anything except by using the tracking address steps above.");
   L.push("");
   L.push("REPORT");
-  L.push("When you finish, reply with a short summary: how many posts you updated, today's counts for each platform, and anything you skipped and why.");
+  L.push("When you finish, reply with a short summary: how many posts you updated, today's count for each platform, any posts listed under needs_attention, and anything you skipped and why.");
   return L.join("\n");
 }
-function trackInput(k,v) {
-  trackPrefSet(k,v);
-  const t = document.getElementById("track-prompt"); if (t) t.value = trackingPrompt();
+function copyTrackingPrompt(btn) {
+  if (!trackingAddress()) { showToast("Your tracking address is not ready yet. Ask Oli.", true); return; }
+  copyToClipboard(trackingPrompt(), btn, "Prompt copied");
 }
-function copyTrackingPrompt(btn) { copyToClipboard(trackingPrompt(), btn, "Prompt copied"); }
 function trackingCardHTML() {
-  const pr = auth.profile || {};
-  const sid = sheetIdFromUrl(pr.sheet_url);
-  const on = enabledPlatforms().map(function(p){ return p.id; });
+  const ready = !!trackingAddress();
+  const needs = [
+    ["The Claude desktop app","with scheduled tasks (Cowork). This is where the task lives and runs."],
+    ["The Claude in Chrome extension","so the task can read your accounts."],
+    ["Your accounts signed in","LinkedIn, Instagram and TikTok, in that same Chrome."],
+    ["A computer that is on","with Claude open at the time the task runs. A missed day is fine, the next run catches up."],
+  ];
   const steps = [
-    ["Check you have the tools","You need the Claude desktop app, the Claude in Chrome extension, and the Google Sheets connector switched on in Claude. Sign in to your social accounts in Chrome on that same computer."],
-    ["Add your account names","Fill in the boxes below. They are saved on this device only, and they update the prompt as you type."],
-    ["Copy the prompt","Press Copy prompt. It already contains your username and tab names."],
-    ["Create a scheduled task in Claude","In the Claude desktop app, start a new scheduled task, paste the prompt in, and set it to run once a day at a time your computer is switched on and awake."],
-    ["Run it once to test","Run the task once by hand, then press Refresh in Arcturus. Posts should show their numbers, and the Overview should show today's follower counts."],
+    ["Copy the prompt","Press Copy prompt below. It already contains your personal tracking address, so there is nothing to fill in."],
+    ["Create a scheduled task in Claude","In the Claude desktop app, create a new scheduled task, paste the prompt in, and set it to run once a day at a time your computer is on."],
+    ["Run it once to test","Run the task by hand, then press Refresh in Arcturus. Published posts should show their numbers and the Overview should show today's counts."],
   ];
   let h = '<div class="card"><div class="card-header"><span class="card-title">Set up results tracking</span></div><div class="card-body">'
-    + '<div class="set-text" style="margin-bottom:10px">Arcturus does not read your social accounts itself. A scheduled task in Claude collects the numbers and writes them into your tabs in the Hub, then Arcturus shows them. The prompt below is written for you.</div>'
-    + '<div class="trk-facts"><div><span>Username</span><b>'+safe(pr.username||auth.username||"")+'</b></div>'
-    + '<div><span>Hub sheet ID</span><b>'+(sid?safe(sid):"Not available")+'</b></div>'
-    + '<div><span>Posts tab</span><b>'+(pr.tab?safe(pr.tab):"Not available")+'</b></div>'
-    + '<div><span>Growth tab</span><b>'+(pr.growth_tab?safe(pr.growth_tab):"Not available")+'</b></div></div>'
-    + '<ol class="trk-steps">';
+    + '<div class="trk-callout"><b>This runs in the background, outside Arcturus.</b> Arcturus cannot read LinkedIn, Instagram or TikTok itself. A scheduled task in Claude does that for you and sends the numbers here. Until it is running, your posts show no results and your follower charts only move when it runs.</div>'
+    + '<div class="trk-sub">What it needs</div><ul class="trk-needs">';
+  needs.forEach(function(n){ h += '<li><b>'+n[0]+'</b> '+n[1]+'</li>'; });
+  h += '</ul><div class="trk-sub">Set it up</div><ol class="trk-steps">';
   steps.forEach(function(st){ h += '<li><b>'+st[0]+'</b><p>'+st[1]+'</p></li>'; });
-  h += '</ol><div class="trk-inputs">';
-  if (on.indexOf("linkedin") !== -1) h += '<label class="form-label">LinkedIn profile address<input class="form-input" inputmode="url" autocapitalize="off" autocomplete="off" placeholder="https://www.linkedin.com/in/your-name" value="'+safe(trackPrefGet("li"))+'" oninput="trackInput(\'li\',this.value)"></label>';
-  if (on.indexOf("instagram") !== -1) h += '<label class="form-label">Instagram username<input class="form-input" autocapitalize="off" autocomplete="off" placeholder="@yourname" value="'+safe(trackPrefGet("ig"))+'" oninput="trackInput(\'ig\',this.value)"></label>';
-  if (on.indexOf("tiktok") !== -1) h += '<label class="form-label">TikTok username<input class="form-input" autocapitalize="off" autocomplete="off" placeholder="@yourname" value="'+safe(trackPrefGet("tt"))+'" oninput="trackInput(\'tt\',this.value)"></label>';
-  h += '</div>'
+  h += '</ol>'
     + '<label class="form-label" for="track-prompt">Your Claude scheduled-task prompt</label>'
-    + '<textarea class="form-input trk-prompt" id="track-prompt" readonly rows="14" onfocus="this.select()">'+safe(trackingPrompt())+'</textarea>'
-    + '<div class="pe-foot"><button class="btn btn-primary" onclick="copyTrackingPrompt(this)">Copy prompt</button>'
-    + '<span class="pe-msg">Text in square brackets means a detail is missing. Fill the boxes above first.</span></div>'
-    + '<div class="set-text" style="margin-top:12px"><b>Good to know.</b> The task only works while your computer is on and Claude is open. A missed day is fine, because the next run catches up on every post from the last 42 days.</div>'
+    + '<textarea class="form-input trk-prompt" id="track-prompt" readonly rows="12" onfocus="this.select()">'+safe(trackingPrompt())+'</textarea>'
+    + '<div class="pe-foot"><button class="btn btn-primary" onclick="copyTrackingPrompt(this)" '+(ready?'':'disabled')+'>Copy prompt</button>'
+    + '<span class="pe-msg">'+(ready?'Treat this prompt like a password. It holds your personal tracking key.':'Your tracking key is not ready yet. Ask Oli.')+'</span></div>'
+    + '<div class="set-text" style="margin-top:12px"><b>Safe by design.</b> The key can only add numbers to your own posts and follower counts. It cannot read the Hub sheet, change what you have written, or reach anyone else\'s posts. If it ever leaks, ask Oli for a new one.</div>'
     + '</div></div>';
   return h;
 }
@@ -2551,10 +2570,8 @@ function renderSettings() {
     html += '<div class="card"><div class="card-header"><span class="card-title">The Hub</span></div><div class="card-body"><div class="set-row">'
       + '<div class="set-text">Everyone\'s posts live in the Arcturus Hub Google Sheet. Your own tabs are <b>'+safe(pr.tab||"—")+'</b> and <b>'+safe(pr.growth_tab||"—")+'</b>. Please keep the headings in row 1 of every tab as they are.</div>'
       + '<div class="set-actions">'+(pr.sheet_url?'<a class="btn btn-ghost" href="'+safe(pr.sheet_url)+'" target="_blank" rel="noopener">Open the Hub ↗</a>':'')+'</div></div></div></div>';
-    html += trackingCardHTML();
-  } else {
-    html += '<div class="card"><div class="card-header"><span class="card-title">Results tracking</span></div><div class="card-body"><div class="set-text">Views, likes and comments are copied in by a tracking task that Oli sets up for each person. Until yours is switched on, your published posts will show no numbers. You can still log your follower counts yourself from the Overview.</div></div></div>';
   }
+  html += trackingCardHTML();
   html += '<div class="card"><div class="card-header"><span class="card-title">About</span></div><div class="card-body"><div class="set-row">'
     + '<div class="set-text"><b>Arcturus '+APP_VERSION+'</b><br>Shortcuts: 1 Overview, 2 Library, 3 Calendar, 4 Settings, N new post.</div>'
     + '<div class="set-actions"><button class="btn btn-ghost" onclick="openReleaseNotes()">📝 Release notes</button><button class="btn btn-ghost" onclick="openFeedback()">💬 Send feedback</button></div></div></div></div>';
@@ -2567,6 +2584,7 @@ function renderSettings() {
 // a modal is open, so it never fires mid-sentence.
 document.addEventListener("keydown", function(e) {
   if (e.key === "Escape" && state.showWelcome) { closeWelcome(); return; }
+  if (e.key === "Escape" && state.showWhatsNew) { dismissWhatsNew(); return; }
   if (e.key === "Escape" && state.showFeedbackModal) { closeFeedback(); return; }
   if (e.key === "Escape" && state.growthModal) { closeGrowthModal(); return; }
   if (!auth.session || state.showWelcome || state.showFeedbackModal || state.growthModal || state.showWhatsNew || state.updateAvailable) return;
