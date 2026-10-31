@@ -328,7 +328,7 @@ a.btn{text-decoration:none}
 .pe-foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px}
 .pe-msg{font-size:12px;color:var(--text2)}
 .pe-msg.error{color:#B91C1C}
-/* v8 PLATFORM SWITCHES, PEOPLE (admin), LOG-A-NUMBER */
+/* v8 PLATFORM SWITCHES, PEOPLE (admin) */
 .plat-row{display:flex;gap:10px;flex-wrap:wrap}
 .plat-opt{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text2);font-size:13px;font-family:var(--font-body);font-weight:500;cursor:pointer;min-height:44px;transition:all 0.15s var(--ease)}
 .plat-opt.on{border-color:var(--accent);background:#C25B3F0D;color:var(--text)}
@@ -343,7 +343,6 @@ a.btn{text-decoration:none}
 .passcode-box b.code{display:block;font-family:var(--font-mono);font-size:20px;letter-spacing:0.08em;color:var(--text);margin:6px 0 10px;word-break:break-all;user-select:all}
 .passcode-box p{font-size:12px;color:var(--text2);line-height:1.5}
 .add-person{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:10px;align-items:end;margin-top:14px}
-.growth-log-btn{margin-left:auto}
 @media (max-width:860px){
   .login-wrap{flex-direction:column}
   .login-aside{flex:0 0 auto;padding:16px;padding-top:max(24px,env(safe-area-inset-top))}
@@ -406,7 +405,7 @@ a.btn{text-decoration:none}
 <div id="overlay-root"></div>
 <div id="toast" class="toast"></div>
 <script>
-const APP_VERSION = "v8.1";
+const APP_VERSION = "v8.1.1";
 // Update flow. Every update signs people out once, then shows What's New after they sign back in.
 const SIGNED_IN_BUILD_KEY = "arcturus_signed_in_build";
 const LAST_SEEN_KEY = "arcturus_last_seen_version";
@@ -419,6 +418,11 @@ const FEEDBACK_TYPES = [
 // Newest first, customer-facing only, short. Each item has an icon name (see NAV_ICONS), a bold lead-in and a plain sentence.
 // Add an entry for every release. Add signOut:false to an entry for a tiny fix that should not sign everyone out.
 const CHANGELOG = [
+  {version:"v8.1.1", date:"31 Oct 2026", items:[
+    {i:"notes", t:"Release notes show the last three updates.", d:"Open Release notes any time and you will see the three most recent releases, newest first."},
+    {i:"chart", t:"Follower counts now come from your tracking task.", d:"The Log today's number button has gone. Your connection and follower charts fill in automatically once your tracking task is running."},
+    {i:"lock", t:"Tidier behind the scenes.", d:"Small clean-ups to the Welcome screen and the empty charts so they match."}
+  ]},
   {version:"v8.1", date:"31 Oct 2026", items:[
     {i:"chart", t:"Tracking for everyone.", d:"Settings now has a copy and paste prompt that sets up a Claude task to collect your views, likes and follower counts in the background. The steps are right there."},
     {i:"notes", t:"Release notes are this pop-up.", d:"Tap Release notes whenever you like to see what is new. There is no separate page any more."},
@@ -428,7 +432,6 @@ const CHANGELOG = [
     {i:"layers", t:"One home for everyone's posts.", d:"Arcturus now keeps everything in a single shared Hub. You still only see your own posts. Oli looks after the Hub and can see everyone's."},
     {i:"spark", t:"TikTok is here.", d:"Switch it on in Settings to plan TikTok posts and track your TikTok followers alongside LinkedIn and Instagram."},
     {i:"check", t:"Simpler statuses.", d:"Posts are now Drafting, Ready or Published. Every old Idea has become a Drafting post."},
-    {i:"pencil", t:"Log your followers yourself.", d:"Use the Log today's number button on the Overview whenever you want to add a follower or connection count."},
     {i:"sliders", t:"Choose your platforms.", d:"Settings has a switch for each platform. Turn off any you do not use and they disappear from menus and filters."},
     {i:"mail", t:"Feedback goes straight to Oli by email.", d:"Same Feedback button, now with no part of it stored in your posts."},
     {i:"users", t:"Settings page for Oli.", d:"Adding people, resetting passcodes and signing people out are now done from Settings."}
@@ -520,7 +523,6 @@ let state = {
   calWeekOffset:0,
   loginMessage:"",loginError:false,showWelcome:false,
   showFeedbackModal:false,feedbackType:"idea",feedbackDraft:"",feedbackError:"",feedbackSending:false,showWhatsNew:false,whatsNewManual:false,updateAvailable:"",
-  growthModal:null,   // {platform, value, error, saving} while the Log-a-number box is open
 };
 let editorState = {};
 let autosaveTimer = null;
@@ -625,7 +627,7 @@ function handleSessionEnded(message, isError) {
   auth.session = ""; auth.profile = null;
   state.posts = []; state.growth = []; state.loading = false; state.view = "overview"; state.editingId = null;
   state.speedDialOpen = false; state.showUrlModal = false;
-  state.showFeedbackModal = false; state.showWhatsNew = false; state.whatsNewManual = false; state.growthModal = null;
+  state.showFeedbackModal = false; state.showWhatsNew = false; state.whatsNewManual = false;
   adminState = {users:[], loaded:false, loading:false, error:"", reveal:null, busy:"", name:"", username:""};
   state.loginMessage = message || ""; state.loginError = !!isError;
   resetProfile();
@@ -1084,7 +1086,7 @@ function sortPosts(list) {
 function renderGrowthChartGeneric(entries, opts) {
   const color=opts.color, unitLabel=opts.unitLabel, gradId=opts.gradId, compact=opts.compact;
   if(entries.length===0){
-    return '<div class="empty" style="padding:'+(compact?"8px 0":"20px 0")+'"><div class="empty-title">No growth data yet</div><div class="empty-sub">Press Log today\'s number to add your first '+safe(opts.sourceLabel)+' count. The line appears from the second one.</div></div>';
+    return '<div class="empty" style="padding:'+(compact?"8px 0":"20px 0")+'"><div class="empty-title">No growth data yet</div><div class="empty-sub">Your tracking task adds the '+safe(opts.sourceLabel)+' count each day. The line appears from the second one.</div></div>';
   }
   const numSize = compact ? 22 : 32;
   if(entries.length===1){
@@ -1134,58 +1136,6 @@ function renderGrowthChart(platformId, compact) {
   const def=getPlatformDef(platformId);
   return renderGrowthChartGeneric(getGrowthEntries(platformId), {color:def.id==="tiktok"?"#FE2C55":def.color,unitLabel:def.growthLabel,gradId:"growthFade_"+def.id,sourceLabel:def.label+" "+def.growthLabel,compact:compact});
 }
-// ── LOG A NUMBER: add today's follower or connection count by hand ──
-function openGrowthModal(platformId) {
-  state.growthModal={platform:platformId,value:"",error:"",saving:false};
-  renderOverlays();
-}
-function closeGrowthModal() {
-  state.growthModal=null;
-  renderOverlays();
-}
-async function saveGrowthModal() {
-  const gm=state.growthModal;
-  if(!gm||gm.saving) return;
-  const def=getPlatformDef(gm.platform);
-  const raw=String(gm.value||"").replace(/[,\s]/g,"");
-  const n=Number(raw);
-  if(raw===""||isNaN(n)||n<0){ gm.error="Enter a number, for example 1250."; renderOverlays(); return; }
-  gm.saving=true; gm.error=""; renderOverlays();
-  try {
-    const entry={platform:gm.platform}; entry[def.growthKey]=n;
-    await hubCall("addGrowth",{entry:entry});
-    // Mirror what the hub just stored (one row per platform per day) so the chart updates straight away
-    const now=new Date(); const iso=now.toISOString();
-    const prefix=gm.platform==="linkedin"?GROWTH_ID_PREFIX:(gm.platform==="instagram"?IG_GROWTH_ID_PREFIX:TT_GROWTH_ID_PREFIX);
-    const id=prefix+iso.slice(0,10);
-    const row={id:id,recorded_at:iso,platform:gm.platform}; row[def.growthKey]=String(n);
-    const i=state.growth.findIndex(function(r){return String(r.id)===id;});
-    if(i>=0) state.growth[i]=Object.assign({},state.growth[i],row); else state.growth.push(row);
-    state.growthModal=null;
-    renderOverlays(); renderMain();
-    showToast(def.label+" "+def.growthLabel+" saved ✓");
-  } catch(err) {
-    gm.saving=false;
-    if(err.auth||err.update) return;
-    gm.error="Could not save: "+err.message;
-    renderOverlays();
-  }
-}
-function growthModalHTML() {
-  const gm=state.growthModal;
-  const def=getPlatformDef(gm.platform);
-  return '<div class="modal-overlay" onclick="if(event.target===this)closeGrowthModal()"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="gm-h" style="width:380px">'
-    + '<div class="modal-title" id="gm-h">Log today\'s '+safe(def.label)+' '+safe(def.growthLabel)+'</div>'
-    + '<div class="modal-sub">Type the number you can see on your '+safe(def.label)+' profile right now. Logging twice in one day just replaces the earlier number.</div>'
-    + '<form onsubmit="event.preventDefault();saveGrowthModal();return false">'
-    + '<div class="form-group"><input class="form-input" id="growth-input" inputmode="numeric" autocomplete="off" placeholder="e.g. 1250" value="'+safe(gm.value)+'" oninput="state.growthModal.value=this.value"></div>'
-    + '<div class="login-msg'+(gm.error?' error':'')+'" role="status">'+safe(gm.error)+'</div>'
-    + '<div style="display:flex;gap:8px;justify-content:flex-end">'
-    + '<button class="btn btn-ghost" type="button" onclick="closeGrowthModal()">Cancel</button>'
-    + '<button class="btn btn-primary" type="submit" '+(gm.saving?"disabled":"")+'>'+(gm.saving?"Saving…":"Save")+'</button>'
-    + '</div></form></div></div>';
-}
-
 // ── OVERVIEW ──────────────────────────────────────────────────────
 function computeEngagementSnapshot(platformId) {
   const scored=state.posts.filter(function(p){return p.platform===platformId&&p.status==="published"&&getPostMetrics(p);})
@@ -1201,8 +1151,7 @@ function renderEngagementCard(platformId) {
   const def=getPlatformDef(platformId);
   const color=def.id==="tiktok"?"#FE2C55":def.color;
   const snap=computeEngagementSnapshot(platformId);
-  let html='<div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title" style="color:'+color+'">'+def.label+' Engagement</span>'
-    + '<button class="btn btn-ghost btn-sm growth-log-btn" onclick="openGrowthModal(\''+platformId+'\')">+ Log today\'s number</button></div><div class="card-body">';
+  let html='<div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title" style="color:'+color+'">'+def.label+' Engagement</span></div><div class="card-body">';
   html += '<div style="margin-bottom:14px">'+renderGrowthChart(platformId,true)+'</div>';
   html += '<hr class="section-divider" style="margin:14px 0">';
   if(!snap){
@@ -2078,7 +2027,7 @@ async function doLoginInner(ev) {
 }
 
 // ── OVERLAYS, WHAT'S NEW, FORCED SIGN-OUT AND UPDATE CHECK ─────────
-// Feedback, Log-a-number, What's New and the update prompt live in #overlay-root. They are only redrawn when one of
+// Feedback, What's New and the update prompt live in #overlay-root. They are only redrawn when one of
 // the things that shapes them changes, so typing in a box is never interrupted.
 function parseVersion(v) {
   return String(v||"0").replace(/^v/i,"").split(".").map(function(n){ return parseInt(n,10)||0; });
@@ -2140,9 +2089,9 @@ function feedbackModalHTML() {
 }
 function whatsNewHTML() {
   const sorted=CHANGELOG.slice().sort(function(a,b){ return cmpVersion(b.version,a.version); });
-  const releases=state.whatsNewManual ? sorted.slice(0,1) : getPendingReleaseNotes();
+  const releases=sorted.filter(function(r){ return cmpVersion(r.version,APP_VERSION)<=0; }).slice(0,3);   // always the last three releases
   let h='<div class="modal-overlay" style="z-index:300" onclick="if(event.target===this)dismissWhatsNew()"><div class="modal whatsnew" role="dialog" aria-modal="true" aria-labelledby="wn-h">'
-    + '<div class="whatsnew-eyebrow" id="wn-h">'+(state.whatsNewManual?'Latest release':'New in version')+'</div>';
+    + '<div class="whatsnew-eyebrow" id="wn-h">'+(state.whatsNewManual?'Recent releases':'New in version')+'</div>';
   releases.forEach(function(r,i){
     h += '<div class="whatsnew-release'+(i>0?" older":"")+'">'
       + '<div class="whatsnew-version">'+safe(r.version)+'</div>'
@@ -2172,22 +2121,16 @@ function renderOverlays() {
   if(!root) return;
   const showFb=!!(state.showFeedbackModal && auth.session);
   const showWn=!!(state.showWhatsNew && auth.session);
-  const gm=(state.growthModal && auth.session) ? state.growthModal : null;
-  const sig=[showFb?1:0,state.feedbackType,state.feedbackSending?1:0,state.feedbackError,showWn?(state.whatsNewManual?2:1):0,state.updateAvailable||"",
-    gm?(gm.platform+"/"+(gm.saving?1:0)+"/"+gm.error):"-"].join("|");
+  const sig=[showFb?1:0,state.feedbackType,state.feedbackSending?1:0,state.feedbackError,showWn?(state.whatsNewManual?2:1):0,state.updateAvailable||""].join("|");
   if(sig===overlaySig) return;
   overlaySig=sig;
   let html="";
   if(showFb) html+=feedbackModalHTML();
-  if(gm) html+=growthModalHTML();
   if(showWn) html+=whatsNewHTML();
   if(state.updateAvailable) html+=updateModalHTML();
   root.innerHTML=html;
   if(showFb && !state.feedbackSending){
     setTimeout(function(){ const el=document.getElementById("feedback-input"); if(el) el.focus(); },30);
-  }
-  if(gm && !gm.saving){
-    setTimeout(function(){ const el=document.getElementById("growth-input"); if(el) el.focus(); },30);
   }
 }
 // Open tabs and home-screen copies never see a new deploy on their own, so this re-fetches the page itself, reads
@@ -2238,7 +2181,7 @@ function welcomeHTML() {
     ["Your posts live in the Arcturus Hub","Every post is one row in the Arcturus Hub, a Google Sheet that Oli looks after. You get your own private tab inside it, and Arcturus only ever shows you your own posts. Oli can see everyone's, so please keep anything truly confidential out of it."],
     ["It saves as you type","There is no save button. The dot beside the ARCTURUS wordmark shows Saving, Saved or Unsaved."],
     ["Choose your platforms","Settings has a switch for LinkedIn, Instagram and TikTok. Turn off the ones you do not use and they disappear from menus and filters."],
-    ["Results fill themselves in","Views, likes and comments are copied in by a tracking task that Oli sets up. A post is Tracking for 42 days, then it is rated Strong, Average or Weak. You can log your own follower counts any time from the Overview."],
+    ["Results fill themselves in","Views, likes and comments are copied in by a tracking task that Oli sets up. A post is Tracking for 42 days, then it is rated Strong, Average or Weak. Follower and connection counts are collected by the same task."],
     ["Make it yours","In Settings you can rename your pillars, change their colours and hide the ones you do not use."],
   ];
   let html = '<div class="modal-overlay" onclick="if(event.target===this)closeWelcome()"><div class="modal welcome" role="dialog" aria-modal="true" aria-labelledby="welcome-h">'
@@ -2586,8 +2529,7 @@ document.addEventListener("keydown", function(e) {
   if (e.key === "Escape" && state.showWelcome) { closeWelcome(); return; }
   if (e.key === "Escape" && state.showWhatsNew) { dismissWhatsNew(); return; }
   if (e.key === "Escape" && state.showFeedbackModal) { closeFeedback(); return; }
-  if (e.key === "Escape" && state.growthModal) { closeGrowthModal(); return; }
-  if (!auth.session || state.showWelcome || state.showFeedbackModal || state.growthModal || state.showWhatsNew || state.updateAvailable) return;
+  if (!auth.session || state.showWelcome || state.showFeedbackModal || state.showWhatsNew || state.updateAvailable) return;
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const tag = (e.target.tagName || "").toLowerCase();
   if (tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable) return;
