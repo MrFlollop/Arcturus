@@ -397,15 +397,42 @@ a.btn{text-decoration:none}
 .wn-ico .nav-icon{width:16px;height:16px;margin:0}
 .wn-txt{min-width:0;padding-top:4px}
 .whatsnew-list li strong{color:var(--text);font-weight:600}
+/* LOADING SPLASH */
+.splash{position:fixed;inset:0;z-index:1000;background:var(--text);color:#F7F4EF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity 0.5s var(--ease),visibility 0.5s var(--ease)}
+.splash.hide{opacity:0;visibility:hidden;pointer-events:none}
+.splash-mark{font-family:var(--font-logo);font-size:44px;letter-spacing:0.08em;line-height:1;display:flex;align-items:center;gap:12px;animation:splashRise 0.6s var(--ease) both}
+.splash-dot{display:inline-block;width:22px;height:22px;border-radius:50%;background:var(--accent);animation:splashPulse 1.4s ease-in-out infinite}
+.splash-bar{width:120px;height:2px;border-radius:1px;background:rgba(247,244,239,0.14);overflow:hidden;position:relative}
+.splash-bar::after{content:"";position:absolute;top:0;bottom:0;left:0;width:40%;background:var(--accent);border-radius:1px;animation:splashSlide 1.2s ease-in-out infinite}
+.splash-sub{font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(247,244,239,0.45);animation:splashRise 0.8s var(--ease) both}
+@keyframes splashRise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes splashPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(0.78);opacity:0.7}}
+@keyframes splashSlide{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
 </style>
 </head>
 <body>
+<div id="splash" class="splash" role="status" aria-live="polite"><div class="splash-mark"><span class="splash-dot"></span>ARCTURUS</div><div class="splash-bar"></div><div class="splash-sub" id="splash-sub">Getting your posts ready</div></div>
 <div id="app" class="app"></div>
 <div id="welcome-root"></div>
 <div id="overlay-root"></div>
 <div id="toast" class="toast"></div>
 <script>
-const APP_VERSION = "v8.1.1";
+const APP_VERSION = "v8.1.2";
+// Loading splash. It stays up until the first screen is ready (or 15 seconds at most), and never flashes by in under 0.7 seconds.
+const splashStart = Date.now();
+let splashGone = false;
+function hideSplash() {
+  if (splashGone) return;
+  splashGone = true;
+  const wait = Math.max(0, 700 - (Date.now() - splashStart));
+  setTimeout(function(){
+    const el = document.getElementById("splash");
+    if (!el) return;
+    el.classList.add("hide");
+    setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 600);
+  }, wait);
+}
+setTimeout(hideSplash, 15000);
 // Update flow. Every update signs people out once, then shows What's New after they sign back in.
 const SIGNED_IN_BUILD_KEY = "arcturus_signed_in_build";
 const LAST_SEEN_KEY = "arcturus_last_seen_version";
@@ -418,6 +445,11 @@ const FEEDBACK_TYPES = [
 // Newest first, customer-facing only, short. Each item has an icon name (see NAV_ICONS), a bold lead-in and a plain sentence.
 // Add an entry for every release. Add signOut:false to an entry for a tiny fix that should not sign everyone out.
 const CHANGELOG = [
+  {version:"v8.1.2", date:"5 Nov 2026", items:[
+    {i:"check", t:"Copy text works on phones.", d:"The Copy text button in the editor now copies properly on iPhone and other mobile browsers."},
+    {i:"spark", t:"A proper loading screen.", d:"Arcturus now opens on a branded loading screen instead of a blank page while it gets your posts ready."},
+    {i:"feedback", t:"Feedback shows its version.", d:"The Feedback box now says which version you are on, and every feedback email carries it so Oli always knows."}
+  ]},
   {version:"v8.1.1", date:"31 Oct 2026", items:[
     {i:"notes", t:"Release notes show the last three updates.", d:"Open Release notes any time and you will see the three most recent releases, newest first."},
     {i:"chart", t:"Follower counts now come from your tracking task.", d:"The Log today's number button has gone. Your connection and follower charts fill in automatically once your tracking task is running."},
@@ -742,20 +774,40 @@ function celebrate() {
   document.body.appendChild(overlay);
   setTimeout(function(){overlay.remove();},3300);
 }
+// Mobile browsers only allow copying inside the tap itself, so the older select-and-copy route runs first,
+// synchronously, and the clipboard API is the backup.
+function legacyCopy(text) {
+  const ta=document.createElement("textarea");
+  ta.value=text;
+  ta.setAttribute("readonly","");
+  ta.style.cssText="position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;font-size:16px;border:0;padding:0";
+  document.body.appendChild(ta);
+  let ok=false;
+  try {
+    ta.focus({preventScroll:true});
+    ta.select();
+    ta.setSelectionRange(0,text.length);
+    ok=document.execCommand("copy");
+  } catch(e) { ok=false; }
+  document.body.removeChild(ta);
+  return ok;
+}
 async function copyToClipboard(text,btnEl,label) {
   if(!text){ showToast("Nothing to copy yet",true); return; }
-  try {
-    await navigator.clipboard.writeText(text);
-    if(btnEl){
-      const original=btnEl.textContent;
-      btnEl.textContent="Copied ✓";
-      btnEl.classList.add("copied");
-      setTimeout(function(){ btnEl.textContent=original; btnEl.classList.remove("copied"); },1800);
-    }
-    showToast((label||"Copied")+" ✓");
-  } catch(err) {
-    showToast("Copy failed — try selecting manually",true);
+  let ok=legacyCopy(text);
+  if(!ok){
+    try {
+      if(navigator.clipboard&&navigator.clipboard.writeText){ await navigator.clipboard.writeText(text); ok=true; }
+    } catch(err) { ok=false; }
   }
+  if(!ok){ showToast("Copy failed — try selecting manually",true); return; }
+  if(btnEl){
+    if(!btnEl.dataset.orig) btnEl.dataset.orig=btnEl.textContent;
+    btnEl.textContent="Copied ✓";
+    btnEl.classList.add("copied");
+    setTimeout(function(){ btnEl.textContent=btnEl.dataset.orig; btnEl.classList.remove("copied"); },1800);
+  }
+  showToast((label||"Copied")+" ✓");
 }
 function getPostMetrics(post) {
   // Only views is required. Missing likes/comments/shares count as zero rather
@@ -894,11 +946,11 @@ async function loadFromSheet() {
     state.growth=(data.growth||[]).map(plainPost);
     ensureVerdicts();
     const warn=(data.warnings||[]).filter(Boolean).join(" ");
-    state.loading=false;state.sheetStatus=warn?"error":"connected";state.sheetMessage=warn?warn:"Connected";render();
+    state.loading=false;state.sheetStatus=warn?"error":"connected";state.sheetMessage=warn?warn:"Connected";render();hideSplash();
     if(warn) showToast(warn,true);
   } catch(err) {
-    if(err.auth||err.update) { state.loading=false; render(); return; }   // sign-in screen or update prompt is already showing
-    state.loading=false;state.sheetStatus="error";state.sheetMessage="Error: "+err.message;render();
+    if(err.auth||err.update) { state.loading=false; render(); hideSplash(); return; }   // sign-in screen or update prompt is already showing
+    state.loading=false;state.sheetStatus="error";state.sheetMessage="Error: "+err.message;render();hideSplash();
     showToast("Could not load your posts",true);
   }
 }
@@ -1925,6 +1977,7 @@ function renderMainInner() {
   main.innerHTML=html+renderSheetBar();
 }
 function showCrash(err) {
+  hideSplash();
   console.error("Arcturus: could not draw the screen", err);
   const app=document.getElementById("app"); if(!app) return;
   const detail=String((err&&(err.stack||err.message))||err).slice(0,700).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
@@ -2070,7 +2123,7 @@ function feedbackModalHTML() {
   const sending=state.feedbackSending;
   let h='<div class="modal-overlay" onclick="if(event.target===this)closeFeedback()"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="fb-h" style="width:440px">'
     + '<div class="modal-title" id="fb-h">Feedback and ideas</div>'
-    + '<div class="modal-sub">Goes straight to Oli by email. Bugs, ideas, anything that got in your way.</div>'
+    + '<div class="modal-sub">Goes straight to Oli by email, tagged with the version you are using ('+safe(APP_VERSION)+'). Bugs, ideas, anything that got in your way.</div>'
     + '<div class="fb-type-row">';
   FEEDBACK_TYPES.forEach(function(t){
     const active=state.feedbackType===t.id;
@@ -2571,6 +2624,7 @@ window.addEventListener("resize", function(){
     loadFromSheet();
   } else {
     render();
+    hideSplash();
   }
   // Catch deploys that land while Arcturus is already open
   document.addEventListener("visibilitychange", function(){ if (!document.hidden) checkForUpdate(false); });
